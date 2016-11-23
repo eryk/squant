@@ -32,7 +32,7 @@ case class Symbol(code: String, //代码
 }
 
 object Symbol extends App {
-  val symbols = parseCSVToMapList(getProjectDir() + "/data/stocks.csv")
+  val symbols = parseCSVToSymbols("/data/stocks.csv")
   symbols.filter(_.pe < 10).filter(_.pe > 0).reverse.foreach(println)
 
 }
