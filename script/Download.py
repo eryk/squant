@@ -18,14 +18,13 @@ print("read: %f s" % (end - start))
 
 columns = df.index
 
-ktype = {"5": "5", "15": "15", "30": "30", "60": "60",  "W": "week", "M": "month"}
-#"D": "day",
+ktype = {"5": "5", "15": "15", "30": "30", "60": "60", "D": "day", "W": "week", "M": "month"}
 
 def download(code, type, path):
     file = "/data/" + path + "/" + code + ".csv"
     print(file)
     df = ts.get_k_data(code, ktype=type, autype="qfq")
-    df.to_csv(file, mode="a", header="false")
+    df.to_csv(file, header=None)
     return code
 
 
