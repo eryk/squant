@@ -1,4 +1,9 @@
-package com.squant.cheetah
+package com.squant.cheetah.domain
+
+import java.time.{LocalDate, LocalDateTime}
+import java.time.format.DateTimeFormatter
+
+import com.squant.cheetah._
 
 import scala.io.Source
 
@@ -25,14 +30,37 @@ case class Symbol(code: String, //代码
                   gpr: Float, //毛利率(%)
                   npr: Float, //净利润率(%)
                   holders: Long //股东人数
-                 ){
-  def getStatus(): Unit ={
+                 ) {
+  def getStatus(): Unit = {
     Source.fromURL("http://d.10jqka.com.cn/v2/fiverange/hs_002121/last.js")
   }
 }
 
 object Symbol extends App {
-  val symbols = parseCSVToSymbols("/data/stocks.csv")
-  symbols.filter(_.pe < 10).filter(_.pe > 0).reverse.foreach(println)
+  def symbols = parseCSVToSymbols("/data/stocks.csv")
 
+  //  symbols.filter(_.pe < 10).filter(_.pe > 0).reverse.foreach(println)
+  var symbolFilter = SymbolFilter(symbols) excludeNew(30) excludeST
+}
+
+case class SymbolFilter(symbolList: Seq[Symbol]) {
+  var symbols = scala.collection.mutable.Seq() ++ symbolList
+
+  def strToDate(date: String): LocalDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyyMMdd"))
+
+  def excludeNew(dayCount: Long): SymbolFilter = {
+    SymbolFilter(
+      for (symbol <- symbols if symbol.timeToMarket.length == 8 && strToDate(symbol.timeToMarket).plusDays(dayCount).isBefore(LocalDate.now())) yield symbol
+    )
+  }
+
+  def excludeST: SymbolFilter = {
+    SymbolFilter(
+      for(symbol <- symbols if symbol.name.contains("ST")) yield symbol
+    )
+  }
+
+  def get():Seq[Symbol] = {
+    symbols
+  }
 }

@@ -1,18 +1,18 @@
-package com.squant
+package com.squant.cheetah
 
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-import scala.collection._
+import scala.collection.{Seq, _}
 
-package object cheetah {
+package object domain {
 
   val stockColumns = List("index", "date", "open", "close", "high", "low", "volume", "code")
 
-  def parseCSVToSymbols(file: String): Seq[Symbol] = {
-    def mapToSymbol(map: Map[String, String]): Symbol =
-      new Symbol(
+  def parseCSVToSymbols(file: String): Seq[domain.Symbol] = {
+    def mapToSymbol(map: Map[String, String]): domain.Symbol =
+      new domain.Symbol(
         map.get("code").get, //代码
         map.get("name").get, //名称
         map.get("industry").get, //所属行业
@@ -48,9 +48,9 @@ package object cheetah {
     } yield mapToSymbol(map)
   }
 
-  def parseCSVToStocks(code: String, ktype: String): Seq[Stock] = {
+  def parseCSVToStocks(code: String, ktype: BarType): Seq[Bar] = {
 
-    def mapToStock(map: Map[String, String]): Stock = new Stock(
+    def mapToStock(map: Map[String, String]): Bar = new Bar(
       ktype,
       map.get("date").get,
       map.get("open").get.toFloat,
