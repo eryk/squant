@@ -1,16 +1,18 @@
-package com.squant
+package com.squant.cheetah
 
 import java.io.File
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-import scala.collection._
+import scala.collection.{Seq, _}
 
-package object cheetah {
+package object domain {
 
-  val stockColumns = List("index","date","open","close","high","low","volume","code")
+  val stockColumns = List("index", "date", "open", "close", "high", "low", "volume", "code")
 
-  def parseCSVToSymbols(file: String): Seq[Symbol] = {
-    def mapToSymbol(map: Map[String, String]): Symbol =
-      new Symbol(
+  def parseCSVToSymbols(file: String): Seq[domain.Symbol] = {
+    def mapToSymbol(map: Map[String, String]): domain.Symbol =
+      new domain.Symbol(
         map.get("code").get, //代码
         map.get("name").get, //名称
         map.get("industry").get, //所属行业
@@ -46,14 +48,40 @@ package object cheetah {
     } yield mapToSymbol(map)
   }
 
-  def parseCSVToStocks(code:String,ktype:String): Seq[Bar] = {
+  def parseCSVToStocks(code: String, ktype: BarType): Seq[Bar] = {
+
+    def mapToStock(map: Map[String, String]): Bar = new Bar(
+      ktype,
+      map.get("date").get,
+      map.get("open").get.toFloat,
+      map.get("close").get.toFloat,
+      map.get("high").get.toFloat,
+      map.get("low").get.toFloat,
+      map.get("volume").get.toFloat,
+      map.get("code").get
+    )
+
     val file = s"/data/$ktype/$code.csv"
     val lines = scala.io.Source.fromFile(new File(file)).getLines().toList
-    lines.foreach(println)
-    Seq()
+    for {
+      line <- lines
+      fields = line.split(",")
+      if (fields.length == 8)
+      map = (stockColumns zip fields) (breakOut): Map[String, String]
+    } yield mapToStock(map)
   }
 
-  def getProjectDir():String = {
+  implicit def stringToDate(date: String): LocalDateTime = {
+    if(date.length == 10){
+      val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+      LocalDateTime.parse(date,formatter)
+    }else{
+      val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+      LocalDateTime.parse(date,formatter)
+    }
+  }
+
+  def getProjectDir(): String = {
     new File("").getAbsolutePath
   }
 }
