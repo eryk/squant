@@ -2,8 +2,9 @@ package com.squant.cheetah.strategy
 
 import akka.actor.Actor
 import com.squant.cheetah.StrategyContext
+import com.typesafe.scalalogging.LazyLogging
 
-trait Strategy extends Actor {
+trait Strategy extends Actor with LazyLogging{
 
   val strategyContext = new StrategyContext
 

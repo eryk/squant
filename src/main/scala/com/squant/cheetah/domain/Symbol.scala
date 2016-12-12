@@ -40,27 +40,75 @@ object Symbol extends App {
   def symbols = parseCSVToSymbols("/data/stocks.csv")
 
   //  symbols.filter(_.pe < 10).filter(_.pe > 0).reverse.foreach(println)
-  var symbolFilter = SymbolFilter(symbols) excludeNew(30) excludeST
-}
+  var symbolFilter = SymbolFilter(symbols) excludeNew (30) excludeST
 
-case class SymbolFilter(symbolList: Seq[Symbol]) {
-  var symbols = scala.collection.mutable.Seq() ++ symbolList
+  def getSymbol(code: String, url: String): String = {
+    def netEaseSymbol(symbol: String): String = {
+      if (symbol.length() != 6) {
+        return ""
+      }
+      if (symbol.startsWith("6")) {
+        return "0" + symbol
+      }
+      if (symbol.startsWith("0") || symbol.startsWith("3")) {
+        return "1" + symbol
+      }
+      ""
+    }
 
-  def strToDate(date: String): LocalDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyyMMdd"))
+    def eastMoneyRealTimeSymbol(symbol: String): String = {
+      if (symbol.length != 6) return ""
+      if (symbol.startsWith("6")) return symbol + "1"
+      if (symbol.startsWith("0") || symbol.startsWith("3")) return symbol + "2"
+      return ""
+    }
 
-  def excludeNew(dayCount: Long): SymbolFilter = {
-    SymbolFilter(
-      for (symbol <- symbols if symbol.timeToMarket.length == 8 && strToDate(symbol.timeToMarket).plusDays(dayCount).isBefore(LocalDate.now())) yield symbol
-    )
+    def sinaSymbol(symbol: String): String = {
+      if (symbol.length != 6) return ""
+      if (symbol.startsWith("0") || symbol.startsWith("3")) return "sz" + symbol
+      if (symbol.startsWith("6")) return "sh" + symbol
+      return ""
+    }
+
+    if (url.contains("sina.com"))
+      return sinaSymbol(code)
+    if (url.contains("163.com")) {
+      return netEaseSymbol(code);
+    }
+
+    if (url.contains("ifeng.com")) {
+      return sinaSymbol(code);
+    }
+    if (url.contains("nuff.eastmoney.com")) {
+      return eastMoneyRealTimeSymbol(code);
+    }
+    if (url.contains("f10.eastmoney.com")) {
+      return sinaSymbol(code);
+    }
+    return "";
   }
 
-  def excludeST: SymbolFilter = {
-    SymbolFilter(
-      for(symbol <- symbols if symbol.name.contains("ST")) yield symbol
-    )
+
+  case class SymbolFilter(symbolList: Seq[Symbol]) {
+    var symbols = scala.collection.mutable.Seq() ++ symbolList
+
+    def strToDate(date: String): LocalDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyyMMdd"))
+
+    def excludeNew(dayCount: Long): SymbolFilter = {
+      SymbolFilter(
+        for (symbol <- symbols if symbol.timeToMarket.length == 8 && strToDate(symbol.timeToMarket).plusDays(dayCount).isBefore(LocalDate.now())) yield symbol
+      )
+    }
+
+    def excludeST: SymbolFilter = {
+      SymbolFilter(
+        for (symbol <- symbols if symbol.name.contains("ST")) yield symbol
+      )
+    }
+
+    def get(): Seq[Symbol] = {
+      symbols
+    }
   }
 
-  def get():Seq[Symbol] = {
-    symbols
-  }
 }
