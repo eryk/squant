@@ -46,7 +46,7 @@ package object cheetah {
     } yield mapToSymbol(map)
   }
 
-  def parseCSVToStocks(code:String,ktype:String): Seq[Stock] = {
+  def parseCSVToStocks(code:String,ktype:String): Seq[Bar] = {
     val file = s"/data/$ktype/$code.csv"
     val lines = scala.io.Source.fromFile(new File(file)).getLines().toList
     lines.foreach(println)
