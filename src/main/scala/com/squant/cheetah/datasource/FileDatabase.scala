@@ -1,17 +1,28 @@
 package com.squant.cheetah.datasource
 
-import java.io.{FileWriter, InputStreamReader, PrintWriter}
+import java.io.FileWriter
 import java.time.{LocalDateTime, LocalTime}
 import java.time.format.DateTimeFormatter
-import java.util.Date
 
-import com.squant.cheetah.domain._
+import com.squant.cheetah.domain.{Tick, TickType, _}
 
-import scala.sys.process._
 import scala.io.Source
 
-object DataBase extends App {
+import scala.sys.process._
+
+class FileDatabase{
   def symbols: Seq[Symbol] = parseCSVToSymbols("/data/stocks.csv")
+
+  def realtime(code: String): Unit = {
+    val sinaCode: String = code match {
+      case code if code.startsWith("6") => "sh" + code
+      case code if code.startsWith("3") || code.startsWith("0") => "sz" + code
+    }
+    val source = Source.fromURL("http://hq.sinajs.cn/list=" + sinaCode, "GBK").mkString
+    if (source.contains("\"")) {
+      val array = source.substring(source.indexOf("\"") + 1, source.lastIndexOf("\"")).split(",")
+    }
+  }
 
   def init() = {
     "python3.5 " + getProjectDir() + "/script/Download.py stocks" !;
@@ -30,15 +41,16 @@ object DataBase extends App {
     }.toList.reverse
   }
 
-  def writeTick(code: String, date: LocalDateTime) = {
+  private def writeTick(code: String, date: LocalDateTime) = {
 
     val formatDate = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
-    val out = new FileWriter(s"/data/tick/$code-$formatDate.csv",false)
+    val out = new FileWriter(s"/data/tick/$code-$formatDate.csv", false)
 
     out.write(Source.fromURL(String.format(tickDayDataURL, date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), Symbol.getSymbol(code, tickDayDataURL)), "gbk").mkString.replaceAll("\t", ",")).ensuring {
       out.close()
       true
     }
   }
+
   writeTick("600199", LocalDateTime.now().plusDays(-1))
 }

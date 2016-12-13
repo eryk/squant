@@ -3,7 +3,7 @@ package com.squant.cheetah
 import java.util.concurrent.Executors
 
 import akka.actor.ActorSystem
-import com.squant.cheetah.datasource.DataBase
+import com.squant.cheetah.datasource.FinanceDB
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.Duration

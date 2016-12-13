@@ -8,13 +8,9 @@ trait Strategy extends Actor with LazyLogging{
 
   val strategyContext = new StrategyContext
 
-  val symbols = scala.collection.mutable.Set[String]()
+  val symbols:Seq[Symbol]
 
-  def initialize
-
-  def setSymbols(symbols: Set[String]): Unit = {
-    this.symbols ++ symbols
-  }
+  def initialize:Unit
 
   def process(code: String)
 
