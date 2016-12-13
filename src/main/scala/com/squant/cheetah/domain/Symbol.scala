@@ -1,9 +1,7 @@
 package com.squant.cheetah.domain
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
-import com.squant.cheetah._
 
 import scala.io.Source
 
@@ -44,15 +42,9 @@ object Symbol extends App {
 
   def getSymbol(code: String, url: String): String = {
     def netEaseSymbol(symbol: String): String = {
-      if (symbol.length() != 6) {
-        return ""
-      }
-      if (symbol.startsWith("6")) {
-        return "0" + symbol
-      }
-      if (symbol.startsWith("0") || symbol.startsWith("3")) {
-        return "1" + symbol
-      }
+      if (symbol.length() != 6) return ""
+      if (symbol.startsWith("6")) return "0" + symbol
+      if (symbol.startsWith("0") || symbol.startsWith("3")) return "1" + symbol
       ""
     }
 
@@ -60,32 +52,26 @@ object Symbol extends App {
       if (symbol.length != 6) return ""
       if (symbol.startsWith("6")) return symbol + "1"
       if (symbol.startsWith("0") || symbol.startsWith("3")) return symbol + "2"
-      return ""
+      ""
     }
 
     def sinaSymbol(symbol: String): String = {
       if (symbol.length != 6) return ""
       if (symbol.startsWith("0") || symbol.startsWith("3")) return "sz" + symbol
       if (symbol.startsWith("6")) return "sh" + symbol
-      return ""
+      ""
     }
 
-    if (url.contains("sina.com"))
-      return sinaSymbol(code)
-    if (url.contains("163.com")) {
-      return netEaseSymbol(code);
+    url match {
+      case url if url.contains("sinajs.cn") => sinaSymbol(code)
+      case url if url.contains("sina.com") => sinaSymbol(code)
+      case url if url.contains("163.com") => netEaseSymbol(code)
+      case url if url.contains("ifeng.com") => sinaSymbol(code)
+      case url if url.contains("ifeng.com") => sinaSymbol(code)
+      case url if url.contains("nuff.eastmoney.com") => eastMoneyRealTimeSymbol(code)
+      case url if url.contains("f10.eastmoney.com") => sinaSymbol(code)
+      case _ => ""
     }
-
-    if (url.contains("ifeng.com")) {
-      return sinaSymbol(code);
-    }
-    if (url.contains("nuff.eastmoney.com")) {
-      return eastMoneyRealTimeSymbol(code);
-    }
-    if (url.contains("f10.eastmoney.com")) {
-      return sinaSymbol(code);
-    }
-    return "";
   }
 
 

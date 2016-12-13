@@ -10,21 +10,9 @@ import scala.io.Source
 
 import scala.sys.process._
 
-class FileDatabase{
-  def symbols: Seq[Symbol] = parseCSVToSymbols("/data/stocks.csv")
+class FileDatabase extends FinanceDB{
 
-  def realtime(code: String): Unit = {
-    val sinaCode: String = code match {
-      case code if code.startsWith("6") => "sh" + code
-      case code if code.startsWith("3") || code.startsWith("0") => "sz" + code
-    }
-    val source = Source.fromURL("http://hq.sinajs.cn/list=" + sinaCode, "GBK").mkString
-    if (source.contains("\"")) {
-      val array = source.substring(source.indexOf("\"") + 1, source.lastIndexOf("\"")).split(",")
-    }
-  }
-
-  def init() = {
+  override def init() = {
     "python3.5 " + getProjectDir() + "/script/Download.py stocks" !;
     "python3.5 " + getProjectDir() + "/script/Download.py ktype" !;
   }
@@ -52,5 +40,21 @@ class FileDatabase{
     }
   }
 
-  writeTick("600199", LocalDateTime.now().plusDays(-1))
+  //包含当天数据，内部做数据的聚合
+  override def ktype(code: String, kType: BarType, start: LocalDateTime, stop: LocalDateTime): Unit = ???
+
+  //地区、概念、行业
+  override def stockCategory(): Map[String, Map[String, Seq[String]]] = ???
+
+  override def getFundamentals(code: String): Unit = ???
+
+  override def updateAll(start: LocalDateTime, stop: LocalDateTime): Boolean = ???
+
+  override def update(code: String, start: LocalDateTime, stop: LocalDateTime): Unit = ???
+}
+
+object FileDatabase extends App{
+  val db = new FileDatabase
+  val realTime = db.realtime("600133")
+  println(realTime)
 }

@@ -5,11 +5,20 @@ import java.time.LocalDateTime
 import com.squant.cheetah.domain._
 import com.squant.cheetah.utils._
 
+import scala.io.Source
+
 //https://www.joinquant.com/data
 //https://www.joinquant.com/data/dict/fundamentals
 trait FinanceDB {
 
-  def realtime(code: String): RealTime
+  def init()
+
+  def realtime(code: String): Option[RealTime] = {
+    val url = "http://hq.sinajs.cn/list="
+    val source = Source.fromURL(url + Symbol.getSymbol(code, url), "GBK").mkString
+    val array = source.substring(source.indexOf("\"") + 1, source.lastIndexOf("\"")).split(",")
+    Some(RealTime.arrayToRealTime(array))
+  }
 
   def tick(code: String, date: LocalDateTime): List[Tick]
 
@@ -19,7 +28,7 @@ trait FinanceDB {
   //地区、概念、行业
   def stockCategory(): Map[String, Map[String, Seq[String]]]
 
-  def stocks(): Seq[Symbol] = parseCSVToSymbols(config.getString("squant.db.path") + "/stocks.csv")
+  def symbols(): Seq[Symbol] = parseCSVToSymbols(config.getString("squant.db.path") + "/stocks.csv")
 
   def getFundamentals(code: String)
 
