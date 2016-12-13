@@ -1,6 +1,7 @@
 package com.squant.cheetah.datasource
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, LocalTime}
+import java.time.format.DateTimeFormatter
 
 import com.squant.cheetah.domain._
 import com.squant.cheetah.utils._
@@ -20,13 +21,21 @@ trait FinanceDB {
     Some(RealTime.arrayToRealTime(array))
   }
 
-  def tick(code: String, date: LocalDateTime): List[Tick]
+  def tick(code: String, date: LocalDateTime): List[Tick] = {
+    val tickDayDataURL = "http://market.finance.sina.com.cn/downxls.php?date=%s&symbol=%s"
+    val lines = Source.fromURL(String.format(tickDayDataURL, date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), Symbol.getSymbol(code, tickDayDataURL)), "gbk").getLines().drop(1)
+    lines.map {
+      line =>
+        val fields = line.split("\t", 6)
+        Tick(LocalTime.parse(fields(0), DateTimeFormatter.ofPattern("HH:mm:ss")), fields(1).toFloat, fields(3).toInt, fields(4).toDouble, TickType.from(fields(5)))
+    }.toList.reverse
+  }
 
   //包含当天数据，内部做数据的聚合
   def ktype(code: String, kType: BarType, start: LocalDateTime, stop: LocalDateTime)
 
   //地区、概念、行业
-  def stockCategory(): Map[String, Map[String, Seq[String]]]
+  def category(): Map[String, Map[String, Seq[String]]] = ???
 
   def symbols(): Seq[Symbol] = parseCSVToSymbols(config.getString("squant.db.path") + "/stocks.csv")
 
