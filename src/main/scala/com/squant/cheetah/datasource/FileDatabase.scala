@@ -15,6 +15,7 @@ class FileDatabase extends FinanceDB {
   override def init() = {
     "python3.5 " + getProjectDir() + "/script/Download.py stocks" !;
     "python3.5 " + getProjectDir() + "/script/Download.py ktype" !;
+    THSData.saveGN("/data/gn.csv")
   }
 
   private def writeTick(code: String, date: LocalDateTime) = {

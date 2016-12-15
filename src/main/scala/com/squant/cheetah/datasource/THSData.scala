@@ -12,7 +12,7 @@ import scala.io.Source
 
 case class GN(name: String, code: String, pinyin: String, url: String, stocks: List[String])
 
-object THSJsonDownloader extends App with LazyLogging {
+object THSData extends App with LazyLogging {
 
   private def getSource(url: String, encode: String): Option[String] = {
     for (i <- 1 to 3)
@@ -106,10 +106,10 @@ object THSJsonDownloader extends App with LazyLogging {
     map.toMap
   }
 
-//  saveGN("/data/gn.csv")
-  val map = readGN("/data/gn.csv")
-  map.foreach{
-    item => println(item._2)
-  }
+  saveGN("/data/gn.csv")
+//  val map = readGN("/data/gn.csv")
+//  map.foreach{
+//    item => println(item._2)
+//  }
 }
 

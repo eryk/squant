@@ -24,12 +24,12 @@
       </fileNamePattern>
     </rollingPolicy>
     <encoder>
-      <pattern>%d %level [%thread]: %m%n</pattern>
+      <pattern>%d %p [%t]: %m%n</pattern>
     </encoder>
   </appender>
 
   <root level="INFO">
-    <appender-ref ref="${squant.logger:-console}"/>
+    <appender-ref ref="${squant.logger:-RFA}"/>
   </root>
 
 </configuration>
