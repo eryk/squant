@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+
+  <property name="logdir" value="${squant.log.dir:-logs}"/>
+
+  <property name="logfile" value="${squant.log.file:-squant}.log"/>
+
+  <appender name="console"
+	    class="ch.qos.logback.core.ConsoleAppender">
+    <target>System.err</target>
+    <encoder>
+      <pattern>%m%n</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="RFA"
+	    class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${logdir}/${logfile}</file>
+    <rollingPolicy
+	class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <fileNamePattern>
+	${logdir}/${logfile}.%d{yyyy-MM-dd}
+      </fileNamePattern>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%d %level [%thread]: %m%n</pattern>
+    </encoder>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="${squant.logger:-console}"/>
+  </root>
+
+</configuration>

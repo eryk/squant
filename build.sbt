@@ -10,7 +10,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % akkaVersion,
   "com.typesafe" % "config" % "1.3.1",
   "org.jsoup" % "jsoup" % "1.10.1",
-  "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0"
+  "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
+  "ch.qos.logback" % "logback-classic" % "1.1.7"
 )
 
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
