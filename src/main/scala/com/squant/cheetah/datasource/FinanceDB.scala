@@ -35,7 +35,9 @@ trait FinanceDB {
   def ktype(code: String, kType: BarType, start: LocalDateTime, stop: LocalDateTime)
 
   //地区、概念、行业
-  def category(): Map[String, Map[String, Seq[String]]] = ???
+  def category(): Map[String, GN] = {
+    THSData.readGN(config.getString("squant.db.path") + "/gn.csv")
+  }
 
   def symbols(): Seq[Symbol] = parseCSVToSymbols(config.getString("squant.db.path") + "/stocks.csv")
 
