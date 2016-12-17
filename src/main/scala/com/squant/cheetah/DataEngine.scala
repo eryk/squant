@@ -1,8 +1,10 @@
-package com.squant.cheetah.datasource
+package com.squant.cheetah
 
-import java.time.{LocalDateTime, LocalTime}
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDateTime, LocalTime}
 
+import com.squant.cheetah.Constants._
+import com.squant.cheetah.datasource.{GN, THSDataSource}
 import com.squant.cheetah.domain._
 import com.squant.cheetah.utils._
 
@@ -10,9 +12,7 @@ import scala.io.Source
 
 //https://www.joinquant.com/data
 //https://www.joinquant.com/data/dict/fundamentals
-trait FinanceDB {
-
-  def init()
+object DataEngine {
 
   def realtime(code: String): Option[RealTime] = {
     val url = "http://hq.sinajs.cn/list="
@@ -32,18 +32,17 @@ trait FinanceDB {
   }
 
   //包含当天数据，内部做数据的聚合
-  def ktype(code: String, kType: BarType, start: LocalDateTime, stop: LocalDateTime)
+  def ktype(code: String, kType: BarType, start: LocalDateTime = LocalDateTime.now().plusYears(-1), stop: LocalDateTime = LocalDateTime.now()): List[Bar] = {
+    Bar.parseCSVToBars(code, kType).takeWhile(bar => bar.date.isAfter(start) && bar.date.isBefore(stop)).toList
+  }
 
   //地区、概念、行业
   def category(): Map[String, GN] = {
-    THSData.readGN(config.getString("squant.db.path") + "/gn.csv")
+    THSDataSource.readGN(config.getString(CONFIG_PATH_DB_BASE) + config.getString(CONFIG_PATH_GN))
   }
 
-  def symbols(): Seq[Symbol] = parseCSVToSymbols(config.getString("squant.db.path") + "/stocks.csv")
+  def symbols(): Seq[Symbol] = parseCSVToSymbols(config.getString(CONFIG_PATH_DB_BASE) + config.getString(CONFIG_PATH_STOCKS))
 
-  def getFundamentals(code: String)
+  def getFundamentals(code: String) = ???
 
-  def updateAll(start: LocalDateTime, stop: LocalDateTime): Boolean
-
-  def update(code: String, start: LocalDateTime, stop: LocalDateTime)
 }

@@ -10,9 +10,9 @@ package object domain {
 
   val stockColumns = List("index", "date", "open", "close", "high", "low", "volume", "code")
 
-  def parseCSVToSymbols(file: String): Seq[domain.Symbol] = {
-    def mapToSymbol(map: Map[String, String]): domain.Symbol =
-      new domain.Symbol(
+  def parseCSVToSymbols(file: String): Seq[Symbol] = {
+    def mapToSymbol(map: Map[String, String]): Symbol =
+      new Symbol(
         map.get("code").get, //代码
         map.get("name").get, //名称
         map.get("industry").get, //所属行业
@@ -46,29 +46,6 @@ package object domain {
       if (fields.length == 23)
       map = (lines(0).split(",") zip fields) (breakOut): Map[String, String]
     } yield mapToSymbol(map)
-  }
-
-  def parseCSVToStocks(code: String, ktype: BarType): Seq[Bar] = {
-
-    def mapToStock(map: Map[String, String]): Bar = new Bar(
-      ktype,
-      map.get("date").get,
-      map.get("open").get.toFloat,
-      map.get("close").get.toFloat,
-      map.get("high").get.toFloat,
-      map.get("low").get.toFloat,
-      map.get("volume").get.toFloat,
-      map.get("code").get
-    )
-
-    val file = s"/data/$ktype/$code.csv"
-    val lines = scala.io.Source.fromFile(new File(file)).getLines().toList
-    for {
-      line <- lines
-      fields = line.split(",")
-      if (fields.length == 8)
-      map = (stockColumns zip fields) (breakOut): Map[String, String]
-    } yield mapToStock(map)
   }
 
   implicit def stringToDate(date: String): LocalDateTime = {

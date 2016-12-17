@@ -3,7 +3,6 @@ package com.squant.cheetah
 import java.util.concurrent.Executors
 
 import akka.actor.ActorSystem
-import com.squant.cheetah.datasource.{FileDatabase, FinanceDB}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.Duration
@@ -14,7 +13,7 @@ object MainEngine extends App{
 
   implicit val ec = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(10))
 
-  val symbols = new FileDatabase().symbols()
+  val symbols = DataEngine.symbols()
 
   for(symbol <- symbols){
     actorSystem.scheduler.schedule(Duration.Zero,60 seconds, () => {

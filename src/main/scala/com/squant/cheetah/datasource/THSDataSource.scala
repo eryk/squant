@@ -1,18 +1,26 @@
 package com.squant.cheetah.datasource
 
 import java.io.{File, FileNotFoundException, PrintWriter}
-import java.nio.charset.{Charset, MalformedInputException}
+import java.nio.charset.MalformedInputException
 
+import com.squant.cheetah.Constants._
+import com.squant.cheetah.utils._
 import com.typesafe.scalalogging.LazyLogging
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Element
 
 import scala.collection.mutable
 import scala.io.Source
 
 case class GN(name: String, code: String, pinyin: String, url: String, stocks: List[String])
 
-object THSData extends App with LazyLogging {
+object THSDataSource extends DataSource with LazyLogging {
+
+  def update() = {
+    //下载股票分类数据
+    saveGN(config.getString(CONFIG_PATH_DB_BASE) + config.getString(CONFIG_PATH_GN))
+  }
+
+  override def clear(): Unit = ???
 
   private def getSource(url: String, encode: String): Option[String] = {
     for (i <- 1 to 3)
@@ -100,16 +108,11 @@ object THSData extends App with LazyLogging {
     val lines = Source.fromFile(file).getLines()
     val map = mutable.Map[String, GN]()
     for (line <- lines) {
-      val fields = line.split(",",5)
+      val fields = line.split(",", 5)
       map.put(fields(0), GN(fields(0), fields(1), fields(2), fields(3), fields(4).split("_").filter(_ != "").toList))
     }
     map.toMap
   }
 
-  saveGN("/data/gn.csv")
-//  val map = readGN("/data/gn.csv")
-//  map.foreach{
-//    item => println(item._2)
-//  }
 }
 
