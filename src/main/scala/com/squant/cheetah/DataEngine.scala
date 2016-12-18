@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, LocalTime}
 
 import com.squant.cheetah.Constants._
-import com.squant.cheetah.datasource.{GN, THSDataSource}
+import com.squant.cheetah.datasource.{Category, THSDataSource}
 import com.squant.cheetah.domain._
 import com.squant.cheetah.utils._
 
@@ -37,8 +37,8 @@ object DataEngine extends App{
   }
 
   //地区、概念、行业
-  def category(): Map[String, GN] = {
-    THSDataSource.readGN(config.getString(CONFIG_PATH_DB_BASE) + config.getString(CONFIG_PATH_GN))
+  def category(): Map[String, Category] = {
+    THSDataSource.readCategory(config.getString(CONFIG_PATH_DB_BASE) + config.getString(CONFIG_PATH_CATEGORY))
   }
 
   def symbols(): Seq[Symbol] = parseCSVToSymbols(config.getString(CONFIG_PATH_DB_BASE) + config.getString(CONFIG_PATH_STOCKS))
