@@ -13,7 +13,7 @@ import scala.io.Source
 
 case class GN(name: String, code: String, pinyin: String, url: String, stocks: List[String])
 
-object THSDataSource extends DataSource with LazyLogging {
+object THSDataSource extends App with DataSource with LazyLogging {
 
   def update() = {
     //下载股票分类数据
@@ -114,5 +114,6 @@ object THSDataSource extends DataSource with LazyLogging {
     map.toMap
   }
 
+  update()
 }
 

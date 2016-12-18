@@ -10,7 +10,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 import scala.io.Source
 
-object SinaDataSource extends DataSource with LazyLogging{
+object SinaDataSource extends App with DataSource with LazyLogging{
 
   private def writeTick(code: String, date: LocalDateTime) = {
     val tickDayDataURL = "http://market.finance.sina.com.cn/downxls.php?date=%s&symbol=%s"
@@ -29,15 +29,11 @@ object SinaDataSource extends DataSource with LazyLogging{
     val stocks = DataEngine.symbols()
 
     stocks.foreach(symbol => {
-      writeTick(symbol.code,LocalDateTime.now())
+      writeTick(symbol.code,LocalDateTime.now().plusDays(-2))
     })
   }
 
   override def clear(): Unit = ???
-}
 
-object StockDataSource extends App{
-//  SinaDataSource.update()
-  TushareDataSource.update()
-//  DataEngine.ktype("002737",MIN_5).foreach(println)
+  update()
 }

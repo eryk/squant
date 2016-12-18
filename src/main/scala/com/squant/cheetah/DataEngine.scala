@@ -1,5 +1,6 @@
 package com.squant.cheetah
 
+import java.io.File
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, LocalTime}
 
@@ -12,7 +13,7 @@ import scala.io.Source
 
 //https://www.joinquant.com/data
 //https://www.joinquant.com/data/dict/fundamentals
-object DataEngine {
+object DataEngine extends App{
 
   def realtime(code: String): Option[RealTime] = {
     val url = "http://hq.sinajs.cn/list="
@@ -22,11 +23,10 @@ object DataEngine {
   }
 
   def tick(code: String, date: LocalDateTime): List[Tick] = {
-    val tickDayDataURL = "http://market.finance.sina.com.cn/downxls.php?date=%s&symbol=%s"
-    val lines = Source.fromURL(String.format(tickDayDataURL, date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), Symbol.getSymbol(code, tickDayDataURL)), "gbk").getLines().drop(1)
+    val lines = Source.fromFile(new File(s"/data/tick/${date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))}/$code.csv")).getLines().drop(1)
     lines.map {
       line =>
-        val fields = line.split("\t", 6)
+        val fields = line.split(",", 6)
         Tick(LocalTime.parse(fields(0), DateTimeFormatter.ofPattern("HH:mm:ss")), fields(1).toFloat, fields(3).toInt, fields(4).toDouble, TickType.from(fields(5)))
     }.toList.reverse
   }
@@ -45,4 +45,5 @@ object DataEngine {
 
   def getFundamentals(code: String) = ???
 
+  tick("002816",LocalDateTime.now().plusDays(-2)).foreach(println)
 }
