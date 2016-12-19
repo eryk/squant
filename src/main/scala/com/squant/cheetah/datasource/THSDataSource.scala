@@ -4,6 +4,7 @@ import java.io.{File, FileNotFoundException, PrintWriter}
 import java.nio.charset.MalformedInputException
 
 import com.squant.cheetah.Constants._
+import com.squant.cheetah.domain.Category
 import com.squant.cheetah.utils._
 import com.typesafe.scalalogging.LazyLogging
 import org.jsoup.Jsoup
@@ -11,7 +12,6 @@ import org.jsoup.Jsoup
 import scala.collection.mutable
 import scala.io.Source
 
-case class Category(name: String, code: String, categoryType: String, pinyin: String, url: String, stocks: List[String])
 
 object THSDataSource extends App with DataSource with LazyLogging {
 

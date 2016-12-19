@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, LocalTime}
 
 import com.squant.cheetah.Constants._
-import com.squant.cheetah.datasource.{Category, THSDataSource}
+import com.squant.cheetah.datasource.THSDataSource
 import com.squant.cheetah.domain._
 import com.squant.cheetah.utils._
 
