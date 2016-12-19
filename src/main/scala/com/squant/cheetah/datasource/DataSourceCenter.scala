@@ -25,10 +25,10 @@ object DataSourceCenter extends App {
         complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>文档</h1>"))
       } ~
         path("symbols") {
-          complete(DataEngine.symbols().asJson.toString())
+          complete(HttpEntity(ContentTypes.`application/json`, DataEngine.symbols().asJson.toString))
         } ~
-        path("realtime") {
-          sys.error("BOOM!")
+        path("realtime" / Remaining) { code: String =>
+          complete(DataEngine.realtime(code).asJson.toString)
         }
     }
 

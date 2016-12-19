@@ -15,11 +15,11 @@ import scala.io.Source
 //https://www.joinquant.com/data/dict/fundamentals
 object DataEngine extends App{
 
-  def realtime(code: String): Option[RealTime] = {
+  def realtime(code: String): RealTime = {
     val url = "http://hq.sinajs.cn/list="
     val source = Source.fromURL(url + Symbol.getSymbol(code, url), "GBK").mkString
     val array = source.substring(source.indexOf("\"") + 1, source.lastIndexOf("\"")).split(",")
-    Some(RealTime.arrayToRealTime(array))
+    RealTime.arrayToRealTime(array)
   }
 
   def tick(code: String, date: LocalDateTime): List[Tick] = {
