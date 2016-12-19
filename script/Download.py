@@ -45,12 +45,12 @@ def __download(code, type, path):
 
 def main():
     try:
-        opts,args = getopt.getopt(sys.argv[1:],"h",["help"])
+        opts, args = getopt.getopt(sys.argv[1:], "h", ["help"])
     except getopt.error:
         print(getopt.error.msg)
         print("for help use --help")
-    for o,a in opts:
-        if o in ("-h","--help"):
+    for o, a in opts:
+        if o in ("-h", "--help"):
             print(__doc__)
     for arg in args:
         if arg == "stocks":
@@ -60,6 +60,7 @@ def main():
         if arg == "all":
             download_stocks()
             download_ktype_data()
+
 
 if __name__ == "__main__":
     main()
