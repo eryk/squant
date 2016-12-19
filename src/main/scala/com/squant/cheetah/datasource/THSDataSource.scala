@@ -128,8 +128,8 @@ object THSDataSource extends App with DataSource with LazyLogging {
     val lines = Source.fromFile(file).getLines()
     val map = mutable.Map[String, Category]()
     for (line <- lines) {
-      val fields = line.split(",", 5)
-      map.put(fields(0), Category(fields(0), fields(1), "gn", fields(2), fields(3), fields(4).split("_").filter(_ != "").toList))
+      val fields = line.split(",", 6)
+      map.put(fields(0), Category(fields(0), fields(1),  fields(2) ,fields(3),fields(4), fields(5).split("_").filter(_ != "").toList))
     }
     map.toMap
   }
