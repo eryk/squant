@@ -2,7 +2,8 @@ package com.squant.cheetah.datasource
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.ContentTypes._
+import akka.http.scaladsl.model.{HttpEntity, _}
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import com.squant.cheetah.DataEngine
@@ -22,13 +23,16 @@ object DataSourceCenter extends App {
   val route =
     get {
       pathSingleSlash {
-        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>文档</h1>"))
+        complete(HttpEntity(`text/html(UTF-8)`, "<h1>文档</h1>"))
       } ~
         path("symbols") {
-          complete(HttpEntity(ContentTypes.`application/json`, DataEngine.symbols().asJson.toString))
+          complete(HttpEntity(`application/json`, DataEngine.symbols().asJson.toString))
+        } ~
+        path("category") {
+          complete(HttpEntity(`application/json`, DataEngine.category().asJson.toString))
         } ~
         path("realtime" / Remaining) { code: String =>
-          complete(DataEngine.realtime(code).asJson.toString)
+          complete(HttpEntity(`application/json`, DataEngine.realtime(code).asJson.toString))
         }
     }
 
