@@ -1,6 +1,6 @@
 .idea
 .iml
-project
+project/target
 target
 data
 logs

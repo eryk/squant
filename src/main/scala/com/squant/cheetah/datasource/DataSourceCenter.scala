@@ -5,32 +5,16 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import scala.io.StdIn
+import com.squant.cheetah.DataEngine
+import io.circe.generic.auto._
+import io.circe.syntax._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration._
+import scala.io.StdIn
 
 //todo different source download
 object DataSourceCenter extends App {
 
-  val system = ActorSystem("AkkaScalaActorSystem")
-
-  implicit val materializer = ActorMaterializer()
-  // needed for the future flatMap/onComplete in the end
-  implicit val executionContext = system.dispatcher
-
-
-  system.scheduler.schedule(Duration.Zero, 1 days, () => {
-    TushareDataSource.update();
-  })
-  system.scheduler.schedule(Duration.Zero, 1 days, () => {
-    SinaDataSource.update();
-  })
-  system.scheduler.schedule(Duration.Zero, 1 days, () => {
-    THSDataSource.update();
-  })
-
-  implicit val system = ActorSystem("my-system")
+  implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
   // needed for the future flatMap/onComplete in the end
   implicit val executionContext = system.dispatcher
@@ -38,12 +22,12 @@ object DataSourceCenter extends App {
   val route =
     get {
       pathSingleSlash {
-        complete("<html><body>Hello world!</body></html>")
+        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>文档</h1>"))
       } ~
-        path("ping") {
-          complete("PONG!")
+        path("symbols") {
+          complete(DataEngine.symbols().asJson.toString())
         } ~
-        path("crash") {
+        path("realtime") {
           sys.error("BOOM!")
         }
     }
@@ -55,5 +39,23 @@ object DataSourceCenter extends App {
   bindingFuture
     .flatMap(_.unbind()) // trigger unbinding from the port
     .onComplete(_ => system.terminate()) // and shutdown when done
-}
+
+
+  //  system.scheduler.schedule(Duration.Zero, 1 days,  new Runnable {
+  //    override def run(): Unit = {
+  //      TushareDataSource.update()
+  //    }
+  //  })
+  //
+  //  system.scheduler.schedule(Duration.Zero, 1 days, new Runnable {
+  //    override def run(): Unit = {
+  //      SinaDataSource.update();
+  //    }
+  //  })
+  //
+  //  system.scheduler.schedule(Duration.Zero, 1 days, new Runnable {
+  //    override def run(): Unit = {
+  //      THSDataSource.update();
+  //    }
+  //  })
 }

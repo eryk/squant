@@ -70,7 +70,6 @@ object THSDataSource extends App with DataSource with LazyLogging {
   }
 
   private def getHYCode(source:String):String = {
-    println(Jsoup.parse(source).select("div[class='stock_name'] span").text().replaceAll("[（）]",""))
     Jsoup.parse(source).select("div[class='stock_name'] span").text().replaceAll("[（）]","")
   }
 

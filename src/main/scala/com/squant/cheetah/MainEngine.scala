@@ -8,16 +8,18 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.Duration
 import scala.concurrent.duration._
 
-object MainEngine extends App{
+object MainEngine extends App {
   val actorSystem = ActorSystem("squant")
 
   implicit val ec = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(10))
 
   val symbols = DataEngine.symbols()
 
-  for(symbol <- symbols){
-    actorSystem.scheduler.schedule(Duration.Zero,60 seconds, () => {
-      println("hello " + symbol)
+  for (symbol <- symbols) {
+    actorSystem.scheduler.schedule(Duration.Zero, 60 seconds, new Runnable {
+      override def run(): Unit = {
+        println("hello " + symbol)
+      }
     })
   }
 }
