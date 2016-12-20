@@ -22,13 +22,13 @@ object DataEngine extends App{
     RealTime.arrayToRealTime(array)
   }
 
-  def tick(code: String, date: LocalDateTime): List[Tick] = {
+  def tick(code: String, date: LocalDateTime): Seq[Tick] = {
     val lines = Source.fromFile(new File(s"/data/tick/${date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))}/$code.csv")).getLines().drop(1)
     lines.map {
       line =>
         val fields = line.split(",", 6)
         Tick(LocalTime.parse(fields(0), DateTimeFormatter.ofPattern("HH:mm:ss")), fields(1).toFloat, fields(3).toInt, fields(4).toDouble, TickType.from(fields(5)))
-    }.toList.reverse
+    }.toSeq.reverse
   }
 
   //包含当天数据，内部做数据的聚合
@@ -45,5 +45,5 @@ object DataEngine extends App{
 
   def getFundamentals(code: String) = ???
 
-  tick("002816",LocalDateTime.now().plusDays(-2)).foreach(println)
+  tick("002816",LocalDateTime.now().plusDays(-4)).foreach(println)
 }

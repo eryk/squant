@@ -1,65 +1,60 @@
 package com.squant.cheetah.datasource
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.ContentTypes._
-import akka.http.scaladsl.model.{HttpEntity, _}
-import akka.http.scaladsl.server.Directives._
-import akka.stream.ActorMaterializer
+import java.net.InetSocketAddress
+import java.time.{LocalDate, LocalDateTime}
+import java.time.format.DateTimeFormatter
+
 import com.squant.cheetah.DataEngine
+import com.squant.cheetah.domain._
+import com.twitter.finagle.http.{Request, Response}
+import com.twitter.finagle.{Http, Service}
+import com.twitter.util.Await
 import io.circe.generic.auto._
-import io.circe.syntax._
+import io.finch._
+import io.finch.circe._
 
-import scala.io.StdIn
-
-//todo different source download
 object DataSourceCenter extends App {
 
-  implicit val system = ActorSystem()
-  implicit val materializer = ActorMaterializer()
-  // needed for the future flatMap/onComplete in the end
-  implicit val executionContext = system.dispatcher
-
-  val route =
-    get {
-      pathSingleSlash {
-        complete(HttpEntity(`text/html(UTF-8)`, "<h1>文档</h1>"))
-      } ~
-        path("symbols") {
-          complete(HttpEntity(`application/json`, DataEngine.symbols().asJson.toString))
-        } ~
-        path("category") {
-          complete(HttpEntity(`application/json`, DataEngine.category().asJson.toString))
-        } ~
-        path("realtime" / Remaining) { code: String =>
-          complete(HttpEntity(`application/json`, DataEngine.realtime(code).asJson.toString))
-        }
+  private val symbols: Endpoint[Seq[Symbol]] =
+    get("symbols") {
+      Ok(DataEngine.symbols())
     }
 
-  // `route` will be implicitly converted to `Flow` using `RouteResult.route2HandlerFlow`
-  val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
-  println(s"Server online at http://localhost:8080/\nPress RETURN to stop...")
-  StdIn.readLine() // let it run until user presses return
-  bindingFuture
-    .flatMap(_.unbind()) // trigger unbinding from the port
-    .onComplete(_ => system.terminate()) // and shutdown when done
+  private val category: Endpoint[Map[String, Category]] =
+    get("category") {
+      Ok(DataEngine.category())
+    }
 
+  private val realtime: Endpoint[RealTime] =
+    get("realtime" :: string) { code: String =>
+      Ok(DataEngine.realtime(code))
+    }
 
-  //  system.scheduler.schedule(Duration.Zero, 1 days,  new Runnable {
-  //    override def run(): Unit = {
-  //      TushareDataSource.update()
-  //    }
-  //  })
-  //
-  //  system.scheduler.schedule(Duration.Zero, 1 days, new Runnable {
-  //    override def run(): Unit = {
-  //      SinaDataSource.update();
-  //    }
-  //  })
-  //
-  //  system.scheduler.schedule(Duration.Zero, 1 days, new Runnable {
-  //    override def run(): Unit = {
-  //      THSDataSource.update();
-  //    }
-  //  })
+  private val tick: Endpoint[Seq[Tick]] =
+    get("tick" :: string :: param("date")) { (code: String, date: String) =>
+      val dt = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyyMMdd")).atTime(0, 0)
+      Ok(DataEngine.tick(code, dt))
+    }
+
+  private val ktype: Endpoint[List[Bar]] =
+    get("k" :: string :: param("ktype")) { (code: String, kType: String) =>
+      Ok(DataEngine.ktype(code, stringToBarType(kType)))
+    }
+
+  private val home: Endpoint[String] =
+    get("/") {
+      Ok("hello world")
+    }
+
+  private val api: Service[Request, Response] = (
+    home :+: symbols :+: category :+: realtime :+: tick :+: ktype
+    ).toServiceAs[Application.Json]
+
+  private lazy val server = {
+    val s = Http.server.serve(new InetSocketAddress(8080), api)
+    s
+  }
+
+  Await.ready(server)
+
 }
