@@ -4,7 +4,7 @@ import java.io.{File, FileWriter}
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-import com.squant.cheetah.DataEngine
+import DataEngine
 import com.squant.cheetah.domain.{MIN_5, Symbol}
 import com.typesafe.scalalogging.LazyLogging
 

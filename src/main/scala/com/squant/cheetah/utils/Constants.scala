@@ -1,4 +1,4 @@
-package com.squant.cheetah
+package com.squant.cheetah.utils
 
 object Constants {
   val CONFIG_PATH_DB_BASE = "squant.db.path.base"

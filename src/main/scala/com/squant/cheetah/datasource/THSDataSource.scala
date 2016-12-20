@@ -3,9 +3,9 @@ package com.squant.cheetah.datasource
 import java.io.{File, FileNotFoundException, PrintWriter}
 import java.nio.charset.MalformedInputException
 
-import com.squant.cheetah.Constants._
+import Constants._
 import com.squant.cheetah.domain.Category
-import com.squant.cheetah.utils._
+import com.squant.cheetah.utils.{Constants, _}
 import com.typesafe.scalalogging.LazyLogging
 import org.jsoup.Jsoup
 

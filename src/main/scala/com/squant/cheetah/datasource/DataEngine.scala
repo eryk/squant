@@ -1,19 +1,18 @@
-package com.squant.cheetah
+package com.squant.cheetah.datasource
 
 import java.io.File
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, LocalTime}
 
-import com.squant.cheetah.Constants._
-import com.squant.cheetah.datasource.THSDataSource
+import Constants._
 import com.squant.cheetah.domain._
-import com.squant.cheetah.utils._
+import com.squant.cheetah.utils.{Constants, _}
 
 import scala.io.Source
 
 //https://www.joinquant.com/data
 //https://www.joinquant.com/data/dict/fundamentals
-object DataEngine extends App{
+object DataEngine{
 
   def realtime(code: String): RealTime = {
     val url = "http://hq.sinajs.cn/list="
@@ -45,5 +44,4 @@ object DataEngine extends App{
 
   def getFundamentals(code: String) = ???
 
-  tick("002816",LocalDateTime.now().plusDays(-4)).foreach(println)
 }

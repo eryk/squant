@@ -4,7 +4,7 @@ import java.net.InetSocketAddress
 import java.time.{LocalDate, LocalDateTime}
 import java.time.format.DateTimeFormatter
 
-import com.squant.cheetah.DataEngine
+import DataEngine
 import com.squant.cheetah.domain._
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.{Http, Service}
