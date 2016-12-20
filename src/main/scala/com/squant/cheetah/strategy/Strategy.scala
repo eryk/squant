@@ -1,15 +1,22 @@
 package com.squant.cheetah.strategy
 
+import java.time.LocalDateTime
+
 import akka.actor.Actor
+import com.squant.cheetah.domain.BarType
+import com.squant.cheetah.engine.{Context, Engine}
 import com.typesafe.scalalogging.LazyLogging
 
-trait Strategy extends Actor with LazyLogging{
+trait Strategy extends Actor with Engine with LazyLogging {
 
-  val strategyContext = new StrategyContext
+  val symbols: Seq[Symbol]
 
-  val symbols:Seq[Symbol]
+  def initialize: Unit
 
-  def initialize:Unit
+  override def currentData(code: String, count: Int, frequency: BarType): Unit = ???
+
+  override def getFundamentals(code: String, startDate: LocalDateTime): Unit = ???
+
 
   def process(code: String)
 

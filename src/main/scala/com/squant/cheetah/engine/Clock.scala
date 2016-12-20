@@ -2,17 +2,40 @@ package com.squant.cheetah.engine
 
 import java.time.LocalDateTime
 
-case class ClockType()
+sealed trait ClockType {
+  def now(): LocalDateTime
 
-case object BACKTEST extends ClockType
+  def isFinished(): Boolean
+}
 
-case object REALTIME extends ClockType
+case class BACKTEST(start: LocalDateTime, stop: LocalDateTime, interval: Int) extends ClockType {
+  var currentTime = start
 
-class Clock(clockType:ClockType,interval:Int) {
-  def now():LocalDateTime = {
-    clockType match{
-      case BACKTEST => LocalDateTime.now()
-      case REALTIME => LocalDateTime.now()
-    }
+  assert(start.isBefore(stop))
+
+  override def now(): LocalDateTime = {
+    currentTime = currentTime.plusMinutes(interval)
+    currentTime
   }
+
+  override def isFinished(): Boolean = currentTime.isBefore(stop)
+}
+
+case class TRADE() extends ClockType {
+
+  override def now(): LocalDateTime = LocalDateTime.now()
+
+  override def isFinished(): Boolean = false;
+}
+
+class Clock(clockType: ClockType) {
+
+  def now(): LocalDateTime = clockType.now()
+
+  def getRange(count: Int): (LocalDateTime, LocalDateTime) = {
+    val date = clockType.now
+    (date.plusMinutes(-count), date)
+  }
+
+  def isFinished(): Boolean = clockType.isFinished()
 }

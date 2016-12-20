@@ -68,10 +68,3 @@ package object utils {
     date.isAfter(start) && date.isBefore(stop)
   }
 }
-
-object Test extends App {
-
-  import com.squant.cheetah.utils._
-
-  println(isTradingTime(LocalDateTime.of(2016, 12, 16, 11, 50, 0)))
-}

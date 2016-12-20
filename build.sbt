@@ -13,7 +13,6 @@ resolvers += Resolver.bintrayRepo("fcomb", "maven")
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" % "akka-actor_2.11" % akkaVersion,
-//  "com.typesafe.akka" % "akka-http_2.11" % akkaHttpVersion,
   "com.github.finagle" %% "finch-core" % finchVersion,
   "com.github.finagle" %% "finch-circe" % finchVersion,
   "io.circe" %% "circe-core" % circeVersion,

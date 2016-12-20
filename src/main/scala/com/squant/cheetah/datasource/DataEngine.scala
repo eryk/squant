@@ -4,17 +4,15 @@ import java.io.File
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, LocalTime}
 
-import Constants._
+import com.squant.cheetah.utils.Constants._
 import com.squant.cheetah.domain._
-import com.squant.cheetah.utils.{Constants, _}
+import com.squant.cheetah.utils._
 
 import scala.io.Source
 
-//https://www.joinquant.com/data
-//https://www.joinquant.com/data/dict/fundamentals
 object DataEngine{
 
-  def realtime(code: String): RealTime = {
+  def realtime(code: String, date:LocalDateTime = LocalDateTime.now()): RealTime = {
     val url = "http://hq.sinajs.cn/list="
     val source = Source.fromURL(url + Symbol.getSymbol(code, url), "GBK").mkString
     val array = source.substring(source.indexOf("\"") + 1, source.lastIndexOf("\"")).split(",")
