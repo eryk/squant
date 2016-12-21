@@ -14,7 +14,7 @@ object SQuantMain extends App {
 
   val context = new Context()
 
-  val tradingSystem = new TradingSystem(actorSystem, context);
+  val tradingSystem = new TradingSystem(actorSystem, );
 
   tradingSystem.run()
 }

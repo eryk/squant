@@ -1,14 +1,23 @@
 package com.squant.cheetah
 
+import java.io.{File, FileInputStream}
 import java.time.{LocalDateTime, LocalTime}
 import java.time.format.DateTimeFormatter
 import java.util.{Calendar, Date}
+
+import org.yaml.snakeyaml.Yaml
 
 package object utils {
 
   import com.typesafe.config._
 
   lazy val config = ConfigFactory.load()
+
+  def yaml(path: String): java.util.Map[String, Any] = {
+    val input = new FileInputStream(new File(path))
+    val yaml = new Yaml()
+    yaml.load(input).asInstanceOf[java.util.Map[String, Any]]
+  }
 
   /**
     * 计算两个日期之间相差的天数

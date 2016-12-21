@@ -2,10 +2,12 @@ symbol_pool:
   - name: pool1
   - condition: "pe < 200 && outstanding < 1000"
 
-broker:
-  - name: yinhe1
-  - username: eryk
-  - password: 123
+protfolio:
+  - name: geren
+    broker: yinhe
+    username: eryk
+    password: 123
+    path: "filepath"
 
 strategies:
   - name: celue1
@@ -13,4 +15,4 @@ strategies:
       cType: trade
       interval: 1
     symbols: pool1
-    broker: yinhe1
+    protfolio: geren
