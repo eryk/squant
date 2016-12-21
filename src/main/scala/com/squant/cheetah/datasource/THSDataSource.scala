@@ -3,9 +3,9 @@ package com.squant.cheetah.datasource
 import java.io.{File, FileNotFoundException, PrintWriter}
 import java.nio.charset.MalformedInputException
 
-import Constants._
 import com.squant.cheetah.domain.Category
-import com.squant.cheetah.utils.{Constants, _}
+import com.squant.cheetah.utils._
+import com.squant.cheetah.utils.Constants._
 import com.typesafe.scalalogging.LazyLogging
 import org.jsoup.Jsoup
 
@@ -34,11 +34,11 @@ object THSDataSource extends App with DataSource with LazyLogging {
     Option.empty[String]
   }
 
-  def hy(): Map[String,Category] = {
+  def hy(): Map[String, Category] = {
     val map = mutable.HashMap[String, Category]()
-    (1 to 5).foreach{ pageNum =>
+    (1 to 5).foreach { pageNum =>
       val url = s"http://data.10jqka.com.cn/funds/hyzjl/field/tradezdf/order/desc/page/$pageNum/ajax/1/"
-      urlToCategoryMap(map, url,"hy")
+      urlToCategoryMap(map, url, "hy")
     }
     map.toMap[String, Category]
   }
@@ -47,12 +47,12 @@ object THSDataSource extends App with DataSource with LazyLogging {
     val map = mutable.HashMap[String, Category]()
     (1 to 10).foreach { pageNum =>
       val url = s"http://data.10jqka.com.cn/funds/gnzjl/board/1/field/tradezdf/order/desc/page/$pageNum/ajax/1/"
-      urlToCategoryMap(map, url,"gn")
+      urlToCategoryMap(map, url, "gn")
     }
     map.toMap[String, Category]
   }
 
-  def urlToCategoryMap(map: mutable.HashMap[String, Category], url: String,categoryType:String): Unit = {
+  def urlToCategoryMap(map: mutable.HashMap[String, Category], url: String, categoryType: String): Unit = {
     getSource(url, "gbk") match {
       case source: Some[String] => {
         val elements = Jsoup.parse(source.get).select("table tbody").get(0).select("tr").iterator()
@@ -69,8 +69,8 @@ object THSDataSource extends App with DataSource with LazyLogging {
     }
   }
 
-  private def getHYCode(source:String):String = {
-    Jsoup.parse(source).select("div[class='stock_name'] span").text().replaceAll("[（）]","")
+  private def getHYCode(source: String): String = {
+    Jsoup.parse(source).select("div[class='stock_name'] span").text().replaceAll("[（）]", "")
   }
 
   private def getGNCode(source: String): String = {
@@ -92,14 +92,14 @@ object THSDataSource extends App with DataSource with LazyLogging {
     }
   }
 
-  def parseToCategory(name: String, url: String,categoryType:String): Category = {
+  def parseToCategory(name: String, url: String, categoryType: String): Category = {
     val pinyin = categoryType match {
       case "gn" => url.replace("http://q.10jqka.com.cn/stock/gn/", "").replace("/", "")
-      case "hy" => url.replace("http://q.10jqka.com.cn/stock/thshy/","").replace("/","")
+      case "hy" => url.replace("http://q.10jqka.com.cn/stock/thshy/", "").replace("/", "")
     }
     getSource(url, "gbk") match {
       case source: Some[String] => {
-        val code = if(categoryType == "gn") getGNCode(source.get) else getHYCode(source.get)
+        val code = if (categoryType == "gn") getGNCode(source.get) else getHYCode(source.get)
         if (code == "") {
           logger.warn("can't get code from gn detail page:" + url)
           Category(name, "", categoryType, pinyin, url, List[String]())
@@ -129,7 +129,7 @@ object THSDataSource extends App with DataSource with LazyLogging {
     val map = mutable.Map[String, Category]()
     for (line <- lines) {
       val fields = line.split(",", 6)
-      map.put(fields(0), Category(fields(0), fields(1),  fields(2) ,fields(3),fields(4), fields(5).split("_").filter(_ != "").toList))
+      map.put(fields(0), Category(fields(0), fields(1), fields(2), fields(3), fields(4), fields(5).split("_").filter(_ != "").toList))
     }
     map.toMap
   }

@@ -1,6 +1,6 @@
 package com.squant.cheetah.domain
 
-case class OrderStyle()
+sealed class OrderStyle
 
 case class MarketOrderStyle() extends OrderStyle
 

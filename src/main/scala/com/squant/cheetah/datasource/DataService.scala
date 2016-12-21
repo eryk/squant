@@ -4,16 +4,18 @@ import java.net.InetSocketAddress
 import java.time.{LocalDate, LocalDateTime}
 import java.time.format.DateTimeFormatter
 
-import DataEngine
 import com.squant.cheetah.domain._
+import com.squant.cheetah.engine.DataEngine
 import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.{Http, Service}
 import com.twitter.util.Await
+
 import io.circe.generic.auto._
 import io.finch._
 import io.finch.circe._
+import com.squant.cheetah.datasource._
 
-object DataSourceCenter extends App {
+object DataService extends App {
 
   private val symbols: Endpoint[Seq[Symbol]] =
     get("symbols") {
@@ -47,7 +49,7 @@ object DataSourceCenter extends App {
     }
 
   private val api: Service[Request, Response] = (
-    home :+: symbols :+: category :+: realtime :+: tick :+: ktype
+    home:+: symbols :+:category :+: realtime :+: tick :+: ktype
     ).toServiceAs[Application.Json]
 
   private lazy val server = {

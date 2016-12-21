@@ -8,7 +8,7 @@ case class OrderCost(openTax: Double = 0, //买入时印花税 (只股票类标�
                      minCommission: Double = 5 //最低佣金，不包含印花税
                     )
 
-case class CostType()
+sealed class CostType
 
 case object STOCK extends CostType
 

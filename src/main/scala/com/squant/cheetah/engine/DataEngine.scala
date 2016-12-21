@@ -1,14 +1,46 @@
-package com.squant.cheetah.datasource
+package com.squant.cheetah.engine
 
 import java.io.File
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, LocalTime}
 
-import com.squant.cheetah.utils.Constants._
+import com.squant.cheetah.datasource.THSDataSource
 import com.squant.cheetah.domain._
+import com.squant.cheetah.utils.Constants._
 import com.squant.cheetah.utils._
 
 import scala.io.Source
+
+class DataEngine(context: Context) {
+
+  private val clock = context.clock
+
+  //获取历史数据
+  def getStockData(code: String, //股票代码
+                   count: Int, //数量, 返回的结果集的行数
+                   frequency: BarType = DAY //单位时间长度
+                  ): List[Bar] = {
+    val now: LocalDateTime = clock.now()
+    val start = frequency match {
+      case SEC_1 => now.plusSeconds(-count)
+      case MIN_1 => now.plusMinutes(-count)
+      case MIN_5 => now.plusMinutes(-count * 5)
+      case MIN_15 => now.plusMinutes(-count * 15)
+      case MIN_30 => now.plusMinutes(-count * 30)
+      case MIN_60 => now.plusMinutes(-count * 60)
+      case DAY => now.plusDays(-count)
+      case WEEK => now.plusWeeks(-count)
+      case MONTH => now.plusMonths(-count)
+    }
+    DataEngine.ktype(code, frequency, start, now)
+  }
+
+  //获取基金净值/期货结算价等
+  def getExtras() = ???
+
+  //查询财务数据
+  def getFundamentals(code: String, startDate: LocalDateTime) = ???
+}
 
 object DataEngine {
 

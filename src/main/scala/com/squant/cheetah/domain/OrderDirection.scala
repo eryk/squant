@@ -1,6 +1,6 @@
 package com.squant.cheetah.domain
 
-case class OrderDirection()
+sealed class OrderDirection
 
 case object LONG extends OrderDirection //开多单
 

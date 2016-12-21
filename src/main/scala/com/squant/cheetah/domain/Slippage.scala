@@ -1,6 +1,6 @@
 package com.squant.cheetah.domain
 
-case class Slippage() {
+sealed class Slippage {
   def compute(price: Double): Double = ???
 }
 

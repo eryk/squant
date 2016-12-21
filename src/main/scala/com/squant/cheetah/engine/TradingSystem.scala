@@ -5,8 +5,9 @@ import com.squant.cheetah.strategy.Strategy
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class TradingSystem(actorSystem: ActorSystem, strategies:Seq[Strategy]) extends LazyLogging {
+class TradingSystem(actorSystem: ActorSystem, strategies: Seq[Strategy]) extends LazyLogging {
 
   def run() = {
     for (strategy <- strategies) {
