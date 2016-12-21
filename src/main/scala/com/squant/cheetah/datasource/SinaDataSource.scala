@@ -29,7 +29,7 @@ object SinaDataSource extends App with DataSource with LazyLogging{
     val stocks = DataEngine.symbols()
 
     stocks.foreach(symbol => {
-      writeTick(symbol.code,LocalDateTime.now().plusDays(-2))
+      writeTick(symbol.code,LocalDateTime.now())
     })
   }
 

@@ -7,13 +7,17 @@ import com.squant.cheetah.domain._
 //策略的上下文环境
 class Context() {
 
-  val name:String = "cheetah"
+  val name: String = "cheetah"
 
   def clock: Clock = ???
 
-  def portfolio:Portfolio = ???
+  def portfolio: Portfolio = ???
 
-  def broker:Broker = ???
+  def broker: Broker = ???
 
-  def symbols:Seq[Symbol] = ???
+  def symbols: Seq[Symbol] = ???
+}
+
+object Context {
+  def buildFrom(file: String): Context = ???
 }

@@ -2,9 +2,8 @@ package com.squant.cheetah.trade
 
 import java.time.LocalDateTime
 
+//账户当前的资金，标的信息，即所有标的操作仓位的信息汇总
 class Portfolio {
-  val DEFAULT_NAME: String = "JQuant"
-  private var name: String = null
   private var status: Record = null
   //需要在初始化时赋值
   //  private val riskAnalysis: RiskAnalysis = new RiskAnalysis
