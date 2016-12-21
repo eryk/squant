@@ -21,7 +21,7 @@ case class BACKTEST(start: LocalDateTime, stop: LocalDateTime, interval: Int) ex
   override def isFinished(): Boolean = currentTime.isBefore(stop)
 }
 
-case class TRADE() extends ClockType {
+case class TRADE(interval: Int) extends ClockType {
 
   override def now(): LocalDateTime = LocalDateTime.now()
 

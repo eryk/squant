@@ -10,9 +10,9 @@ import com.squant.cheetah.utils._
 
 import scala.io.Source
 
-object DataEngine{
+object DataEngine {
 
-  def realtime(code: String, date:LocalDateTime = LocalDateTime.now()): RealTime = {
+  def realtime(code: String, date: LocalDateTime = LocalDateTime.now()): RealTime = {
     val url = "http://hq.sinajs.cn/list="
     val source = Source.fromURL(url + Symbol.getSymbol(code, url), "GBK").mkString
     val array = source.substring(source.indexOf("\"") + 1, source.lastIndexOf("\"")).split(",")
@@ -42,4 +42,8 @@ object DataEngine{
 
   def getFundamentals(code: String) = ???
 
+  //获取指数成份股
+  def getIndexStocks() = ???
+
+  def getSymbolInfo(code: String): Symbol = symbols().filter(_.code == code)(0)
 }

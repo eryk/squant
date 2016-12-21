@@ -1,18 +1,17 @@
 package com.squant.cheetah.strategy
 
-import akka.actor.Actor
 import com.squant.cheetah.engine.Engine
 import com.typesafe.scalalogging.LazyLogging
 
-trait Strategy extends Actor with Engine with LazyLogging {
+trait Strategy extends Engine with LazyLogging {
 
   val symbols: Seq[Symbol]
 
   def initialize: Unit
 
-  def process(code: String)
+  def process(symbol: Symbol)
 
-  override def receive = {
-    case code: String => process(code)
+  def processes() = {
+    symbols.foreach(process)
   }
 }
