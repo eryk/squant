@@ -6,7 +6,6 @@ import java.time.format.DateTimeFormatter
 import java.util.{Calendar, Date}
 
 import com.squant.cheetah.engine.{Clock, Context}
-import com.squant.cheetah.strategy.Strategy
 import org.yaml.snakeyaml.Yaml
 
 import scala.collection.JavaConverters._

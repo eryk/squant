@@ -1,12 +1,12 @@
 package com.squant.cheetah.trade
 
-class PortfolioMetric {
+class PortfolioMetric(cash:Double) {
 
-  var startingCash:Double = 0 //起始资金
-  var endingCash: Double = 0 //期末资金
-  var inoutCash: Double = 0 //累计出入金，比如初始资金 1000, 后来转移出去 100, 则这个值是 1000 - 100
-  var availableCash: Double = 0 //可用资金, 可用来购买证券的资金
-  var transferableCash: Double = 0 //可取资金, 即可以提现的资金, 不包括今日卖出证券所得资金
+  var startingCash:Double = cash //起始资金
+  var endingCash: Double = cash //期末资金
+  var inoutCash: Double = cash //累计出入金，比如初始资金 1000, 后来转移出去 100, 则这个值是 1000 - 100
+  var availableCash: Double = cash //可用资金, 可用来购买证券的资金
+  var transferableCash: Double = cash //可取资金, 即可以提现的资金, 不包括今日卖出证券所得资金
   var lockedCache: Double = 0 //挂单锁住资金
 
   var pnl: Double = 0 //交易盈亏

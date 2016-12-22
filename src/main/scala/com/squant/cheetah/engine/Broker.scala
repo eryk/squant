@@ -1,12 +1,21 @@
 package com.squant.cheetah.engine
 
 import com.squant.cheetah.domain.{OrderDirection, OrderStyle}
-import com.squant.cheetah.trade.Portfolio
+import com.squant.cheetah.trade.{Portfolio, Position}
+import com.squant.cheetah.domain._
 
-class Broker(portfolio: Portfolio) {
+class Broker(clock: Clock, portfolio: Portfolio) {
 
   // 下单
-  def order(code: String, amount: Int, style: OrderStyle, side: OrderDirection) = {
+  def order(code: String, amount: Int, style: OrderStyle, side: OrderDirection): Order = {
+
+    //TODO 先创建order，由broker操作
+
+    side match {
+      case LONG => portfolio.longOrder(code,amount,style)
+      case SHORT => portfolio.shortOrder(code,amount,style)
+    }
+    Order()
   }
 
   // 撤单

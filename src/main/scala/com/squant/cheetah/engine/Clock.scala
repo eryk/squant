@@ -5,9 +5,11 @@ import java.time.LocalDateTime
 sealed trait ClockType {
   def now(): LocalDateTime
 
+  def update()
+
   def isFinished(): Boolean
 
-  def interval():Int
+  def interval(): Int
 }
 
 case class BACKTEST(start: LocalDateTime, stop: LocalDateTime, i: Int) extends ClockType {
@@ -15,8 +17,11 @@ case class BACKTEST(start: LocalDateTime, stop: LocalDateTime, i: Int) extends C
 
   assert(start.isBefore(stop))
 
-  override def now(): LocalDateTime = {
+  override def update() = {
     currentTime = currentTime.plusMinutes(interval)
+  }
+
+  override def now(): LocalDateTime = {
     currentTime
   }
 
@@ -32,6 +37,8 @@ case class TRADE(i: Int) extends ClockType {
   def interval() = i
 
   override def isFinished(): Boolean = false;
+
+  override def update(): Unit = {}
 }
 
 class Clock(clockType: ClockType) {

@@ -12,7 +12,7 @@ class Context(c: Clock, startingCash: Double = 100000) {
 
   val portfolio: Portfolio = new Portfolio(startingCash)
 
-  def broker: Broker = new Broker(portfolio)
+  def broker: Broker = new Broker(clock, portfolio)
 
   def symbols: Seq[Symbol] = DataEngine.symbols()
 
