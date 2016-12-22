@@ -5,7 +5,12 @@ import java.time.{LocalDateTime, LocalTime}
 import java.time.format.DateTimeFormatter
 import java.util.{Calendar, Date}
 
+import com.squant.cheetah.engine.{Clock, Context}
+import com.squant.cheetah.strategy.Strategy
 import org.yaml.snakeyaml.Yaml
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable
 
 package object utils {
 
@@ -17,6 +22,18 @@ package object utils {
     val input = new FileInputStream(new File(path))
     val yaml = new Yaml()
     yaml.load(input).asInstanceOf[java.util.Map[String, Any]]
+  }
+
+  def loadContext(file: String): Map[String, Context] = {
+    val strategyMap = yaml(file).get("contexts").asInstanceOf[java.util.List[java.util.Map[String, String]]].asScala
+    val contexts = mutable.Map[String, Context]()
+    strategyMap.foreach(map => {
+      val value = map.asScala
+      val interval: String = value.get("interval").get
+      contexts.put(value.get("name").get, new Context(Clock.mk(interval.toInt)))
+    }
+    )
+    contexts.toMap
   }
 
   /**
@@ -68,6 +85,7 @@ package object utils {
 
   /**
     * 检查给定时间是否在时间范围内
+    *
     * @param date
     * @param start
     * @param stop

@@ -6,9 +6,11 @@ sealed trait ClockType {
   def now(): LocalDateTime
 
   def isFinished(): Boolean
+
+  def interval():Int
 }
 
-case class BACKTEST(start: LocalDateTime, stop: LocalDateTime, interval: Int) extends ClockType {
+case class BACKTEST(start: LocalDateTime, stop: LocalDateTime, i: Int) extends ClockType {
   var currentTime = start
 
   assert(start.isBefore(stop))
@@ -18,12 +20,16 @@ case class BACKTEST(start: LocalDateTime, stop: LocalDateTime, interval: Int) ex
     currentTime
   }
 
+  def interval() = i
+
   override def isFinished(): Boolean = currentTime.isBefore(stop)
 }
 
-case class TRADE(interval: Int) extends ClockType {
+case class TRADE(i: Int) extends ClockType {
 
   override def now(): LocalDateTime = LocalDateTime.now()
+
+  def interval() = i
 
   override def isFinished(): Boolean = false;
 }
@@ -37,5 +43,23 @@ class Clock(clockType: ClockType) {
     (date.plusMinutes(-count), date)
   }
 
+  def interval() = clockType.interval()
+
   def isFinished(): Boolean = clockType.isFinished()
+}
+
+object Clock {
+  /**
+    *
+    * @param interval 单位:分钟
+    * @param start
+    * @param stop
+    * @return
+    */
+  def mk(interval: Int = 1, start: Option[LocalDateTime] = None, stop: Option[LocalDateTime] = Option[LocalDateTime](LocalDateTime.now())): Clock = {
+    start match {
+      case None => new Clock(TRADE(interval))
+      case Some(t) => new Clock(BACKTEST(start.get, stop.get, interval))
+    }
+  }
 }

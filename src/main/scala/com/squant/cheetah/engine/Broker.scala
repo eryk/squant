@@ -6,7 +6,8 @@ import com.squant.cheetah.trade.Portfolio
 class Broker(portfolio: Portfolio) {
 
   // 下单
-  def order(code: String, amount: Int, style: OrderStyle, side: OrderDirection) = ???
+  def order(code: String, amount: Int, style: OrderStyle, side: OrderDirection) = {
+  }
 
   // 撤单
   def cancelOrder(id: String) = ???

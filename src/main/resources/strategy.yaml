@@ -1,7 +1,3 @@
-symbol_pool:
-  - name: pool1
-  - condition: "pe < 200 && outstanding < 1000"
-
 protfolio:
   - name: geren
     broker: yinhe
@@ -9,10 +5,10 @@ protfolio:
     password: 123
     path: "filepath"
 
-strategies:
-  - name: celue1
-    clock:
-      cType: trade
-      interval: 1
-    symbols: pool1
-    protfolio: geren
+contexts:
+  - name: one
+    cType: backtest
+    interval: "1"
+    start: 20150101
+    stop: 20161222
+    startingCash: 100000

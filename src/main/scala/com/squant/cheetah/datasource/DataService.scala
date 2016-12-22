@@ -10,10 +10,10 @@ import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finagle.{Http, Service}
 import com.twitter.util.Await
 
+import com.squant.cheetah.datasource._
 import io.circe.generic.auto._
 import io.finch._
 import io.finch.circe._
-import com.squant.cheetah.datasource._
 
 object DataService extends App {
 
@@ -49,7 +49,8 @@ object DataService extends App {
     }
 
   private val api: Service[Request, Response] = (
-    home:+: symbols :+:category :+: realtime :+: tick :+: ktype
+    home
+//      :+: symbols :+:category :+: realtime :+: tick :+: ktype
     ).toServiceAs[Application.Json]
 
   private lazy val server = {
