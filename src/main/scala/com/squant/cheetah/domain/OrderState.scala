@@ -15,3 +15,5 @@ case object PART_SUCCESS extends OrderState //部分成交
 case object FAILED extends OrderState //交易失败
 
 case object CANCELED extends OrderState //订单被取消
+
+case object UNKNOW extends OrderState

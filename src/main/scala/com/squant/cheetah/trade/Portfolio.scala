@@ -2,7 +2,7 @@ package com.squant.cheetah.trade
 
 import java.time.LocalDateTime
 
-import com.squant.cheetah.domain.OrderStyle
+import com.squant.cheetah.domain.{FAILED, OrderState, OrderStyle, SUCCESS, UNKNOW}
 
 import scala.collection._
 
@@ -18,15 +18,29 @@ class Portfolio(startingCash: Double) {
   //key是股票代码code
   var positions: Map[String, Position] = mutable.Map[String, Position]() //记录账户当前持仓情况
 
-  def longOrder(code: String, amount: Int, style: OrderStyle): Boolean = {
+  def longOrder(code: String, amount: Int, style: OrderStyle): OrderState = {
     if (porfolioMetric.availableCash > amount * style.price) {
 
     }
-    true
+    UNKNOW
   }
 
-  def shortOrder(code: String, amount: Int, style: OrderStyle): Boolean = {
-    if(positions.contains(code))
-    true
+  def shortOrder(code: String, amount: Int, style: OrderStyle): OrderState = {
+    positions.contains(code) match {
+      case true => {
+        val position = positions.get(code).get
+        if (position.totalAmount < amount) {
+          return FAILED
+        } else if (position.totalAmount == amount) {
+          positions - code
+          //TODO update porfolio
+        } else {
+          Position.sub(positions.get(code).get, positions.get(code).get)
+          //TODO update porfolio
+        }
+        SUCCESS
+      }
+      case false => FAILED
+    }
   }
 }
