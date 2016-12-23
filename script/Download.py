@@ -35,11 +35,28 @@ def download_ktype_data():
     print("read: %f s" % (end - start))
 
 
+def download_index_ktype_data():
+    symbols = ts.get_index().code
+    values = []
+    start = time.clock()
+    for code in symbols:
+        future = executor.submit(__download, code, "D", "index")
+        values.append(future)
+    for result in values:
+        result.result()
+    end = time.clock()
+    print("save index: %f s" % (end - start))
+
+
 def __download(code, type, path):
     file = "/data/" + path + "/" + code + ".csv"
     print(file)
-    df = ts.get_k_data(code, ktype=type, autype="qfq")
-    df.to_csv(file, header=None)
+    if (path == "index"):
+        df = ts.get_k_data(code, ktype=type,index="true", autype="qfq")
+        df.to_csv(file, header=None)
+    else:
+        df = ts.get_k_data(code, ktype=type, autype="qfq")
+        df.to_csv(file, header=None)
     return code
 
 
@@ -57,6 +74,8 @@ def main():
             download_stocks()
         if arg == "ktype":
             download_ktype_data()
+        if arg == "index":
+            download_index_ktype_data()
         if arg == "all":
             download_stocks()
             download_ktype_data()

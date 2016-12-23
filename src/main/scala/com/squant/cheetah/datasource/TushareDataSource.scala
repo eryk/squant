@@ -12,6 +12,8 @@ object TushareDataSource extends App with DataSource with LazyLogging {
     "python3.5 " + getProjectDir() + "/script/Download.py stocks" !;
     //下载各级别k线数据
     "python3.5 " + getProjectDir() + "/script/Download.py ktype" !;
+    //下载指标数据
+    "python3.5 " + getProjectDir() + "/script/Download.py index" !;
   }
 
   override def clear(): Unit = ???
