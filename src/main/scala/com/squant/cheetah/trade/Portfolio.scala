@@ -18,14 +18,15 @@ class Portfolio(startingCash: Double) {
   //key是股票代码code
   var positions: Map[String, Position] = mutable.Map[String, Position]() //记录账户当前持仓情况
 
-  def longOrder(code: String, amount: Int, style: OrderStyle): OrderState = {
+  def longOrder(code: String, amount: Int, style: OrderStyle, ts: LocalDateTime): OrderState = {
     if (porfolioMetric.availableCash > amount * style.price) {
-
+      Position.add(positions.get(code).get, Position.mk(code, amount, style.price(), ts))
+      //TODO update porfolio
     }
     UNKNOW
   }
 
-  def shortOrder(code: String, amount: Int, style: OrderStyle): OrderState = {
+  def shortOrder(code: String, amount: Int, style: OrderStyle, ts: LocalDateTime): OrderState = {
     positions.contains(code) match {
       case true => {
         val position = positions.get(code).get

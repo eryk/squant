@@ -24,6 +24,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
   "ch.qos.logback" % "logback-classic" % "1.1.7",
 
+  "com.tictactec" % "ta-lib" % "0.4.0",
+
   "io.circe" %% "circe-yaml" % "0.4.0"
 )
 

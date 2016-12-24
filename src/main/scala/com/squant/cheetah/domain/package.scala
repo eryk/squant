@@ -1,7 +1,7 @@
 package com.squant.cheetah
 
 import java.io.File
-import java.time.LocalDateTime
+import java.time.{LocalDate, LocalDateTime}
 import java.time.format.DateTimeFormatter
 
 import scala.collection.{Seq, _}
@@ -48,13 +48,17 @@ package object domain {
     } yield mapToSymbol(map)
   }
 
+  implicit def localDate2LocalDateTime(date: LocalDate): LocalDateTime = {
+    date.atTime(0, 0, 0)
+  }
+
   implicit def stringToDate(date: String): LocalDateTime = {
-    if(date.length == 10){
+    if (date.length == 10) {
       val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-      LocalDateTime.parse(date,formatter)
-    }else{
+      LocalDate.parse(date, formatter)
+    } else {
       val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-      LocalDateTime.parse(date,formatter)
+      LocalDateTime.parse(date, formatter)
     }
   }
 

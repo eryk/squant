@@ -21,7 +21,8 @@ def download_stocks():
 
 
 def download_ktype_data():
-    ktype = {"5": "5", "15": "15", "30": "30", "60": "60", "D": "day", "W": "week", "M": "month"}
+    # ktype = {"5": "5", "15": "15", "30": "30", "60": "60", "D": "day", "W": "week", "M": "month"}
+    ktype = {"D": "day"}
     columns = ts.get_stock_basics().index
     start = time.clock()
     values = []

@@ -7,7 +7,7 @@ import java.time.LocalDateTime
   *
   */
 case class Position(stockName: String, //证券名称
-                    symbol: String, //证券代码
+                    code: String, //证券代码
                     ts: LocalDateTime, //更新时间戳
                     totalAmount: Int, //证券数量
                     closeableAmount: Int, //可卖数量
@@ -22,9 +22,13 @@ case class Position(stockName: String, //证券名称
 
 object Position {
 
+  def mk(code: String, amount: Int, price: Double, ts: LocalDateTime): Position = {
+    Position("", code, ts, amount, 0, amount, 0, price, price, 0, 0, amount * price)
+  }
+
   def sub(hold: Position, newPos: Position): Position = {
     Position(hold.stockName,
-      hold.symbol,
+      hold.code,
       newPos.ts,
       hold.totalAmount - newPos.totalAmount,
       hold.closeableAmount - newPos.totalAmount,
@@ -41,7 +45,7 @@ object Position {
 
   def add(hold: Position, newPos: Position): Position = {
     Position(hold.stockName,
-      hold.symbol,
+      hold.code,
       newPos.ts,
       hold.totalAmount + newPos.totalAmount,
       hold.closeableAmount,

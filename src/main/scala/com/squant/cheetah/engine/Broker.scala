@@ -7,15 +7,13 @@ import com.squant.cheetah.domain._
 class Broker(clock: Clock, portfolio: Portfolio) {
 
   // 下单
-  def order(code: String, amount: Int, style: OrderStyle, side: OrderDirection): Order = {
+  def order(code: String, amount: Int, style: OrderStyle, side: OrderDirection): Unit = {
 
     //TODO 先创建order，由broker操作
-
-    side match {
-      case LONG => portfolio.longOrder(code,amount,style)
-      case SHORT => portfolio.shortOrder(code,amount,style)
+    val orderState = side match {
+      case LONG => portfolio.longOrder(code,amount,style,clock.now)
+      case SHORT => portfolio.shortOrder(code,amount,style,clock.now)
     }
-    Order()
   }
 
   // 撤单

@@ -62,7 +62,8 @@ object DataEngine {
 
   //包含当天数据，内部做数据的聚合
   def ktype(code: String, kType: BarType, start: LocalDateTime = LocalDateTime.now().plusYears(-1), stop: LocalDateTime = LocalDateTime.now()): List[Bar] = {
-    Bar.parseCSVToBars(code, kType).takeWhile(bar => bar.date.isAfter(start) && bar.date.isBefore(stop)).toList
+    val bars = Bar.parseCSVToBars(code, kType)
+    bars.takeWhile(bar => bar.date.isAfter(start) && bar.date.isBefore(stop)).toList
   }
 
   //地区、概念、行业

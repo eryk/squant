@@ -1,3 +1,5 @@
 package com.squant.cheetah.domain
 
-case class Order()
+class Order(code: String, amount: Int, style: OrderStyle){
+  var state:OrderState = CREATE
+}
