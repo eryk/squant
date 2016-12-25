@@ -30,12 +30,19 @@ case class Bar(barType: BarType, date: LocalDateTime, open: Float, close: Float,
 
 object Bar extends App {
 
-  def typeToPath(barType:BarType):String = {
+  def typeToPath(barType: BarType): String = {
     val ktype = Map("MIN_5" -> "5", "MIN_15" -> "15", "MIN_30" -> "30", "MIN_60" -> "60", "DAY" -> "day", "WEEK" -> "week", "MONTH" -> "month")
     ktype.get(barType.toString).get
   }
 
-  def parseCSVToBars(code: String, ktype: BarType): Seq[Bar] = {
+  /**
+    *
+    * @param code
+    * @param ktype
+    * @param index if true,return index data ,else return stock data
+    * @return
+    */
+  def parseCSVToBars(code: String, ktype: BarType, index:Boolean = false): Seq[Bar] = {
 
     def mapToStock(map: Map[String, String]): Bar = new Bar(
       ktype,
@@ -48,7 +55,12 @@ object Bar extends App {
       map.get("code").get
     )
 
-    val file = s"/data/${typeToPath(ktype)}/$code.csv"
+    var file:String =  ""
+    if(index){
+      file = s"/data/index/$code.csv"
+    }else{
+      file = s"/data/${typeToPath(ktype)}/$code.csv"
+    }
     val lines = scala.io.Source.fromFile(new File(file)).getLines().toList
     for {
       line <- lines

@@ -61,9 +61,9 @@ object DataEngine {
   }
 
   //包含当天数据，内部做数据的聚合
-  def ktype(code: String, kType: BarType, start: LocalDateTime = LocalDateTime.now().plusYears(-1), stop: LocalDateTime = LocalDateTime.now()): List[Bar] = {
-    val bars = Bar.parseCSVToBars(code, kType)
-    bars.takeWhile(bar => bar.date.isAfter(start) && bar.date.isBefore(stop)).toList
+  def ktype(code: String, kType: BarType, start: LocalDateTime = LocalDateTime.now().plusYears(-1), stop: LocalDateTime = LocalDateTime.now(), index: Boolean = false): List[Bar] = {
+    val bars = Bar.parseCSVToBars(code, kType, index)
+    bars.filter(bar => bar.date.isAfter(start) && bar.date.isBefore(stop)).toList
   }
 
   //地区、概念、行业
@@ -79,4 +79,6 @@ object DataEngine {
   def getIndexStocks() = ???
 
   def getSymbolInfo(code: String): Symbol = symbols().filter(_.code == code)(0)
+
+  DataEngine.ktype("000300", DAY,index=true).foreach(println)
 }
