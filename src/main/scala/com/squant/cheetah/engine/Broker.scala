@@ -12,7 +12,7 @@ class Broker(clock: Clock, portfolio: Portfolio) {
     //TODO 先创建order，由broker操作
     val orderState = side match {
       case LONG => portfolio.longOrder(code,amount,style,clock.now)
-      case SHORT => portfolio.shortOrder(code,amount,style,clock.now)
+      case SHORT => portfolio.shortAllOrder(code,style,clock.now)
     }
   }
 

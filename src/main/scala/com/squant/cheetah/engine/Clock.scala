@@ -52,10 +52,12 @@ class Clock(clockType: ClockType) {
 
   def interval() = clockType.interval()
 
+  def update() = clockType.update()
+
   def isFinished(): Boolean = clockType.isFinished()
 }
 
-object Clock {
+object Clock extends App{
   /**
     *
     * @param interval 单位:分钟

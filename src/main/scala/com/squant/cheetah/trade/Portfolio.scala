@@ -2,7 +2,7 @@ package com.squant.cheetah.trade
 
 import java.time.LocalDateTime
 
-import com.squant.cheetah.domain.{FAILED, OrderState, OrderStyle, SUCCESS, UNKNOW}
+import com.squant.cheetah.domain.{CREATE_FAIL, FAILED, OrderState, OrderStyle, SUCCESS, UNKNOW}
 
 import scala.collection._
 
@@ -16,11 +16,15 @@ class Portfolio(startingCash: Double) {
   var ts: LocalDateTime = null //最后更新record的时间点
 
   //key是股票代码code
-  var positions: Map[String, Position] = mutable.Map[String, Position]() //记录账户当前持仓情况
+  var positions: mutable.Map[String, Position] = mutable.Map[String, Position]() //记录账户当前持仓情况
 
   def longOrder(code: String, amount: Int, style: OrderStyle, ts: LocalDateTime): OrderState = {
-    if (porfolioMetric.availableCash > amount * style.price) {
-      Position.add(positions.get(code).get, Position.mk(code, amount, style.price(), ts))
+    porfolioMetric.availableCash > amount * style.price match {
+      case true => {
+        positions.put(code, Position.add(positions.get(code).get, Position.mk(code, amount, style.price(), ts)))
+        porfolioMetric.availableCash = porfolioMetric.availableCash - amount * style.price
+      }
+      case false => CREATE_FAIL
       //TODO update porfolio
     }
     UNKNOW
@@ -42,6 +46,16 @@ class Portfolio(startingCash: Double) {
         SUCCESS
       }
       case false => FAILED
+    }
+  }
+
+  def shortAllOrder(code: String, style: OrderStyle, ts: LocalDateTime): OrderState = {
+    positions.get(code) match {
+      case Some(position) => {
+        porfolioMetric.availableCash += position.totalAmount * position.avgCost
+        SUCCESS
+      }
+      case _ => FAILED
     }
   }
 }

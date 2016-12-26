@@ -14,6 +14,7 @@ class TradingSystem(actorSystem: ActorSystem, strategies: Seq[Strategy]) extends
       actorSystem.scheduler.schedule(Duration.Zero, strategy.clock.interval minutes, new Runnable {
         override def run(): Unit = {
           strategy.processes()
+          strategy.clock.update()
         }
       })
     }

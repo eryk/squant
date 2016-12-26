@@ -16,10 +16,10 @@ class DataEngine(context: Context) {
   private val clock = context.clock
 
   //获取历史数据
-  def getStockData(code: String, //股票代码
+  def getHistoryData(code: String, //股票代码
                    count: Int, //数量, 返回的结果集的行数
-                   frequency: BarType = DAY //单位时间长度
-                  ): List[Bar] = {
+                   frequency: BarType = DAY, //单位时间长度
+                  index:Boolean = false): List[Bar] = {
     val now: LocalDateTime = clock.now()
     val start = frequency match {
       case SEC_1 => now.plusSeconds(-count)
@@ -32,7 +32,7 @@ class DataEngine(context: Context) {
       case WEEK => now.plusWeeks(-count)
       case MONTH => now.plusMonths(-count)
     }
-    DataEngine.ktype(code, frequency, start, now)
+    DataEngine.ktype(code, frequency, start, now,index)
   }
 
   //获取基金净值/期货结算价等
