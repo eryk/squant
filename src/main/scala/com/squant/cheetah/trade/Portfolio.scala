@@ -2,7 +2,7 @@ package com.squant.cheetah.trade
 
 import java.time.LocalDateTime
 
-import com.squant.cheetah.domain.{CREATE_FAIL, FAILED, OrderState, OrderStyle, SUCCESS, UNKNOW}
+import com.squant.cheetah.domain.{CREATE_FAIL, FAILED, Order, OrderState, OrderStyle, SUCCESS, UNKNOW}
 
 import scala.collection._
 
@@ -18,11 +18,11 @@ class Portfolio(startingCash: Double) {
   //key是股票代码code
   var positions: mutable.Map[String, Position] = mutable.Map[String, Position]() //记录账户当前持仓情况
 
-  def longOrder(code: String, amount: Int, style: OrderStyle, ts: LocalDateTime): OrderState = {
-    porfolioMetric.availableCash > amount * style.price match {
+  def longOrder(order: Order): OrderState = {
+    porfolioMetric.availableCash > order.volume match {
       case true => {
-        positions.put(code, Position.add(positions.get(code).get, Position.mk(code, amount, style.price(), ts)))
-        porfolioMetric.availableCash = porfolioMetric.availableCash - amount * style.price
+        positions.put(order.code, Position.mk(order))
+        porfolioMetric.availableCash = porfolioMetric.availableCash - order.volume
       }
       case false => CREATE_FAIL
       //TODO update porfolio
@@ -30,17 +30,17 @@ class Portfolio(startingCash: Double) {
     UNKNOW
   }
 
-  def shortOrder(code: String, amount: Int, style: OrderStyle, ts: LocalDateTime): OrderState = {
-    positions.contains(code) match {
+  def shortOrder(order: Order): OrderState = {
+    positions.contains(order.code) match {
       case true => {
-        val position = positions.get(code).get
-        if (position.totalAmount < amount) {
+        val position = positions.get(order.code).get
+        if (position.totalAmount < order.amount) {
           return FAILED
-        } else if (position.totalAmount == amount) {
-          positions - code
+        } else if (position.totalAmount == order.amount) {
+          positions - order.code
           //TODO update porfolio
         } else {
-          Position.sub(positions.get(code).get, positions.get(code).get)
+          Position.sub(positions.get(order.code).get, positions.get(order.code).get)
           //TODO update porfolio
         }
         SUCCESS
@@ -49,8 +49,8 @@ class Portfolio(startingCash: Double) {
     }
   }
 
-  def shortAllOrder(code: String, style: OrderStyle, ts: LocalDateTime): OrderState = {
-    positions.get(code) match {
+  def shortAllOrder(order: Order): OrderState = {
+    positions.get(order.code) match {
       case Some(position) => {
         porfolioMetric.availableCash += position.totalAmount * position.avgCost
         SUCCESS

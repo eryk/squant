@@ -2,6 +2,8 @@ package com.squant.cheetah.trade
 
 import java.time.LocalDateTime
 
+import com.squant.cheetah.domain.Order
+
 /**
   * 持有一只股票详情
   *
@@ -22,8 +24,8 @@ case class Position(stockName: String, //证券名称
 
 object Position {
 
-  def mk(code: String, amount: Int, price: Double, ts: LocalDateTime): Position = {
-    Position("", code, ts, amount, 0, amount, 0, price, price, 0, 0, amount * price)
+  def mk(order: Order): Position = {
+    Position("", order.code, order.date, order.amount, 0, order.amount, 0, order.price, order.price, 0, 0, order.volume)
   }
 
   def sub(hold: Position, newPos: Position): Position = {

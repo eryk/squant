@@ -9,6 +9,6 @@ contexts:
   - name: one
     cType: backtest
     interval: "1"
-    start: 20150101
-    stop: 20161222
+    start: "20150101"
+    stop: "20161222"
     startingCash: 100000

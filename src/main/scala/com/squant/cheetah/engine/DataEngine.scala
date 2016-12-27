@@ -80,5 +80,4 @@ object DataEngine {
 
   def getSymbolInfo(code: String): Symbol = symbols().filter(_.code == code)(0)
 
-  DataEngine.ktype("000300", DAY,index=true).foreach(println)
 }

@@ -28,7 +28,7 @@ package object domain {
         map.get("esp").get.toFloat, //每股收益
         map.get("bvps").get.toFloat, //每股净资
         map.get("pb").get.toFloat, //市净率
-        map.get("timeToMarket").get, //上市日期
+        stringToDate(map.get("timeToMarket").get), //上市日期
         map.get("undp").get.toFloat, //未分利润
         map.get("perundp").get.toFloat, //每股未分配
         map.get("rev").get.toFloat, //收入同比(%)
@@ -53,7 +53,12 @@ package object domain {
   }
 
   implicit def stringToDate(date: String): LocalDateTime = {
-    if (date.length == 10) {
+    if(date == "0"){
+      LocalDateTime.of(1970,1,1,0,0)
+    }else if(date.length == 8){
+      val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+      LocalDate.parse(date, formatter)
+    } else if (date.length == 10) {
       val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
       LocalDate.parse(date, formatter)
     } else {

@@ -24,12 +24,16 @@ package object utils {
   }
 
   def loadContext(file: String): Map[String, Context] = {
+    import com.squant.cheetah.domain._
+
     val strategyMap = yaml(file).get("contexts").asInstanceOf[java.util.List[java.util.Map[String, String]]].asScala
     val contexts = mutable.Map[String, Context]()
     strategyMap.foreach(map => {
       val value = map.asScala
       val interval: String = value.get("interval").get
-      contexts.put(value.get("name").get, new Context(Clock.mk(interval.toInt)))
+      val start:LocalDateTime = stringToDate(value.get("start").get)
+      val stop:LocalDateTime = stringToDate(value.get("stop").get)
+      contexts.put(value.get("name").get, new Context(Clock.mk(interval.toInt,Some(start),Some(stop))))
     }
     )
     contexts.toMap

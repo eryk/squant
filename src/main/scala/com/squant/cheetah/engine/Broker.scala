@@ -1,18 +1,17 @@
 package com.squant.cheetah.engine
 
-import com.squant.cheetah.domain.{OrderDirection, OrderStyle}
-import com.squant.cheetah.trade.{Portfolio, Position}
 import com.squant.cheetah.domain._
+import com.squant.cheetah.trade.Portfolio
 
-class Broker(clock: Clock, portfolio: Portfolio) {
+class Broker(portfolio: Portfolio) {
 
   // 下单
-  def order(code: String, amount: Int, style: OrderStyle, side: OrderDirection): Unit = {
+  def order(order: Order): Unit = {
 
     //TODO 先创建order，由broker操作
-    val orderState = side match {
-      case LONG => portfolio.longOrder(code,amount,style,clock.now)
-      case SHORT => portfolio.shortAllOrder(code,style,clock.now)
+    order.direction match {
+      case LONG => portfolio.longOrder(order)
+      case SHORT => portfolio.shortAllOrder(order)
     }
   }
 

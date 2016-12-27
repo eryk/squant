@@ -1,6 +1,6 @@
 package com.squant.cheetah.domain
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import java.time.format.DateTimeFormatter
 
 import scala.io.Source
@@ -20,7 +20,7 @@ case class Symbol(code: String, //代码
                   esp: Float, //每股收益
                   bvps: Float, //每股净资
                   pb: Float, //市净率
-                  timeToMarket: String, //上市日期
+                  timeToMarket: LocalDateTime, //上市日期
                   undp: Float, //未分利润
                   perundp: Float, // 每股未分配
                   rev: Float, //收入同比(%)
@@ -82,7 +82,7 @@ object Symbol extends App {
 
     def excludeNew(dayCount: Long): SymbolFilter = {
       SymbolFilter(
-        for (symbol <- symbols if symbol.timeToMarket.length == 8 && strToDate(symbol.timeToMarket).plusDays(dayCount).isBefore(LocalDate.now())) yield symbol
+        for (symbol <- symbols if symbol.timeToMarket.plusDays(dayCount).isBefore(LocalDate.now())) yield symbol
       )
     }
 
