@@ -25,7 +25,7 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.1.7",
 
   "com.tictactec" % "ta-lib" % "0.4.0",
-
+  "com.quantifind" % "wisp_2.11" % "0.0.4",
   "io.circe" %% "circe-yaml" % "0.4.0"
 )
 
