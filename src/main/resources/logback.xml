@@ -29,7 +29,7 @@
   </appender>
 
   <root level="INFO">
-    <appender-ref ref="${squant.logger:-RFA}"/>
+    <appender-ref ref="${squant.logger:-console}"/>
   </root>
 
 </configuration>
