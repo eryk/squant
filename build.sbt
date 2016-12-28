@@ -32,7 +32,7 @@ libraryDependencies ++= Seq(
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
 
 // Assembly settings
-mainClass in Global := Some("com.squant.cheetah.MainEngine")
+mainClass in Global := Some("com.squant.cheetah.SQuantMain")
 assemblyJarName in assembly := s"$name-$version.jar"
 
 fork in run := true

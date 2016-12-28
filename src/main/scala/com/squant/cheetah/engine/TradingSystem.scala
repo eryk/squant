@@ -7,13 +7,18 @@ import com.typesafe.scalalogging.LazyLogging
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 
+import com.squant.cheetah.utils._
+
 class TradingSystem(actorSystem: ActorSystem, strategies: Seq[Strategy]) extends LazyLogging {
 
   def run() = {
     for (strategy <- strategies) {
-      actorSystem.scheduler.schedule(Duration.Zero, strategy.clock.interval minutes, new Runnable {
+      strategy.init()
+      actorSystem.scheduler.schedule(Duration.Zero, 1 microseconds, new Runnable {
         override def run(): Unit = {
-          strategy.processes()
+          if(isTradingTime(strategy.clock.now())){
+            strategy.processes()
+          }
           strategy.clock.update()
         }
       })

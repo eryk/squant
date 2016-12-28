@@ -14,11 +14,6 @@ class Context(c: Clock, startingCash: Double = 100000) {
 
   def broker: Broker = new Broker(portfolio)
 
-  def symbols: Seq[Symbol] = DataEngine.symbols().filter(
-    symbol => ! symbol.name.contains("ST") &&
-      ! symbol.name.startsWith("N") &&
-      symbol.timeToMarket.isBefore(clock.now().plusDays(-30)))
-
   var benchmark: String = "000001"
   //设置佣金/印花税
   var cost: OrderCost = OrderCost()

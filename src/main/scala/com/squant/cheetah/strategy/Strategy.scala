@@ -8,7 +8,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 abstract class Strategy(context: Context) extends LazyLogging {
 
-  var symbols: Seq[Symbol] = context.symbols
+  var symbols: Seq[Symbol] = DataEngine.symbols()
 
   val broker = context.broker
 
@@ -16,7 +16,7 @@ abstract class Strategy(context: Context) extends LazyLogging {
 
   val clock = context.clock
 
-  val g = scala.collection.mutable.Map[String,Any]()
+  val g = scala.collection.mutable.Map[String, Any]()
 
   def init(): Unit
 
@@ -28,4 +28,5 @@ abstract class Strategy(context: Context) extends LazyLogging {
 
   def now(): LocalDateTime = clock.now()
 
+  def find(code: String):Option[Symbol] = symbols.find(_.code == code)
 }
