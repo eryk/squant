@@ -6,9 +6,9 @@ protfolio:
     path: "filepath"
 
 contexts:
-  - name: one
+  - name: default
     cType: backtest
-    interval: "1"
-    start: "20150101"
+    interval: "60" #interval用于actor调度和clock的update，单位是分钟
+    start: "20160104"
     stop: "20161222"
     startingCash: 100000

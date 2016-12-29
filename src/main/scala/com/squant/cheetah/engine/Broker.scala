@@ -12,6 +12,7 @@ class Broker(portfolio: Portfolio) {
     order.direction match {
       case LONG => portfolio.longOrder(order)
       case SHORT => portfolio.shortAllOrder(order)
+      case _ => new UnknownError()
     }
   }
 

@@ -27,7 +27,7 @@ case class BACKTEST(start: LocalDateTime, stop: LocalDateTime, i: Int) extends C
 
   def interval() = i
 
-  override def isFinished(): Boolean = currentTime.isBefore(stop)
+  override def isFinished(): Boolean = currentTime.isAfter(stop)
 }
 
 case class TRADE(i: Int) extends ClockType {
@@ -41,23 +41,27 @@ case class TRADE(i: Int) extends ClockType {
   override def update(): Unit = {}
 }
 
-class Clock(clockType: ClockType) {
+class Clock(cType: ClockType) {
 
-  def now(): LocalDateTime = clockType.now()
+  def now(): LocalDateTime = cType.now()
 
   def getRange(count: Int): (LocalDateTime, LocalDateTime) = {
-    val date = clockType.now
+    val date = cType.now
     (date.plusMinutes(-count), date)
   }
 
-  def interval() = clockType.interval()
+  def clockType(): ClockType = cType
 
-  def update() = clockType.update()
+  def interval() = cType.interval()
 
-  def isFinished(): Boolean = clockType.isFinished()
+  def update() = {
+    cType.update()
+  }
+
+  def isFinished(): Boolean = cType.isFinished()
 }
 
-object Clock extends App{
+object Clock extends App {
   /**
     *
     * @param interval 单位:分钟

@@ -30,9 +30,9 @@ package object utils {
     val contexts = mutable.Map[String, Context]()
     strategyMap.foreach(map => {
       val value = map.asScala
-      val interval: String = value.get("interval").get
-      val start:LocalDateTime = stringToDate(value.get("start").get)
-      val stop:LocalDateTime = stringToDate(value.get("stop").get)
+      val interval: String = value.get("interval").getOrElse("0")
+      val start:LocalDateTime = stringToDate(value.get("start").getOrElse("19901219"))
+      val stop:LocalDateTime = stringToDate(value.get("stop").getOrElse("20860621"))
       contexts.put(value.get("name").get, new Context(Clock.mk(interval.toInt,Some(start),Some(stop))))
     }
     )
