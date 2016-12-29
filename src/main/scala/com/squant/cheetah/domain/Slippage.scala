@@ -11,6 +11,7 @@ case class FixedSlippage(count: Double = 0.02) extends Slippage {
     order.direction match {
       case LONG => order.price + count
       case SHORT => order.price - count
+      case _ => order.price
     }
   }
 }
@@ -22,6 +23,7 @@ case class PriceRelatedSlippage(precent: Double = 0.002) extends Slippage {
     order.direction match {
       case LONG => order.price * (1 + precent)
       case SHORT => order.price * (1 - precent)
+      case _ => order.price
     }
   }
 }

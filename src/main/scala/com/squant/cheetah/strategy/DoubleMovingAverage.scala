@@ -7,9 +7,7 @@ import com.squant.cheetah.engine.Context
 class DoubleMovingAverage(sContext: Context) extends Strategy(sContext) {
 
   override def init() = {
-    val start = System.currentTimeMillis()
     symbols = Seq[Symbol](find("000001").get)
-    println("init cost:" + (System.currentTimeMillis() - start))
     logger.info("symbols:" + symbols.size)
     this
   }
@@ -23,10 +21,9 @@ class DoubleMovingAverage(sContext: Context) extends Strategy(sContext) {
 
     val cash:Double = sContext.portfolio.availableCash
 
-    println(s"$ma5\t$ma10")
-
     if (ma5 > ma10) {
       broker.order(Order(symbol.code, 100, LimitOrderStyle(closeData.last.close), LONG, sContext.clock.now()))
+      println(closeData.last)
       logger.info(s"buying ${symbol.name},price=${closeData.last.close}")
     } else if (ma5 < ma10 && sContext.portfolio.positions.contains(symbol.code)) {
       broker.order(Order(symbol.code, 100, LimitOrderStyle(closeData.last.close), SHORT, sContext.clock.now()))

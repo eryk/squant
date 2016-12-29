@@ -16,7 +16,7 @@ case object CLOCK_EVENT extends EVENT_TYPE
 
 case object DATA_EVENT extends EVENT_TYPE
 
-abstract class Strategy(sContext: StrategyContext) extends LazyLogging with Actor {
+abstract class Strategy(sContext: StrategyContext) extends LazyLogging{
 
   var symbols: Seq[Symbol] = DataEngine.symbols()
 
@@ -28,23 +28,13 @@ abstract class Strategy(sContext: StrategyContext) extends LazyLogging with Acto
 
   def init(): Strategy
 
-  var isInit = false
-
   def process(symbol: Symbol)
 
-  private def processes() = {
-    symbols.foreach(process)
-  }
-
-  override def receive: Receive = {
-    case INIT_EVENT => init()
-    case CLOCK_EVENT => {
-      println("clockk_event")
-      if (isTradingTime(sContext.clock.now())) {
-        processes()
-      }
-      sContext.clock.update()
+  def processes() = {
+    if (isTradingTime(sContext.clock.now())) {
+      symbols.foreach(process)
     }
+    sContext.clock.update()
   }
 
   def now(): LocalDateTime = sContext.clock.now()
