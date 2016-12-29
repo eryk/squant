@@ -2,7 +2,7 @@ package com.squant.cheetah.trade
 
 import java.time.LocalDateTime
 
-import com.squant.cheetah.domain.{CREATE_FAIL, FAILED, Order, OrderState, OrderStyle, SUCCESS, UNKNOW}
+import com.squant.cheetah.domain.{OPEN_FAIL, FAILED, Order, OrderState, OrderStyle, SUCCESS, UNKNOW}
 
 import scala.collection._
 
@@ -51,7 +51,7 @@ class Portfolio(sCash: Double) {
         positions.put(order.code, Position.mk(order))
         availableCash = availableCash - order.volume
       }
-      case false => CREATE_FAIL
+      case false => OPEN_FAIL
       //TODO update porfolio
     }
     UNKNOW
@@ -85,4 +85,6 @@ class Portfolio(sCash: Double) {
       case _ => FAILED
     }
   }
+
+  def showResult() = ???
 }

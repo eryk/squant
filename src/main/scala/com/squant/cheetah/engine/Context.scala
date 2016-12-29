@@ -15,10 +15,12 @@ class Context(c: Clock, startingCash: Double = 100000) {
   def broker: Broker = new Broker(portfolio)
 
   var benchmark: String = "000001"
-  //设置佣金/印花税
-  var cost: OrderCost = OrderCost()
-  var costType: CostType = STOCK
   //设置滑点
   var slippage: Slippage = PriceRelatedSlippage()
+  //扣费类型，默认为股票
+  var costType: CostType = STOCK
+  //设置佣金/印花税
+  var cost: OrderCost = OrderCost(slippage = slippage, costType = costType)
+
 
 }
