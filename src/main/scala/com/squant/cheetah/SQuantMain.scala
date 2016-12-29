@@ -3,7 +3,7 @@ package com.squant.cheetah
 import java.util.concurrent.TimeUnit
 
 import com.squant.cheetah.engine.TRADE
-import com.squant.cheetah.strategy.DoubleMovingAverage
+import com.squant.cheetah.examples.DoubleMovingAverage
 import com.squant.cheetah.utils.Constants._
 import com.squant.cheetah.utils._
 import com.typesafe.scalalogging.LazyLogging
@@ -23,6 +23,6 @@ object SQuantMain extends App with LazyLogging {
       TimeUnit.MINUTES.sleep(context.clock.interval())
     }
   }
-
+  logger.info("portfolio:" + strategy.portfolio.endingCash)
   logger.info(s"strategy is finished. cost=${System.currentTimeMillis() - start} ms")
 }
