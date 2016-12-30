@@ -4,11 +4,12 @@ import java.time.LocalDateTime
 
 import com.squant.cheetah.domain.{FAILED, LONG, Order, OrderState, OrderStyle, SHORT, SUCCESS}
 import com.squant.cheetah.engine.Context
+import com.typesafe.scalalogging.LazyLogging
 
 import scala.collection._
 
 //账户当前的资金，标的信息，即所有标的操作仓位的信息汇总
-class Portfolio(context: Context) {
+class Portfolio(context: Context) extends LazyLogging {
 
   //起始资金
   val startingCash: Double = context.startCash
@@ -26,8 +27,6 @@ class Portfolio(context: Context) {
     var annualReturn: Double = 0
     //平均每只股票持仓天数
     var avgPositionDays: Int = 0
-    //持仓总天数
-    var totalPositionDays: Int = 0
     //最大单笔盈利
     var maxEarnPerOp: Double = 0
     //最大单笔亏损
@@ -45,7 +44,7 @@ class Portfolio(context: Context) {
     //最大资产
     var max: Double = 0
     //最小资产
-    var min: Double = 0
+    var min: Double = Double.MaxValue
     //最大回撤=最大资产-最小资产
     var drawdown: Double = 0
     //总交易次数
@@ -60,42 +59,101 @@ class Portfolio(context: Context) {
     var sharpe: Double = 0
     //所提诺比率
     var sortino: Double = 0
+
+    def update(order: Order): Unit = {
+      ts = context.clock.now()
+      order.direction match {
+        case LONG => {
+          //是否已经持有此股票
+          if (positions.get(order.code).isEmpty) {
+            positions.put(order.code, Position.mk(order))
+          } else {
+            val position = positions.get(order.code).get
+            positions.put(order.code, position.add(Position.mk(order)))
+          }
+          //扣除交易金额
+          availableCash -= order.volume
+          endingCash -= order.volume
+        }
+        case SHORT => {
+          val position = positions.get(order.code).get.sub(Position.mk(order))
+          if (position.totalAmount == 0) {
+            positions.remove(order.code)
+          } else {
+            positions.put(order.code, position)
+          }
+          availableCash += order.volume
+          endingCash += order.volume
+          max = Math.max(max, endingCash)
+          min = Math.min(min, endingCash)
+        }
+        case _ => new UnknownError("unkown order direction")
+      }
+      totalOperate += 1
+      pnl = endingCash - startingCash
+      pnlRate = (endingCash - startingCash) / startingCash * 100
+      //计算税费
+      availableCash -= context.cost.cost(order)
+      endingCash -= context.cost.cost(order)
+
+      records.append(ts -> new Record(order, context.cost.cost(order), ts))
+    }
+
+    override def toString: String = {
+      val buffer = mutable.StringBuilder.newBuilder
+      for (item <- records) {
+        buffer.append(s"\t\t${item._1} ${item._2}\n")
+      }
+
+      val posStr = mutable.StringBuilder.newBuilder
+      positions.foreach { item =>
+        posStr.append(s"\t\t${item._1} ${item._2}\n")
+      }
+
+      s"账户详情信息:\n" +
+        s"\t起始资金：$startingCash\n" +
+        f"\t期末资金：$endingCash%2.2f\n" +
+        f"\t可用资金：$availableCash%2.2f\n" +
+        f"\t交易盈亏：$pnl%2.2f($pnlRate%2.2f" + "%)\n" +
+        s"\t交易次数：$totalOperate\n" +
+        f"\t最大资产：$max%2.2f\n" +
+        f"\t最小资产：$min%2.2f\n" +
+        f"\t持仓情况：\n${posStr.toString}" +
+        s"\t交易记录：\n${buffer.toString}"
+    }
   }
 
   private val metric = new Metric
 
-  private val records = mutable.Map[LocalDateTime, Record]() //记录各个时间点账户状态
+  private val records = mutable.Buffer[(LocalDateTime, Record)]() //记录各个时间点账户状态
 
   var ts: LocalDateTime = null //最后更新record的时间点
 
   //key是股票代码code
-  var positions: mutable.Map[String, Position] = mutable.Map[String, Position]() //记录账户当前持仓情况
+  var positions: mutable.Map[String, Position] = mutable.LinkedHashMap[String, Position]() //记录账户当前持仓情况
 
   def buyAll(code: String, orderStyle: OrderStyle): OrderState = {
     val amount = (availableCash / orderStyle.price() / 100).toInt * 100
-
-    if(amount == 0){
+    if (amount == 0) {
       return FAILED
     }
-
-    val order = Order(code, amount, orderStyle, LONG, context.clock.now())
-    availableCash -= order.volume
-    endingCash -= order.volume
-
-    positions.put(code, Position.mk(order))
+    val order = context.slippage.compute(Order(code, amount, orderStyle, LONG, context.clock.now()))
+    metric.update(order)
     SUCCESS
   }
 
   def sellAll(code: String, orderStyle: OrderStyle): OrderState = {
     positions.get(code) match {
       case Some(position) => {
-        availableCash += position.totalAmount * orderStyle.price()
-        endingCash += position.totalAmount * orderStyle.price()
-        positions.remove(code)
-        Order(code, position.totalAmount, orderStyle, SHORT, context.clock.now())
+        val order = context.slippage.compute(Order(code, position.totalAmount, orderStyle, SHORT, context.clock.now()))
+        metric.update(order) //最后更新metric，metric里会记录position
         SUCCESS
       }
       case None => FAILED
     }
+  }
+
+  def report(): Unit = {
+    logger.info(metric.toString)
   }
 }

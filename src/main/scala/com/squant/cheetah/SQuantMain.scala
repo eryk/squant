@@ -19,10 +19,10 @@ object SQuantMain extends App with LazyLogging {
 
   while (!context.clock.isFinished()) {
     strategy.processes()
-    if (context.clock.clockType() == TRADE) {
+    if (context.clock.clockType().isInstanceOf[TRADE]) {
       TimeUnit.MINUTES.sleep(context.clock.interval())
     }
   }
-  logger.info("portfolio:" + strategy.portfolio.endingCash)
+  strategy.portfolio.report()
   logger.info(s"strategy is finished. cost=${System.currentTimeMillis() - start} ms")
 }

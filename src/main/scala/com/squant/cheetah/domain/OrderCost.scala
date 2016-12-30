@@ -6,16 +6,15 @@ case class OrderCost(openTax: Double = 0, //买入时印花税 (只股票类标�
                      closeCommission: Double = 0.00025, //卖出时佣金
                      closeTodayCommission: Double = 0, //平今仓佣金
                      minCommission: Double = 5, //最低佣金，不包含印花税
-                     slippage: Slippage = PriceRelatedSlippage(), //设置滑点
                      costType: CostType = STOCK //默认的扣费类型为股票
                     ) {
   def cost(order: Order): Double = costType match {
     case STOCK if order.direction == LONG => {
-      val cost = order.amount * slippage.compute(order) * (openTax + openCommission)
+      val cost = order.amount * order.price * (openTax + openCommission)
       if (cost < minCommission) minCommission else cost
     }
     case STOCK if order.direction == SHORT => {
-      order.amount * slippage.compute(order) * (closeTax + closeCommission)
+      order.amount * order.price * (closeTax + closeCommission)
     }
     case _ => order.price
   }

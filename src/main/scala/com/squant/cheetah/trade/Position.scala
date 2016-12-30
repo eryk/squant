@@ -20,45 +20,45 @@ case class Position(stockName: String, //证券名称
                     floatPnl: Double, //浮动盈亏
                     pnlRatio: Double, //盈亏比例
                     latestValue: Double //最新市值
-                   )
+                   ) {
+
+  def sub(pos: Position): Position = {
+    Position(this.stockName,
+      this.code,
+      pos.ts,
+      this.totalAmount - pos.totalAmount,
+      this.closeableAmount - pos.totalAmount,
+      this.todayAmount,
+      this.sellAmount + pos.totalAmount,
+      (this.totalAmount * this.avgCost - pos.totalAmount * pos.totalAmount)
+        / (this.totalAmount - pos.totalAmount),
+      pos.close,
+      (this.totalAmount + pos.totalAmount) * (this.avgCost - pos.close),
+      (this.totalAmount + pos.totalAmount) * (this.avgCost - pos.close) / (this.totalAmount * this.avgCost - pos.totalAmount * pos.totalAmount),
+      this.totalAmount * this.avgCost - pos.totalAmount * pos.totalAmount
+    )
+  }
+
+  def add(pos: Position): Position = {
+    Position(this.stockName,
+      this.code,
+      pos.ts,
+      this.totalAmount + pos.totalAmount,
+      this.closeableAmount,
+      this.todayAmount + pos.totalAmount,
+      this.sellAmount,
+      (this.totalAmount * this.avgCost + pos.totalAmount * pos.totalAmount)
+        / (this.totalAmount + pos.totalAmount),
+      pos.close,
+      (this.totalAmount + pos.totalAmount) * (this.avgCost - pos.close),
+      (this.totalAmount + pos.totalAmount) * (this.avgCost - pos.close) / (this.totalAmount * this.avgCost - pos.totalAmount * pos.totalAmount),
+      this.totalAmount * this.avgCost + pos.totalAmount * pos.totalAmount
+    )
+  }
+}
 
 object Position {
-
   def mk(order: Order): Position = {
     Position("", order.code, order.date, order.amount, 0, order.amount, 0, order.price, order.price, 0, 0, order.volume)
-  }
-
-  def sub(hold: Position, newPos: Position): Position = {
-    Position(hold.stockName,
-      hold.code,
-      newPos.ts,
-      hold.totalAmount - newPos.totalAmount,
-      hold.closeableAmount - newPos.totalAmount,
-      hold.todayAmount,
-      hold.sellAmount + newPos.totalAmount,
-      (hold.totalAmount * hold.avgCost - newPos.totalAmount * newPos.totalAmount)
-        / (hold.totalAmount - newPos.totalAmount),
-      newPos.close,
-      (hold.totalAmount + newPos.totalAmount) * (hold.avgCost - newPos.close),
-      (hold.totalAmount + newPos.totalAmount) * (hold.avgCost - newPos.close) / (hold.totalAmount * hold.avgCost - newPos.totalAmount * newPos.totalAmount),
-      hold.totalAmount * hold.avgCost - newPos.totalAmount * newPos.totalAmount
-    )
-  }
-
-  def add(hold: Position, newPos: Position): Position = {
-    Position(hold.stockName,
-      hold.code,
-      newPos.ts,
-      hold.totalAmount + newPos.totalAmount,
-      hold.closeableAmount,
-      hold.todayAmount + newPos.totalAmount,
-      hold.sellAmount,
-      (hold.totalAmount * hold.avgCost + newPos.totalAmount * newPos.totalAmount)
-        / (hold.totalAmount + newPos.totalAmount),
-      newPos.close,
-      (hold.totalAmount + newPos.totalAmount) * (hold.avgCost - newPos.close),
-      (hold.totalAmount + newPos.totalAmount) * (hold.avgCost - newPos.close) / (hold.totalAmount * hold.avgCost - newPos.totalAmount * newPos.totalAmount),
-      hold.totalAmount * hold.avgCost + newPos.totalAmount * newPos.totalAmount
-    )
   }
 }
