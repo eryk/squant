@@ -18,6 +18,13 @@ class Portfolio(context: Context) extends LazyLogging {
   //可用资金, 可用来购买证券的资金
   var availableCash: Double = startingCash
 
+  private val records = mutable.Buffer[Record]() //记录各个时间点账户状态
+
+  var ts: LocalDateTime = null //最后更新record的时间点
+
+  //key是股票代码code
+  var positions: mutable.Map[String, Position] = mutable.LinkedHashMap[String, Position]() //记录账户当前持仓情况
+
   private class Metric() {
     //交易盈亏
     var pnl: Double = 0
@@ -42,7 +49,7 @@ class Portfolio(context: Context) extends LazyLogging {
     //基准收益百分比
     var benchmarkBenfitPercent: Double = 0
     //最大资产
-    var max: Double = 0
+    var max: Double = startingCash
     //最小资产
     var min: Double = Double.MaxValue
     //最大回撤=最大资产-最小资产
@@ -73,10 +80,17 @@ class Portfolio(context: Context) extends LazyLogging {
           }
           //扣除交易金额
           availableCash -= order.volume
-          endingCash -= order.volume
+
+          records.append(new Record(order.code, order.amount, order.price, order.volume, context.cost.cost(order), ts))
         }
         case SHORT => {
-          val position = positions.get(order.code).get.sub(Position.mk(order))
+          var position = positions.get(order.code).get
+
+          //TODO 搞准金额
+
+          //TODO 搞准仓位数据
+
+          position = position.sub(Position.mk(order))
           if (position.totalAmount == 0) {
             positions.remove(order.code)
           } else {
@@ -84,25 +98,26 @@ class Portfolio(context: Context) extends LazyLogging {
           }
           availableCash += order.volume
           endingCash += order.volume
+
           max = Math.max(max, endingCash)
           min = Math.min(min, endingCash)
         }
         case _ => new UnknownError("unkown order direction")
       }
       totalOperate += 1
-      pnl = endingCash - startingCash
-      pnlRate = (endingCash - startingCash) / startingCash * 100
       //计算税费
       availableCash -= context.cost.cost(order)
       endingCash -= context.cost.cost(order)
 
-      records.append(ts -> new Record(order, context.cost.cost(order), ts))
+      pnl = endingCash - startingCash
+      pnlRate = (endingCash - startingCash) / startingCash * 100
+
     }
 
     override def toString: String = {
       val buffer = mutable.StringBuilder.newBuilder
       for (item <- records) {
-        buffer.append(s"\t\t${item._1} ${item._2}\n")
+        buffer.append(s"\t\t${item}\n")
       }
 
       val posStr = mutable.StringBuilder.newBuilder
@@ -125,12 +140,12 @@ class Portfolio(context: Context) extends LazyLogging {
 
   private val metric = new Metric
 
-  private val records = mutable.Buffer[(LocalDateTime, Record)]() //记录各个时间点账户状态
-
-  var ts: LocalDateTime = null //最后更新record的时间点
-
-  //key是股票代码code
-  var positions: mutable.Map[String, Position] = mutable.LinkedHashMap[String, Position]() //记录账户当前持仓情况
+  def buy(code: String, amount: Int, orderStyle: OrderStyle): OrderState = {
+    val order = context.slippage.compute(Order(code, amount, orderStyle, LONG, context.clock.now()))
+    metric update order
+    logger.debug(s"${context.clock.now()} buy ${code} $amount at price ${order.price}")
+    SUCCESS
+  }
 
   def buyAll(code: String, orderStyle: OrderStyle): OrderState = {
     val amount = (availableCash / orderStyle.price() / 100).toInt * 100
@@ -138,7 +153,15 @@ class Portfolio(context: Context) extends LazyLogging {
       return FAILED
     }
     val order = context.slippage.compute(Order(code, amount, orderStyle, LONG, context.clock.now()))
-    metric.update(order)
+    metric update order
+    logger.debug(s"${context.clock.now()} buy ${code} $amount at price ${order.price}")
+    SUCCESS
+  }
+
+  def sell(code: String, amount: Int, orderStyle: OrderStyle): OrderState = {
+    val order = context.slippage.compute(Order(code, amount, orderStyle, SHORT, context.clock.now()))
+    metric update order
+    logger.debug(s"${context.clock.now()} sell ${code} $amount at price ${order.price}")
     SUCCESS
   }
 
@@ -146,7 +169,8 @@ class Portfolio(context: Context) extends LazyLogging {
     positions.get(code) match {
       case Some(position) => {
         val order = context.slippage.compute(Order(code, position.totalAmount, orderStyle, SHORT, context.clock.now()))
-        metric.update(order) //最后更新metric，metric里会记录position
+        metric update order //最后更新metric，metric里会记录position
+        logger.debug(s"${context.clock.now()} sell ${code} ${order.amount} at price ${order.price}")
         SUCCESS
       }
       case None => FAILED
