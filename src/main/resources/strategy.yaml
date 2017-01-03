@@ -8,7 +8,7 @@ protfolio:
 contexts:
   - name: default
     cType: backtest
-    interval: "1" #interval用于actor调度和clock的update，单位是分钟
-    start: "20160104"
-    stop: "20161222"
+    interval: "60" #interval用于actor调度和clock的update，单位是分钟
+    start: "20150501"
+    stop: "20160522"
     startingCash: 100000
