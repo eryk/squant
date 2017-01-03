@@ -23,7 +23,9 @@ class Portfolio(context: Context) extends LazyLogging {
   var ts: LocalDateTime = null //最后更新record的时间点
 
   //key是股票代码code
-  var positions: mutable.Map[String, Position] = mutable.LinkedHashMap[String, Position]() //记录账户当前持仓情况
+  var positions: mutable.Map[String, Position] = mutable.LinkedHashMap[String, Position]()
+
+  //记录账户当前持仓情况
 
   private class Metric() {
     //交易盈亏
@@ -81,7 +83,7 @@ class Portfolio(context: Context) extends LazyLogging {
           //扣除交易金额
           availableCash -= order.volume
 
-          records.append(new Record(order.code, order.amount, order.price, order.volume, context.cost.cost(order), ts))
+          records.append(new Record(order.code, order.direction ,order.amount, order.price, order.volume, context.cost.cost(order), ts))
         }
         case SHORT => {
           var position = positions.get(order.code).get
@@ -97,7 +99,7 @@ class Portfolio(context: Context) extends LazyLogging {
             positions.put(order.code, position)
           }
           availableCash += order.volume
-          endingCash += order.volume
+
 
           max = Math.max(max, endingCash)
           min = Math.min(min, endingCash)
@@ -105,8 +107,14 @@ class Portfolio(context: Context) extends LazyLogging {
         case _ => new UnknownError("unkown order direction")
       }
       totalOperate += 1
+
       //计算税费
       availableCash -= context.cost.cost(order)
+
+      endingCash = positions.foldLeft[Double](availableCash) {
+        (a, b) => a + b._2.totalAmount * b._2.avgCost
+      }
+
       endingCash -= context.cost.cost(order)
 
       pnl = endingCash - startingCash
@@ -148,11 +156,13 @@ class Portfolio(context: Context) extends LazyLogging {
   }
 
   def buyAll(code: String, orderStyle: OrderStyle): OrderState = {
-    val amount = (availableCash / orderStyle.price() / 100).toInt * 100
+
+    val amount = (availableCash / context.slippage.compute(Order(code,0,orderStyle,LONG,context.clock.now())).price / 100).toInt * 100
     if (amount == 0) {
       return FAILED
     }
     val order = context.slippage.compute(Order(code, amount, orderStyle, LONG, context.clock.now()))
+
     metric update order
     logger.debug(s"${context.clock.now()} buy ${code} $amount at price ${order.price}")
     SUCCESS

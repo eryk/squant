@@ -2,12 +2,13 @@ package com.squant.cheetah.trade
 
 import java.time.LocalDateTime
 
-import com.squant.cheetah.domain.Order
+import com.squant.cheetah.domain.{Order, OrderDirection}
 
 /**
   * 记录股票交易状态，持仓情况，以及风险分析指标
   */
 case class Record(code: String,
+                  direction: OrderDirection,
                   amount: Int,
                   price: Double, //价格
                   volume: Double, //当日买入卖出额
@@ -15,6 +16,6 @@ case class Record(code: String,
                   ts: LocalDateTime
                  ) {
   override def toString: String = {
-    f"$ts $code $amount,$price%2.2f,$volume%2.2f,$cost%2.2f"
+    f"$ts $code $direction $amount,$price%2.2f,$volume%2.2f,$cost%2.2f"
   }
 }
