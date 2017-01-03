@@ -9,6 +9,11 @@ contexts:
   - name: default
     cType: backtest
     interval: "60" #interval用于actor调度和clock的update，单位是分钟
+<<<<<<< HEAD
     start: "20150501"
     stop: "20160522"
+=======
+    start: "20150101"
+    stop: "20151231"
+>>>>>>> 9e0efd01fb02d1ef97eacc13625514d4e3e27437
     startingCash: 100000

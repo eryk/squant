@@ -13,17 +13,11 @@ resolvers += Resolver.bintrayRepo("fcomb", "maven")
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" % "akka-actor_2.11" % akkaVersion,
-  "com.github.finagle" %% "finch-core" % finchVersion,
-  "com.github.finagle" %% "finch-circe" % finchVersion,
-  "io.circe" %% "circe-core" % circeVersion,
-  "io.circe" %% "circe-generic" % circeVersion,
-  "io.circe" %% "circe-parser" % circeVersion,
-  "io.circe" %% "circe-java8" % circeVersion,
   "com.typesafe" % "config" % "1.3.1",
   "org.jsoup" % "jsoup" % "1.10.1",
   "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
   "ch.qos.logback" % "logback-classic" % "1.1.7",
-
+  "org.apache.commons" % "commons-math3" % "3.6.1",
   "com.tictactec" % "ta-lib" % "0.4.0",
   "com.quantifind" % "wisp_2.11" % "0.0.4",
   "io.circe" %% "circe-yaml" % "0.4.0"
@@ -32,7 +26,7 @@ libraryDependencies ++= Seq(
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
 
 // Assembly settings
-mainClass in Global := Some("com.squant.cheetah.SQuantMain")
-assemblyJarName in assembly := s"$name-$version.jar"
+//mainClass in Global := Some("com.squant.cheetah.SQuantMain")
+//assemblyJarName in assembly := s"$name-$version.jar"
 
 fork in run := true

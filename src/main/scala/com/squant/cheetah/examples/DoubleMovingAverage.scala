@@ -14,19 +14,15 @@ class DoubleMovingAverage(context: Context) extends Strategy(context) {
   override def process(symbol: Symbol) = {
     val closeData = dataEngine.getHistoryData(symbol.code, 30, DAY)
 
-    val ma5:Float = closeData.takeRight(5).map(_.close).sum / 5
+    if (closeData.size != 0) {
+      val ma5: Float = closeData.takeRight(5).map(_.close).sum / 5
 
-    val ma10:Float = closeData.takeRight(10).map(_.close).sum / 10
+      val ma10: Float = closeData.takeRight(10).map(_.close).sum / 10
 
-    if (ma5 > ma10) {
-      portfolio.buyAll(symbol.code, LimitOrderStyle(closeData.last.close)) match{
-        case SUCCESS => logger.info(s"buying ${symbol.name},price=${closeData.last.close}")
-        case _ =>
-      }
-    } else if (ma5 < ma10 && portfolio.positions.contains(symbol.code)) {
-      portfolio.sellAll(symbol.code, LimitOrderStyle(closeData.last.close)) match {
-        case SUCCESS => logger.info(s"Selling ${symbol.name},price=${closeData.last.close}")
-        case _ =>
+      if (ma5 > ma10) {
+        portfolio.buyAll(symbol.code, LimitOrderStyle(closeData.last.close))
+      } else if (ma5 < ma10 && portfolio.positions.contains(symbol.code)) {
+        portfolio.sellAll(symbol.code, LimitOrderStyle(closeData.last.close))
       }
     }
   }

@@ -18,6 +18,6 @@ class Context(c: Clock) {
   //扣费类型，默认为股票
   var costType: CostType = STOCK
   //设置佣金/印花税
-  var cost: OrderCost = OrderCost(slippage = slippage, costType = costType)
+  var cost: OrderCost = OrderCost(costType = costType)
 
 }
