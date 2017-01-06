@@ -31,11 +31,11 @@ case object MID extends TickType
 case object SELL extends TickType
 
 case class Tick(
-                 date: LocalTime, //时间
+                 date: LocalDateTime, //时间
                  price: Double, //成交价格  单位：元
                  volume: Int, //成交量   单位：手
                  amount: Double, //成交额：元
                  tickType: TickType
                ) {
-  override def toString: String = "Tick{" + "时间='" + date.format(DateTimeFormatter.ofPattern("HH:mm:ss")) + '\'' + ", 价格=" + price + ", 成交量=" + volume + ", 成交额=" + amount + ", 类型=" + `tickType` + '}'
+  override def toString: String = "Tick{" + "时间='" + date.format(DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss")) + '\'' + ", 价格=" + price + ", 成交量=" + volume + ", 成交额=" + amount + ", 类型=" + `tickType` + '}'
 }

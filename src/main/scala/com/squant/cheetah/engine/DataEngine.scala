@@ -54,7 +54,7 @@ object DataEngine {
     lines.map {
       line =>
         val fields = line.split(",", 6)
-        Tick(LocalTime.parse(fields(0), DateTimeFormatter.ofPattern("HH:mm:ss")), fields(1).toFloat, fields(3).toInt, fields(4).toDouble, TickType.from(fields(5)))
+        Tick(LocalDateTime.parse(date.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + " " + fields(0), DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss")), fields(1).toFloat, fields(3).toInt, fields(4).toDouble, TickType.from(fields(5)))
     }.toSeq.reverse
   }
 
