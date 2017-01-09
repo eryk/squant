@@ -5,7 +5,6 @@ import java.time.format.DateTimeFormatter
 import com.squant.cheetah.domain.{BarType, DAY, MIN_15, MIN_30, MIN_5, MIN_60, MONTH, WEEK}
 
 package object datasource {
-  private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
   implicit def stringToBarType(kType:String):BarType = {
     kType match{

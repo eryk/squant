@@ -17,6 +17,8 @@ package object utils {
 
   lazy val config = ConfigFactory.load()
 
+  lazy val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+
   def yaml(path: String): java.util.Map[String, Any] = {
     val input = new FileInputStream(new File(path))
     val yaml = new Yaml()

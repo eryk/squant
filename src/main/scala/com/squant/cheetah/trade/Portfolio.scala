@@ -83,14 +83,9 @@ class Portfolio(context: Context) extends LazyLogging {
           //扣除交易金额
           availableCash -= order.volume
 
-          records.append(new Record(order.code, order.direction ,order.amount, order.price, order.volume, context.cost.cost(order), ts))
         }
         case SHORT => {
           var position = positions.get(order.code).get
-
-          //TODO 搞准金额
-
-          //TODO 搞准仓位数据
 
           position = position.sub(Position.mk(order))
           if (position.totalAmount == 0) {
@@ -99,7 +94,6 @@ class Portfolio(context: Context) extends LazyLogging {
             positions.put(order.code, position)
           }
           availableCash += order.volume
-
 
           max = Math.max(max, endingCash)
           min = Math.min(min, endingCash)
@@ -120,6 +114,7 @@ class Portfolio(context: Context) extends LazyLogging {
       pnl = endingCash - startingCash
       pnlRate = (endingCash - startingCash) / startingCash * 100
 
+      records.append(new Record(order.code, order.direction ,order.amount, order.price, order.volume, context.cost.cost(order), ts))
     }
 
     override def toString: String = {
