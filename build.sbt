@@ -17,7 +17,8 @@ libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-math3" % "3.6.1",
   "com.tictactec" % "ta-lib" % "0.4.0",
   "com.quantifind" % "wisp_2.11" % "0.0.4",
-  "org.yaml" % "snakeyaml" % "1.17"
+  "org.yaml" % "snakeyaml" % "1.17",
+  "com.github.philcali" %% "cronish" % "0.1.3"
 )
 
 testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
