@@ -2,6 +2,7 @@ package com.squant.cheetah.datasource
 
 import java.io.{File, FileNotFoundException, PrintWriter}
 import java.nio.charset.MalformedInputException
+import java.time.LocalDateTime
 
 import com.squant.cheetah.domain.Category
 import com.squant.cheetah.utils._
@@ -15,12 +16,20 @@ import scala.io.Source
 
 object THSDataSource extends App with DataSource with LazyLogging {
 
-  def update() = {
+  //初始化数据源
+  override def init(): Unit = {
+    update(LocalDateTime.now, LocalDateTime.now)
+  }
+
+  def update(start: LocalDateTime, stop: LocalDateTime) = {
     //下载股票分类数据
     saveCategory(config.getString(CONFIG_PATH_DB_BASE) + config.getString(CONFIG_PATH_CATEGORY))
   }
 
-  override def clear(): Unit = ???
+  override def clear(): Unit = {
+    rm(config.getString(CONFIG_PATH_DB_BASE) + config.getString(CONFIG_PATH_CATEGORY))
+      .foreach(r => logger.info(s"delete ${r._1} ${r._2}"))
+  }
 
   private def getSource(url: String, encode: String): Option[String] = {
     for (i <- 1 to 3)
@@ -133,7 +142,5 @@ object THSDataSource extends App with DataSource with LazyLogging {
     }
     map.toMap
   }
-
-  update()
 }
 
