@@ -33,9 +33,9 @@ package object utils {
     strategyMap.foreach(map => {
       val value = map.asScala
       val interval: String = value.get("interval").getOrElse("0")
-      val start:LocalDateTime = stringToDate(value.get("start").getOrElse("19901219"))
-      val stop:LocalDateTime = stringToDate(value.get("stop").getOrElse("20860621"))
-      contexts.put(value.get("name").get, new Context(Clock.mk(interval.toInt,Some(start),Some(stop))))
+      val start: LocalDateTime = stringToDate(value.get("start").getOrElse("19901219"))
+      val stop: LocalDateTime = stringToDate(value.get("stop").getOrElse("20860621"))
+      contexts.put(value.get("name").get, new Context(Clock.mk(interval.toInt, Some(start), Some(stop))))
     }
     )
     contexts.toMap
@@ -98,5 +98,17 @@ package object utils {
     */
   def isInRange(date: LocalDateTime, start: LocalDateTime, stop: LocalDateTime): Boolean = {
     date.isAfter(start) && date.isBefore(stop)
+  }
+
+  implicit def strToFile(path: String): File = {
+    new File(path)
+  }
+
+  implicit def fileToString(file: File): String = {
+    file.getAbsolutePath
+  }
+
+  def rm(path: String): Array[(String, Boolean)] = {
+    Option(path.listFiles).map(_.flatMap(f => rm(f))).getOrElse(Array()) :+ (path.getPath -> path.delete)
   }
 }
