@@ -36,11 +36,10 @@ object THSDataSource extends App with DataSource with LazyLogging {
       try {
         return Some(Source.fromURL(url, encode).mkString)
       } catch {
-        case ex: MalformedInputException => if (i == 3) logger.error("fail to get source:" + url)
         case ex: FileNotFoundException => if (i == 3) logger.error("page not found:" + url)
-        case ex: Exception => if (i == 3) ex.printStackTrace()
+        case ex: Exception => if (i == 3) logger.error("fail to get source:" + url, ex.getMessage)
       }
-    Option.empty[String]
+    None
   }
 
   def hy(): Map[String, Category] = {
@@ -79,11 +78,11 @@ object THSDataSource extends App with DataSource with LazyLogging {
   }
 
   private def getHYCode(source: String): String = {
-    Jsoup.parse(source).select("div[class='stock_name'] span").text().replaceAll("[（）]", "")
+    Jsoup.parse(source).select("div[class='board-hq'] span").get(0).text().replaceAll("[（）]", "")
   }
 
   private def getGNCode(source: String): String = {
-    Jsoup.parse(source).select("div[class='stock-name fl'] span").text()
+    Jsoup.parse(source).select("div[class='board-hq'] span").get(0).text()
   }
 
   private def fetchStockFromCode(code: String): List[String] = {
