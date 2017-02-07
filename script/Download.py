@@ -1,9 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/python3.5
 # coding:utf-8
 
 import tushare as ts
 import os
 import time
+import datetime
 from concurrent.futures import ThreadPoolExecutor
 import getopt
 import sys
@@ -20,16 +21,24 @@ def download_stocks():
     print("read: %f s" % (end - start))
 
 
-def download_ktype_data():
-    # ktype = {"5": "5", "15": "15", "30": "30", "60": "60", "D": "day", "W": "week", "M": "month"}
-    ktype = {"15": "15", "D": "day"}
+def download_ktype_data(ktype="D"):
+    """
+    date    日期和时间低频数据时为：YYYY-MM-DD,高频数为：YYYY-MM-DD HH:MM
+    open    开盘价
+    close   收盘价
+    high    最高价
+    low     最低价
+    volume  成交量
+    code    证券代码
+    """
+    ktype_map = {"5": "5", "15": "15", "30": "30", "60": "60", "D": "day", "W": "week", "M": "month"}
+
     columns = ts.get_stock_basics().index
     start = time.clock()
     values = []
     for code in columns:
-        for (type, path) in ktype.items():
-            future = executor.submit(__download, code, type, path)
-            values.append(future)
+        future = executor.submit(__download, code, ktype, ktype_map[ktype])
+        values.append(future)
     for result in values:
         result.result()
     end = time.clock()
@@ -49,16 +58,23 @@ def download_index_ktype_data():
     print("save index: %f s" % (end - start))
 
 
-def __download(code, type, path):
+def __download(code, type, path, start, end):
     file = "/data/" + path + "/" + code + ".csv"
     print(file)
-    if (path == "index"):
-        df = ts.get_k_data(code, ktype=type,index="true", autype="qfq")
-        df.to_csv(file, header=None)
+    if path == "index":
+        df = ts.get_k_data(code, ktype=type, index="true", autype="qfq", start=start, end=end)
+        __write_csv(df, file)
     else:
-        df = ts.get_k_data(code, ktype=type, autype="qfq")
-        df.to_csv(file, header=None)
+        df = ts.get_k_data(code, ktype=type, autype="qfq", start=start, end=end)
+        __write_csv(df, file)
     return code
+
+
+def __write_csv(df, file):
+    if os.path.exists(file):
+        df.to_csv(file, index=False, header=None, mode='a')
+    else:
+        df.to_csv(file, index=False)
 
 
 def main():
