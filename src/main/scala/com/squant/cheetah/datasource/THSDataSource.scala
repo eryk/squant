@@ -83,7 +83,7 @@ object THSDataSource extends App with DataSource with LazyLogging {
   }
 
   private def getGNCode(source: String): String = {
-    Jsoup.parse(source).select("div[class='stock-name fl'] span").text()
+    Jsoup.parse(source).select("div[class='board-hq'] span").get(0).text()
   }
 
   private def fetchStockFromCode(code: String): List[String] = {
