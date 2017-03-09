@@ -13,7 +13,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 import scala.io.Source
 
-object SinaDataSource extends App with DataSource with LazyLogging {
+object TickDataSource extends App with DataSource with LazyLogging {
 
   val base = config.getString(CONFIG_PATH_DB_BASE)
   val tick = config.getString(CONFIG_PATH_TICK)
