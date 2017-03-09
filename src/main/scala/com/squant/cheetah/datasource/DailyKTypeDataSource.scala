@@ -2,6 +2,7 @@ package com.squant.cheetah.datasource
 
 import java.io.{File, FileWriter}
 import java.time.LocalDateTime
+import java.util.concurrent.{ExecutorService, Executors}
 
 import com.squant.cheetah.engine.DataEngine
 import com.squant.cheetah.utils.Constants._
@@ -11,6 +12,8 @@ import com.typesafe.scalalogging.LazyLogging
 import scala.io.Source
 
 object DailyKTypeDataSource extends App with DataSource with LazyLogging {
+
+  val threadPool: ExecutorService = Executors.newFixedThreadPool(16)
 
   val baseDir = config.getString(CONFIG_PATH_DB_BASE)
   val ktypeDir = config.getString(CONFIG_PATH_KTYPE)
@@ -63,14 +66,23 @@ object DailyKTypeDataSource extends App with DataSource with LazyLogging {
     }
 
     for ((code, rCode) <- INDEX_SYMBOL) {
-      val data = Source.fromURL(indexURL.format(rCode, format(start, "yyyyMMdd"), format(stop, "yyyyMMdd")), "gbk").getLines()
-      writeData(code, data, "index")
+      threadPool.submit(new Runnable {
+        override def run(): Unit = {
+          val data = Source.fromURL(indexURL.format(rCode, format(start, "yyyyMMdd"), format(stop, "yyyyMMdd")), "gbk").getLines()
+          writeData(code, data, "index")
+        }
+      })
+
     }
 
     val stocks = DataEngine.symbols()
     for (stock <- stocks) {
-      val data = Source.fromURL(stockURL.format(stockCode(stock.code), format(start, "yyyyMMdd"), format(stop, "yyyyMMdd")), "gbk").getLines()
-      writeData(stock.code, data, "stock")
+      threadPool.submit(new Runnable {
+        override def run(): Unit = {
+          val data = Source.fromURL(stockURL.format(stockCode(stock.code), format(start, "yyyyMMdd"), format(stop, "yyyyMMdd")), "gbk").getLines()
+          writeData(stock.code, data, "stock")
+        }
+      })
     }
   }
 
@@ -78,4 +90,6 @@ object DailyKTypeDataSource extends App with DataSource with LazyLogging {
   override def clear(): Unit = {
     rm(s"/$baseDir/$ktypeDir/day").foreach(r => logger.info(s"delete ${r._1} ${r._2}"))
   }
+
+  update(start = LocalDateTime.of(1990, 1, 1, 0, 0))
 }
