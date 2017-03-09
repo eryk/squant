@@ -16,5 +16,5 @@ object Updater extends App with StrictLogging{
   //下载逐笔数据
   job{TickDataSource.update(start,stop)} executes "Every day on the weekday at 00:10".cron
   //下载k线数据
-  job{KTypeDataSource.update(start,stop)} executes "Every day on the weekday at 00:40".cron
+  job{MinuteKTypeDataSource.update(start,stop)} executes "Every day on the weekday at 00:40".cron
 }

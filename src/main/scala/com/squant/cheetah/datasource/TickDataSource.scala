@@ -4,11 +4,10 @@ import java.io.{File, FileWriter}
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+import com.squant.cheetah.DataEngine
 import com.squant.cheetah.domain.Symbol
-import com.squant.cheetah.engine.DataEngine
 import com.squant.cheetah.utils._
 import com.squant.cheetah.utils.Constants._
-
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.io.Source

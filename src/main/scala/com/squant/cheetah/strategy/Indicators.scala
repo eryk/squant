@@ -1,7 +1,7 @@
 package com.squant.cheetah.strategy
 
+import com.squant.cheetah.DataEngine
 import com.squant.cheetah.domain.DAY
-import com.squant.cheetah.engine.DataEngine
 import com.tictactec.ta.lib.{Core, MInteger, RetCode}
 
 object Indicators extends App{

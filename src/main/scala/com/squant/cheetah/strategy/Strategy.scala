@@ -2,8 +2,9 @@ package com.squant.cheetah.strategy
 
 import java.time.LocalDateTime
 
+import com.squant.cheetah.DataEngine
 import com.squant.cheetah.domain._
-import com.squant.cheetah.engine.{Context, DataEngine}
+import com.squant.cheetah.engine.Context
 import com.squant.cheetah.trade.Portfolio
 import com.squant.cheetah.utils._
 import com.typesafe.scalalogging.LazyLogging

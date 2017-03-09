@@ -3,7 +3,7 @@ package com.squant.cheetah.datasource
 import java.io.{File, FileWriter}
 import java.time.LocalDateTime
 
-import com.squant.cheetah.engine.DataEngine
+import com.squant.cheetah.DataEngine
 import com.squant.cheetah.utils.Constants._
 import com.squant.cheetah.utils._
 import com.typesafe.scalalogging.LazyLogging
@@ -29,7 +29,7 @@ object DailyKTypeDataSource extends App with DataSource with LazyLogging {
 
   //初始化数据源
   override def init(): Unit = {
-
+    update(start = LocalDateTime.of(1990, 1, 1, 0, 0))
   }
 
   //每个周期更新数据
@@ -82,6 +82,4 @@ object DailyKTypeDataSource extends App with DataSource with LazyLogging {
   override def clear(): Unit = {
     rm(s"/$baseDir/$ktypeDir/day").foreach(r => logger.info(s"delete ${r._1} ${r._2}"))
   }
-
-  update(start = LocalDateTime.of(1990, 1, 1, 0, 0))
 }
