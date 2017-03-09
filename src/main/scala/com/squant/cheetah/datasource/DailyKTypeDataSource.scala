@@ -2,7 +2,6 @@ package com.squant.cheetah.datasource
 
 import java.io.{File, FileWriter}
 import java.time.LocalDateTime
-import java.util.concurrent.{ExecutorService, Executors}
 
 import com.squant.cheetah.engine.DataEngine
 import com.squant.cheetah.utils.Constants._
@@ -12,8 +11,6 @@ import com.typesafe.scalalogging.LazyLogging
 import scala.io.Source
 
 object DailyKTypeDataSource extends App with DataSource with LazyLogging {
-
-  val threadPool: ExecutorService = Executors.newFixedThreadPool(16)
 
   val baseDir = config.getString(CONFIG_PATH_DB_BASE)
   val ktypeDir = config.getString(CONFIG_PATH_KTYPE)
@@ -44,10 +41,12 @@ object DailyKTypeDataSource extends App with DataSource with LazyLogging {
       if (!dir.exists()) {
         dir.mkdirs()
       }
+      val isNewFile = !file.exists();
 
       val writer = new FileWriter(file, true)
-      if (!file.exists()) {
-        writer.write(new String(data.take(1).next().getBytes("utf-8")) + "\n")
+
+      if (isNewFile) {
+        writer.write(new String(data.next().getBytes("utf-8")) + "\n")
       }
       val iter = data.drop(1).toList.reverse
       for (line: String <- iter) {
@@ -65,24 +64,17 @@ object DailyKTypeDataSource extends App with DataSource with LazyLogging {
       }
     }
 
+    //update index daily data
     for ((code, rCode) <- INDEX_SYMBOL) {
-      threadPool.submit(new Runnable {
-        override def run(): Unit = {
-          val data = Source.fromURL(indexURL.format(rCode, format(start, "yyyyMMdd"), format(stop, "yyyyMMdd")), "gbk").getLines()
-          writeData(code, data, "index")
-        }
-      })
-
+      val data = Source.fromURL(indexURL.format(rCode, format(start, "yyyyMMdd"), format(stop, "yyyyMMdd")), "gbk").getLines()
+      writeData(code, data, "index")
     }
 
+    //update stock daily data
     val stocks = DataEngine.symbols()
     for (stock <- stocks) {
-      threadPool.submit(new Runnable {
-        override def run(): Unit = {
-          val data = Source.fromURL(stockURL.format(stockCode(stock.code), format(start, "yyyyMMdd"), format(stop, "yyyyMMdd")), "gbk").getLines()
-          writeData(stock.code, data, "stock")
-        }
-      })
+      val data = Source.fromURL(stockURL.format(stockCode(stock.code), format(start, "yyyyMMdd"), format(stop, "yyyyMMdd")), "gbk").getLines()
+      writeData(stock.code, data, "stock")
     }
   }
 
