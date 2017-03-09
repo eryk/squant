@@ -111,4 +111,8 @@ package object utils {
   def rm(path: String): Array[(String, Boolean)] = {
     Option(path.listFiles).map(_.flatMap(f => rm(f))).getOrElse(Array()) :+ (path.getPath -> path.delete)
   }
+
+  def format(date:LocalDateTime,format:String): String ={
+    return date.format(DateTimeFormatter.ofPattern(format));
+  }
 }

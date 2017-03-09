@@ -15,8 +15,8 @@ import scala.io.Source
 
 object TickDataSource extends App with DataSource with LazyLogging {
 
-  val base = config.getString(CONFIG_PATH_DB_BASE)
-  val tick = config.getString(CONFIG_PATH_TICK)
+  val baseDir = config.getString(CONFIG_PATH_DB_BASE)
+  val tickDir = config.getString(CONFIG_PATH_TICK)
 
   //初始化数据源
   override def init(): Unit = {
@@ -32,16 +32,16 @@ object TickDataSource extends App with DataSource with LazyLogging {
   }
 
   override def clear(): Unit = {
-    rm("/data/tick").foreach(r => logger.info(s"delete ${r._1} ${r._2}"))
+    rm(s"/$baseDir/$tickDir").foreach(r => logger.info(s"delete ${r._1} ${r._2}"))
   }
 
   private def writeTick(code: String, date: LocalDateTime) = {
     val tickDayDataURL = "http://market.finance.sina.com.cn/downxls.php?date=%s&symbol=%s"
     val formatDate = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
-    if (!new File(s"/$base/$tick/$formatDate").exists()) {
-      new File(s"/$base/$tick/$formatDate").mkdirs()
+    if (!new File(s"/$baseDir/$tickDir/$formatDate").exists()) {
+      new File(s"/$baseDir/$tickDir/$formatDate").mkdirs()
     }
-    val out = new FileWriter(s"/$base/$tick/$formatDate/$code.csv", false)
+    val out = new FileWriter(s"/$baseDir/$tickDir/$formatDate/$code.csv", false)
     out.write(Source.fromURL(String.format(tickDayDataURL, date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), Symbol.getSymbol(code, tickDayDataURL)), "gbk").mkString.replaceAll("\t", ",")).ensuring {
       out.close()
       true
