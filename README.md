@@ -1,5 +1,11 @@
 # TODO 
-* 在回测过程中使用tick数据进行测试
-* 建立数据规则校验机制
 * 常用指标计算
-* 修改python脚本增加时间参数
+* DataEngine读取分钟数据
+* Dockerfile
+
+# changelog
+
+## 2017-03-09
+1. 增加分钟数据源MinuteKTypeDataSource
+2. 增加日线数据DailyKTypeDataSource
+3. 增加股票基本信息数据StockBasicsSource
