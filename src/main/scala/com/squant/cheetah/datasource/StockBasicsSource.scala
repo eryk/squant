@@ -1,6 +1,7 @@
 package com.squant.cheetah.datasource
 
 import java.io.{File, FileWriter}
+import java.nio.file.{Files, Paths}
 import java.time.LocalDateTime
 
 import com.squant.cheetah.utils.Constants._
@@ -24,13 +25,27 @@ object StockBasicsSource extends App with DataSource with LazyLogging {
   override def update(start: LocalDateTime = LocalDateTime.now(),
                       stop: LocalDateTime = LocalDateTime.now()): Unit = {
     val content = Source.fromURL(url, "gbk").mkString;
-    val writer = new FileWriter(new File(s"$path/$name"), false)
+    val sourceFile = new File(s"$path/$name")
+    val writer = new FileWriter(sourceFile, false)
     writer.write(content)
     writer.close()
+
+    if(!sourceFile.exists()){
+      logger.error("fail to download stock basics data.");
+      return
+    }
+
+    val dest = new File(s"$path/$name-${format(stop,"yyyyMMdd")}")
+    if(dest.exists()){
+      dest.delete()
+    }
+    Files.copy(sourceFile.toPath,dest.toPath)
   }
 
   //清空数据源
   override def clear(): Unit = {
     rm(s"$path/$name")
   }
+
+  update()
 }
