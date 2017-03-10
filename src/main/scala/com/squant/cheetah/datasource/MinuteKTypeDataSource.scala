@@ -29,7 +29,7 @@ object MinuteKTypeDataSource extends App with DataSource with LazyLogging {
 
   //(sh|sz)code,frequence
   val mURL = "http://money.finance.sina.com.cn/quotes_service/api/json_v2.php/" +
-    "CN_MarketData.getKLineData?symbol=sh000001&scale=15&ma=no&datalen=1023"
+    "CN_MarketData.getKLineData?symbol=%s&scale=%s&ma=no&datalen=1023"
 
   //初始化数据源
   override def init(): Unit = {
@@ -38,7 +38,7 @@ object MinuteKTypeDataSource extends App with DataSource with LazyLogging {
 
   def update(start: LocalDateTime = LocalDateTime.now(), stop: LocalDateTime = LocalDateTime.now()) = {
     def url(code: String, idx: Boolean = false, kType: String): String = {
-      mURL.format(getCode(code, index = idx), kType)
+      mURL.format(code, kType)
     }
 
     def getCode(code: String, index: Boolean = false): String = {
@@ -54,11 +54,18 @@ object MinuteKTypeDataSource extends App with DataSource with LazyLogging {
     }
 
     def jsonParser(string: String): Seq[Map[String, String]] = {
-      val gson = new Gson()
-      val map = gson.fromJson(string, classOf[java.util.List[java.util.Map[String, String]]])
-      for {elem <- map.asScala.toList
-           item = elem.asScala.toMap
-      } yield item
+      try {
+        val gson = new Gson()
+        val map = gson.fromJson(string, classOf[java.util.List[java.util.Map[String, String]]])
+        for {elem <- map.asScala.toList
+             item = elem.asScala.toMap
+        } yield item
+      } catch {
+        case ex: Exception => {
+          logger.error("fail to parse json. %s".format(string))
+          Seq[Map[String, String]]()
+        }
+      }
     }
 
     def writeData(code: String, data: Iterator[String], ktype: String, path: String): Unit = {
@@ -73,7 +80,7 @@ object MinuteKTypeDataSource extends App with DataSource with LazyLogging {
       val writer = new FileWriter(file, true)
 
       if (isNewFile) {
-        writer.write("day,open,high,low,close,volume" + "\n")
+        writer.write("date,code,open,high,low,close,volume" + "\n")
       }
       val iter = data.drop(1).toList.reverse
       for (line: String <- iter) {
@@ -83,27 +90,34 @@ object MinuteKTypeDataSource extends App with DataSource with LazyLogging {
     }
 
     //update index minute data
-    for ((code, rCode) <- INDEX_SYMBOL) {
+    for ((c, rCode) <- INDEX_SYMBOL) {
       for (k <- ktypeSubDir) {
-        val content = Source.fromURL(url(code = getCode(code, index = true), kType = k), "gb2312").mkString
-        val data = jsonParser(content).map(item => {
-          s"${item.get("day").get},${item.get("open").get},${item.get("high").get},${item.get("low").get},${item.get("close").get},${item.get("volume").get}"
-        })
-        writeData(code, data.toList.reverse.toIterator, k, "index")
+        val content = downloadWithRetry(url(code = getCode(c, index = true), kType = k), "gb2312")
+        if (content != None && content != "") {
+          val data = jsonParser(content).map(item => {
+            s"${item.get("day").get},$c,${item.get("open").get},${item.get("high").get},${item.get("low").get},${item.get("close").get},${item.get("volume").get}"
+          })
+          writeData(c, data.toList.reverse.toIterator, k, "index")
+        } else {
+          logger.error(s"fail to download source. code=$c")
+        }
       }
     }
 
     val symbols = DataEngine.symbols()
     for (symbol <- symbols) {
       for (k <- ktypeSubDir) {
-        val content = Source.fromURL(url(code = getCode(symbol.code), kType = k), "gb2312").mkString
-        val data = jsonParser(content).map(item => {
-          s"${item.get("day").get},${item.get("open").get},${item.get("high").get},${item.get("low").get},${item.get("close").get},${item.get("volume").get}"
-        })
-        writeData(symbol.code, data.toList.reverse.toIterator, k, "stock")
+        val content = downloadWithRetry(url(code = getCode(symbol.code), kType = k), "gb2312")
+        if (content != None && content != "") {
+          val data = jsonParser(content).map(item => {
+            s"${item.get("day").get},${symbol.code},${item.get("open").get},${item.get("high").get},${item.get("low").get},${item.get("close").get},${item.get("volume").get}"
+          })
+          writeData(symbol.code, data.toList.reverse.toIterator, k, "stock")
+        } else {
+          logger.error(s"fail to download source. code=${symbol.code}")
+        }
       }
     }
-
   }
 
   override def clear(): Unit = {

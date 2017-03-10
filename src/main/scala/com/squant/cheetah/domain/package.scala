@@ -8,7 +8,13 @@ import scala.collection.{Seq, _}
 
 package object domain {
 
-  val stockColumns = List("index", "date", "open", "close", "high", "low", "volume", "code")
+  //  val stockColumns = List("index", "date", "open", "close", "high", "low", "volume", "code")
+  val dayIndexColumns = List("date", "code", "name", "close", "high", "low", "open", "lastClose", "p_change",
+    "a_change", "volume", "amount")
+  val dayStockColumns = List("date", "code", "name", "close", "high", "low", "open", "lastClose", "p_change",
+    "a_change", "turnover", "volume", "amount", "mktcap", "nmc")
+
+  val minStockColumns = List("date", "code", "open", "high", "low", "close", "volume")
 
   def parseCSVToSymbols(file: String): Seq[Symbol] = {
     def mapToSymbol(map: Map[String, String]): Symbol =
@@ -53,16 +59,19 @@ package object domain {
   }
 
   implicit def stringToDate(date: String): LocalDateTime = {
-    if(date == "0"){
-      LocalDateTime.of(1970,1,1,0,0)
-    }else if(date.length == 8){
+    if (date == "0") {
+      LocalDateTime.of(1970, 1, 1, 0, 0)
+    } else if (date.length == 8) {
       val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
       LocalDate.parse(date, formatter)
     } else if (date.length == 10) {
       val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
       LocalDate.parse(date, formatter)
-    } else {
+    } else if (date.length == 16) {
       val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+      LocalDateTime.parse(date, formatter)
+    } else {
+      val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
       LocalDateTime.parse(date, formatter)
     }
   }
