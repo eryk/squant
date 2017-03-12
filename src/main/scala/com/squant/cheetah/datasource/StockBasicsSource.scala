@@ -24,14 +24,14 @@ object StockBasicsSource extends App with DataSource with LazyLogging {
   //每个周期更新数据
   override def update(start: LocalDateTime = LocalDateTime.now(),
                       stop: LocalDateTime = LocalDateTime.now()): Unit = {
-    val content = Source.fromURL(url, "gbk").mkString;
+    val content = Source.fromURL(url, "gbk").mkString
     val sourceFile = new File(s"$path/$name")
     val writer = new FileWriter(sourceFile, false)
     writer.write(content)
     writer.close()
 
     if(!sourceFile.exists()){
-      logger.error("fail to download stock basics data.");
+      logger.error("fail to download stock basics data.")
       return
     }
 

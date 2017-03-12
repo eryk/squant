@@ -12,10 +12,10 @@ import com.typesafe.scalalogging.LazyLogging
 
 import scala.io.Source
 
-object TickDataSource extends App with DataSource with LazyLogging {
+object TickDataSource extends DataSource with LazyLogging {
 
-  val baseDir = config.getString(CONFIG_PATH_DB_BASE)
-  val tickDir = config.getString(CONFIG_PATH_TICK)
+  private val baseDir = config.getString(CONFIG_PATH_DB_BASE)
+  private val tickDir = config.getString(CONFIG_PATH_TICK)
 
   //初始化数据源
   override def init(): Unit = {

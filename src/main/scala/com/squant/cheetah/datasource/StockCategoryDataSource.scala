@@ -1,12 +1,11 @@
 package com.squant.cheetah.datasource
 
 import java.io.{File, FileNotFoundException, PrintWriter}
-import java.nio.charset.MalformedInputException
 import java.time.LocalDateTime
 
 import com.squant.cheetah.domain.Category
-import com.squant.cheetah.utils._
 import com.squant.cheetah.utils.Constants._
+import com.squant.cheetah.utils._
 import com.typesafe.scalalogging.LazyLogging
 import org.jsoup.Jsoup
 
@@ -18,6 +17,7 @@ object StockCategoryDataSource extends App with DataSource with LazyLogging {
 
   //初始化数据源
   override def init(): Unit = {
+    clear()
     update(LocalDateTime.now, LocalDateTime.now)
   }
 

@@ -99,7 +99,7 @@ object Bar extends App {
     }
     val lines = scala.io.Source.fromFile(new File(file)).getLines().toList.drop(1)
     val columns = ktype match {
-      case MIN_1 | MIN_5 | MIN_15 | MIN_30 | MIN_60 => minStockColumns
+      case SEC_1 |MIN_1 | MIN_5 | MIN_15 | MIN_30 | MIN_60 => minStockColumns
       case DAY | WEEK | MONTH =>
         if (index)
           dayIndexColumns

@@ -10,13 +10,13 @@ import com.typesafe.scalalogging.LazyLogging
 
 import scala.io.Source
 
-object DailyKTypeDataSource extends App with DataSource with LazyLogging {
+object DailyKTypeDataSource extends DataSource with LazyLogging {
 
-  val baseDir = config.getString(CONFIG_PATH_DB_BASE)
-  val ktypeDir = config.getString(CONFIG_PATH_KTYPE)
+  private val baseDir = config.getString(CONFIG_PATH_DB_BASE)
+  private val ktypeDir = config.getString(CONFIG_PATH_KTYPE)
 
-  val indexURL = "http://quotes.money.163.com/service/chddata.html?code=%s&start=%s&end=%s&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;VOTURNOVER;VATURNOVER"
-  val stockURL = "http://quotes.money.163.com/service/chddata.html?code=%s&start=%s&end=%s&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP"
+  private val indexURL = "http://quotes.money.163.com/service/chddata.html?code=%s&start=%s&end=%s&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;VOTURNOVER;VATURNOVER"
+  private val stockURL = "http://quotes.money.163.com/service/chddata.html?code=%s&start=%s&end=%s&fields=TCLOSE;HIGH;LOW;TOPEN;LCLOSE;CHG;PCHG;TURNOVER;VOTURNOVER;VATURNOVER;TCAP;MCAP"
 
   private val INDEX_SYMBOL = Map[String, String](
     ("000001", "0000001"), ("000002", "0000002"), ("000003", "0000003"), ("000008", "0000008"),
@@ -29,6 +29,7 @@ object DailyKTypeDataSource extends App with DataSource with LazyLogging {
 
   //初始化数据源
   override def init(): Unit = {
+    clear()
     update(start = LocalDateTime.of(1990, 1, 1, 0, 0))
   }
 
