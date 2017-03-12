@@ -14,11 +14,11 @@ import scala.io.Source
 
 object MinuteKTypeDataSource extends DataSource with LazyLogging {
 
-  private var baseDir = config.getString(CONFIG_PATH_DB_BASE)
-  private var ktypeDir = config.getString(CONFIG_PATH_KTYPE)
-  private var ktypeSubDir = Seq("5", "15", "30", "60")
+  private val baseDir = config.getString(CONFIG_PATH_DB_BASE)
+  private val ktypeDir = config.getString(CONFIG_PATH_KTYPE)
+  private val ktypeSubDir = Seq("5", "15", "30", "60")
 
-  private var INDEX_SYMBOL = Map[String, String](
+  private val INDEX_SYMBOL = Map[String, String](
     ("000001", "sh000001"), ("000002", "sh000002"), ("000003", "sh000003"), ("000008", "sh000008"),
     ("000009", "sh000009"), ("000010", "sh000010"), ("000011", "sh000011"), ("000012", "sh000012"),
     ("000016", "sh000016"), ("000017", "sh000017"), ("000300", "sh000300"), ("399001", "sz399001"),

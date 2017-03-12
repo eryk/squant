@@ -10,7 +10,7 @@ import com.typesafe.scalalogging.LazyLogging
 
 import scala.io.Source
 
-object StockBasicsSource extends App with DataSource with LazyLogging {
+object StockBasicsSource extends DataSource with LazyLogging {
   private val url = "http://218.244.146.57/static/all.csv"
 
   private val path = config.getString(CONFIG_PATH_DB_BASE)
@@ -18,6 +18,7 @@ object StockBasicsSource extends App with DataSource with LazyLogging {
 
   //初始化数据源
   override def init(): Unit = {
+    clear()
     update()
   }
 

@@ -13,7 +13,7 @@ import scala.collection.mutable
 import scala.io.Source
 
 
-object StockCategoryDataSource extends App with DataSource with LazyLogging {
+object StockCategoryDataSource extends DataSource with LazyLogging {
 
   //初始化数据源
   override def init(): Unit = {

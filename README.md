@@ -1,8 +1,18 @@
 # TODO 
+* 数据清洗规则模块,支持建立清洗规则机制，对数据源进行规则过滤清洗
+* 股票数据建模与存储
 * 常用指标计算
-* Dockerfile
+
+# 快速上手
+
+sudo docker pull registry.cn-hangzhou.aliyuncs.com/eryk/squant
+sudo docker run --name squant -v /data:/data -d registry.cn-hangzhou.aliyuncs.com/eryk/squant:1.0
 
 # changelog
+
+## 2017-03-12
+
+1. 生成docker镜像，支持股票数据批量下载
 
 ## 2017-03-11
 

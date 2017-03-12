@@ -24,10 +24,11 @@ libraryDependencies ++= Seq(
   "com.google.code.gson" % "gson" % "2.8.0"
 )
 
-testOptions += Tests.Argument(TestFrameworks.JUnit, "-v")
+assemblyMergeStrategy in assembly := {
+  case PathList(ps @ _*) if ps.last == "application.conf" => MergeStrategy.discard
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
+}
 
-// Assembly settings
-//mainClass in Global := Some("com.squant.cheetah.SQuantMain")
-//assemblyJarName in assembly := s"$name-$version.jar"
-
-fork in run := true
+//mainClass in assembly := Some("com.squant.cheetah.datasource.Updater")

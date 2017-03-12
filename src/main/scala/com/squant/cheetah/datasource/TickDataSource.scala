@@ -19,7 +19,8 @@ object TickDataSource extends DataSource with LazyLogging {
 
   //初始化数据源
   override def init(): Unit = {
-    //TODO 按照时间范围初始化
+    clear()
+    update(start = LocalDateTime.now(), stop = LocalDateTime.now)
   }
 
   override def update(start: LocalDateTime, stop: LocalDateTime): Unit = {
