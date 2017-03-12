@@ -5,7 +5,12 @@
 
 # 快速上手
 
+## 下载股票数据到指定目录
+
+sudo mkdir /data
+
 sudo docker pull registry.cn-hangzhou.aliyuncs.com/eryk/squant
+
 sudo docker run --name squant -v /data:/data -d registry.cn-hangzhou.aliyuncs.com/eryk/squant:1.0
 
 # changelog
