@@ -3,6 +3,7 @@ package com.squant.cheetah
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Date
 
 import com.squant.cheetah.datasource.StockCategoryDataSource
 import com.squant.cheetah.domain._
@@ -48,6 +49,19 @@ object DataEngine {
     val source = Source.fromURL(url + Symbol.getSymbol(code, url), "GBK").mkString
     val array = source.substring(source.indexOf("\"") + 1, source.lastIndexOf("\"")).split(",")
     RealTime.arrayToRealTime(array)
+  }
+
+  def realtime2(code: String, date:LocalDateTime = LocalDateTime.now()): RealTime2 = {
+    val url = "http://nuff.eastmoney.com/EM_Finance2015TradeInterface/JS.ashx?id=%s&_=%s"
+
+    def getPath(symbol: String): String = {
+      val date: Date = new Date
+      return url.format(Symbol.getSymbol(symbol, url), date.getTime)
+    }
+
+    val source = Source.fromURL(getPath(code), "utf8").mkString
+    val array = source.substring(source.indexOf("Value") + 8, source.lastIndexOf("]")).replaceAll("\"","").split(",")
+    RealTime.arrayToRealTime2(array)
   }
 
   def tick(code: String, date: LocalDateTime): Seq[Tick] = {
