@@ -34,10 +34,7 @@ case class Bar(barType: BarType, date: LocalDateTime, code: String, name: String
                low: Float, open: Float,lastClose: Float, p_change: Float, a_change: Float, volume: Float,
                amount: Float, turnover: Float, mktcap: Float, nmc: Float)
 
-object Bar extends App {
-
-  val baseDir = config.getString(CONFIG_PATH_DB_BASE)
-  val ktypeDir = config.getString(CONFIG_PATH_KTYPE)
+object Bar{
 
   import com.squant.cheetah.utils._
 
@@ -71,6 +68,9 @@ object Bar extends App {
     * @return
     */
   def parseCSVToBars(code: String, ktype: BarType, index: Boolean = false): Seq[Bar] = {
+
+    val baseDir = config.getString(CONFIG_PATH_DB_BASE)
+    val ktypeDir = config.getString(CONFIG_PATH_KTYPE)
 
     def mapToStock(map: Map[String, String]): Bar = new Bar(
       ktype,
@@ -114,7 +114,4 @@ object Bar extends App {
       map = (columns zip fields) (breakOut): Map[String, String]
     } yield mapToStock(map)
   }
-
-  val stocks = parseCSVToBars("000001", MIN_15)
-  stocks.foreach(println)
 }

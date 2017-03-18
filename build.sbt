@@ -21,7 +21,10 @@ libraryDependencies ++= Seq(
   "com.github.philcali" %% "cronish" % "0.1.3",
   "com.github.scopt" % "scopt_2.11" % "3.5.0",
   "com.github.tototoshi" %% "scala-csv" % "1.3.4",
-  "com.google.code.gson" % "gson" % "2.8.0"
+  "com.google.code.gson" % "gson" % "2.8.0",
+  "org.apache.hbase" % "hbase-client" % "1.3.0",
+  "org.apache.hbase" % "hbase-common" % "1.3.0",
+  "org.apache.hadoop" % "hadoop-common" % "2.7.3"
 )
 
 assemblyMergeStrategy in assembly := {

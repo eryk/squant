@@ -24,7 +24,7 @@ package object datasource {
     try {
       fn
     } catch {
-      case e =>
+      case e:Exception =>
         if (n > 1)
           retry(n - 1)(fn)
         else

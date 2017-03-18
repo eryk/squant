@@ -1,7 +1,7 @@
 package com.squant.cheetah
 
 import java.io.{File, FileInputStream}
-import java.time.{LocalDateTime, LocalTime}
+import java.time.{Instant, LocalDateTime, LocalTime, ZoneId}
 import java.time.format.DateTimeFormatter
 import java.util.{Calendar, Date}
 
@@ -40,6 +40,50 @@ package object utils {
     )
     contexts.toMap
   }
+
+  implicit def strToFile(path: String): File = {
+    new File(path)
+  }
+
+  implicit def fileToString(file: File): String = {
+    file.getAbsolutePath
+  }
+
+  def rm(path: String): Array[(String, Boolean)] = {
+    Option(path.listFiles).map(_.flatMap(f => rm(f))).getOrElse(Array()) :+ (path.getPath -> path.delete)
+  }
+
+  /** *************************************************************/
+  /** ***************** time process function *********************/
+  /** *************************************************************/
+
+  def format(date: LocalDateTime, format: String): String = {
+    date.format(DateTimeFormatter.ofPattern(format))
+  }
+
+  def localDateTimeToLong(date: LocalDateTime): Long = {
+    Date.from(date.atZone(ZoneId.systemDefault()).toInstant).getTime
+  }
+
+  def longToLocalDateTime(timetstamp: Long): LocalDateTime = {
+    LocalDateTime.ofInstant(Instant.ofEpochMilli(timetstamp), ZoneId.systemDefault())
+  }
+
+  def dateToLocalDateTime(date: Date): LocalDateTime = {
+    longToLocalDateTime(date.getTime)
+  }
+
+  def localDateTimeToDate(localDateTime: LocalDateTime):Date = {
+    Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant)
+  }
+
+  /**
+    * 检查给定时间是否在时间范围内
+    */
+  def isInRange(date: LocalDateTime, start: LocalDateTime, stop: LocalDateTime): Boolean = {
+    date.isAfter(start) && date.isBefore(stop)
+  }
+
 
   /**
     * 计算两个日期之间相差的天数
@@ -86,33 +130,5 @@ package object utils {
         || (now.isAfter(LocalTime.of(13, 0, 0, 0))) && now.isBefore(LocalTime.of(15, 0, 0, 0))) return true
     }
     false
-  }
-
-  /**
-    * 检查给定时间是否在时间范围内
-    *
-    * @param date
-    * @param start
-    * @param stop
-    * @return
-    */
-  def isInRange(date: LocalDateTime, start: LocalDateTime, stop: LocalDateTime): Boolean = {
-    date.isAfter(start) && date.isBefore(stop)
-  }
-
-  implicit def strToFile(path: String): File = {
-    new File(path)
-  }
-
-  implicit def fileToString(file: File): String = {
-    file.getAbsolutePath
-  }
-
-  def rm(path: String): Array[(String, Boolean)] = {
-    Option(path.listFiles).map(_.flatMap(f => rm(f))).getOrElse(Array()) :+ (path.getPath -> path.delete)
-  }
-
-  def format(date:LocalDateTime,format:String): String ={
-    return date.format(DateTimeFormatter.ofPattern(format));
   }
 }
