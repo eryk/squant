@@ -2,8 +2,6 @@ package com.squant.cheetah.engine
 
 import java.time.LocalDateTime
 
-import com.squant.cheetah.DataEngine
-import com.squant.cheetah.domain.{BarType, DAY}
 import com.squant.cheetah.utils._
 import org.apache.hadoop.hbase._
 import org.apache.hadoop.hbase.client._
@@ -23,7 +21,7 @@ trait DataBase {
 
   def deleteTable(name: String)
 
-  def toDB(tableName: String, rowSet: Set[Row])
+  def toDB(tableName: String, rowSet: List[Row])
 
   def fromDB(tableName: String, start: LocalDateTime, stop: LocalDateTime): List[Row]
 
@@ -66,7 +64,11 @@ class HBase(zookeeper: String = "127.0.0.1", root: String = "/hbase") extends Da
     }
   }
 
-  override def toDB(tableName: String, rowSet: Set[Row]) = {
+  override def toDB(tableName: String, rowSet: List[Row]) = {
+    if (!isTableExist(tableName)) {
+      createTable(tableName)
+    }
+
     val puts = scala.collection.mutable.Buffer[Put]()
 
     for (row <- rowSet) {
@@ -105,14 +107,4 @@ class HBase(zookeeper: String = "127.0.0.1", root: String = "/hbase") extends Da
     admin.close()
     conn.close()
   }
-}
-
-object HBase extends App {
-
-  val values = DataEngine.ktype("000001",DAY,start = LocalDateTime.now.plusDays(-30))
-  values.foreach(print)
-
-//  val hbase = new HBase()
-//  hbase.createTable("test")
-//  hbase.toDB()
 }

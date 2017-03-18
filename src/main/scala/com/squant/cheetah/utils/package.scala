@@ -110,7 +110,7 @@ package object utils {
     * @return string
     */
   def getRecentWorkingDay(date: LocalDateTime, format: String): String = {
-    var tmpDate = date;
+`    var tmpDate = date
     while (date.getDayOfWeek.getValue >= 6) tmpDate = date.plusDays(-1)
     tmpDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
   }
