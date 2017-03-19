@@ -28,7 +28,7 @@ trait DataBase {
   def close()
 }
 
-class HBase(zookeeper: String = "127.0.0.1", root: String = "/hbase") extends DataBase {
+class HBaseEngine(zookeeper: String = "127.0.0.1", root: String = "/hbase") extends DataBase {
 
   private val conn = {
     val configuration = HBaseConfiguration.create()
@@ -106,5 +106,17 @@ class HBase(zookeeper: String = "127.0.0.1", root: String = "/hbase") extends Da
   override def close(): Unit = {
     admin.close()
     conn.close()
+  }
+}
+
+object DataBase {
+
+  var engine:DataBase = null
+
+  def getEngine = {
+    if (engine == null) {
+      engine = new HBaseEngine()
+    }
+    engine
   }
 }

@@ -84,7 +84,7 @@ object DataEngine {
     StockCategoryDataSource.readCategory(config.getString(CONFIG_PATH_DB_BASE) + config.getString(CONFIG_PATH_CATEGORY))
   }
 
-  def symbols(): Seq[Symbol] = parseCSVToSymbols(config.getString(CONFIG_PATH_DB_BASE) + config.getString(CONFIG_PATH_STOCKS))
+  def symbols(): Seq[Symbol] = Symbol.csvToSymbols(config.getString(CONFIG_PATH_DB_BASE) + config.getString(CONFIG_PATH_STOCKS))
 
   def getFundamentals(code: String) = ???
 
