@@ -7,6 +7,7 @@ scalaVersion := "2.11.8"
 lazy val akkaVersion = "2.4.14"
 
 resolvers += Resolver.bintrayRepo("fcomb", "maven")
+resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" % "akka-actor_2.11" % akkaVersion,
@@ -24,7 +25,8 @@ libraryDependencies ++= Seq(
   "com.google.code.gson" % "gson" % "2.8.0",
   "org.apache.hbase" % "hbase-client" % "1.3.0",
   "org.apache.hbase" % "hbase-common" % "1.3.0",
-  "org.apache.hadoop" % "hadoop-common" % "2.7.3"
+  "org.apache.hadoop" % "hadoop-common" % "2.7.3",
+  "org.scalatest" % "scalatest_2.11" % "3.0.1" % "test" from "http://repo.artima.com/releases"
 )
 
 assemblyMergeStrategy in assembly := {
