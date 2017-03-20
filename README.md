@@ -28,6 +28,11 @@ sudo docker run --name squant -v /data:/data -d registry.cn-hangzhou.aliyuncs.co
 
 # changelog
 
+## 2017-03-20
+
+1. squant支持HBase存储接口
+2. 数据源添加toCSV和toDB方法，数据源可以导出成csv文件（无增量）和写入hbase（增量更新）
+
 ## 2017-03-12
 
 1. 生成docker镜像，支持股票数据批量下载
