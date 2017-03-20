@@ -94,7 +94,7 @@ class HBaseEngine(zookeeper: String = "127.0.0.1", root: String = "/hbase") exte
     while (iter.hasNext) {
       val t = iter.next()
       val columns = t.listCells().asScala
-      val values = columns.map((cell: Cell) => (Bytes.toString(cell.getQualifierArray), Bytes.toString(cell.getValueArray)))
+      val values = columns.map((cell: Cell) => (new String(CellUtil.cloneQualifier(cell),"utf8"), new String(CellUtil.cloneValue(cell),"utf8")))
 
       resultList.append(Row(Bytes.toString(t.getRow), columns.head.getTimestamp, values.toMap))
     }

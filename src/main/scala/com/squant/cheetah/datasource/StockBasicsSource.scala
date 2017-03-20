@@ -56,6 +56,11 @@ object StockBasicsSource extends DataSource with LazyLogging {
     engine.toDB(tableName, symbols)
   }
 
+  def fromDB(tableName: String = tableName, engine: DataBase): Seq[Symbol] = {
+    val rows = engine.fromDB(tableName, start = LocalDateTime.now().plusDays(-2), stop = LocalDateTime.now())
+    rows.map(Symbol.rowToSymbol)
+  }
+
   //清空数据源
   override def clear(): Unit = {
     rm(s"$path/$name")
