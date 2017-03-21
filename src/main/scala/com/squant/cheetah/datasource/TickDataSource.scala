@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter
 
 import com.squant.cheetah.DataEngine
 import com.squant.cheetah.domain.{Symbol, Tick, TickType}
+import com.squant.cheetah.engine.DataBase
 import com.squant.cheetah.utils._
 import com.squant.cheetah.utils.Constants._
 import com.typesafe.scalalogging.LazyLogging
@@ -23,11 +24,11 @@ object TickDataSource extends DataSource with LazyLogging {
     update(start = LocalDateTime.now(), stop = LocalDateTime.now)
   }
 
-  override def update(start: LocalDateTime, stop: LocalDateTime): Unit = {
+  override def update(start: LocalDateTime = LocalDateTime.now(), stop: LocalDateTime = LocalDateTime.now()): Unit = {
     val stocks = DataEngine.symbols()
 
-    stocks.foreach(symbol => {
-      toCSV(symbol.code, LocalDateTime.now())
+    stocks.par.foreach(symbol => {
+      toCSV(symbol.code, stop)
     })
   }
 
@@ -55,6 +56,15 @@ object TickDataSource extends DataSource with LazyLogging {
       out.close()
       true
     }
+  }
+
+  def toDB(code: String, tableName: String, engine: DataBase, ticks: List[Tick]): Unit = {
+    engine.toDB(tableName, ticks.map(Tick.tickToRow(code, _)))
+  }
+
+  def fromDB(tableName: String, engine: DataBase, s: LocalDateTime, e: LocalDateTime): List[Tick] = {
+    val rows = engine.fromDB(tableName, start = s, stop = e)
+    rows.map(Tick.rowToTick)
   }
 
 }

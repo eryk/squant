@@ -3,8 +3,11 @@ package com.squant.cheetah.domain
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, LocalTime}
 
-object TickType{
-  def from(name:String):TickType = name match {
+import com.squant.cheetah.engine.Row
+import com.squant.cheetah.utils._
+
+object TickType {
+  def from(name: String): TickType = name match {
     case "买盘" => BUY
     case "卖盘" => SELL
     case "中性盘" => MID
@@ -38,4 +41,28 @@ case class Tick(
                  tickType: TickType
                ) {
   override def toString: String = "Tick{" + "时间='" + date.format(DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss")) + '\'' + ", 价格=" + price + ", 成交量=" + volume + ", 成交额=" + amount + ", 类型=" + `tickType` + '}'
+}
+
+object Tick {
+
+  def tickToRow(code: String, tick: Tick): Row = {
+    val map = scala.collection.mutable.HashMap[String, String]()
+    map.put("price", tick.price.toString)
+    map.put("volume", tick.volume.toString)
+    map.put("amount", tick.amount.toString)
+    map.put("tickType", tick.tickType.toString)
+    Row(code + "_" + format(tick.date, "yyyyMMddHHmmss"), localDateTimeToLong(tick.date), map.toMap)
+  }
+
+  def rowToTick(row: Row): Tick = {
+    val map = row.record
+
+    Tick(
+      longToLocalDateTime(row.timestamp),
+      map.get("price").get.toDouble,
+      map.get("volume").get.toInt,
+      map.get("volume").get.toDouble,
+      TickType.from(map.get("tickType").get)
+    )
+  }
 }
