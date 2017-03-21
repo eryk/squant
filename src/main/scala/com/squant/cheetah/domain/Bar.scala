@@ -4,6 +4,7 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+import com.squant.cheetah.engine.Row
 import com.squant.cheetah.utils.Constants._
 import com.squant.cheetah.utils._
 
@@ -31,17 +32,12 @@ case object WEEK extends BarType
 case object MONTH extends BarType
 
 case class Bar(barType: BarType, date: LocalDateTime, code: String, name: String, close: Float, high: Float,
-               low: Float, open: Float,lastClose: Float, p_change: Float, a_change: Float, volume: Float,
+               low: Float, open: Float, lastClose: Float, p_change: Float, a_change: Float, volume: Float,
                amount: Float, turnover: Float, mktcap: Float, nmc: Float)
 
-object Bar{
+object Bar {
 
   import com.squant.cheetah.utils._
-
-  def typeToPath(barType: BarType): String = {
-    val ktype = Map("MIN_5" -> "5", "MIN_15" -> "15", "MIN_30" -> "30", "MIN_60" -> "60", "DAY" -> "day", "WEEK" -> "week", "MONTH" -> "month")
-    ktype.get(barType.toString).get
-  }
 
   private def sumTick(ticks: Seq[Tick]): Bar = ???
 
@@ -60,58 +56,58 @@ object Bar{
     case barType if (barType == DAY) => Seq[Bar]()
   }
 
-  /**
-    *
-    * @param code
-    * @param ktype
-    * @param index if true,return index data ,else return stock data
-    * @return
-    */
-  def parseCSVToBars(code: String, ktype: BarType, index: Boolean = false): Seq[Bar] = {
 
-    val baseDir = config.getString(CONFIG_PATH_DB_BASE)
-    val ktypeDir = config.getString(CONFIG_PATH_KTYPE)
+  def barToRow(bar: Bar): Row = {
+    val map = scala.collection.mutable.HashMap[String, String]()
+    map.put("barType", bar.barType.toString)
+    map.put("code", bar.code.toString)
+    map.put("name", bar.name.toString)
+    map.put("close", bar.close.toString)
+    map.put("high", bar.high.toString)
+    map.put("low", bar.low.toString)
+    map.put("open", bar.open.toString)
+    map.put("lastClose", bar.lastClose.toString)
+    map.put("p_change", bar.p_change.toString)
+    map.put("a_change", bar.a_change.toString)
+    map.put("volume", bar.volume.toString)
+    map.put("amount", bar.amount.toString)
+    map.put("turnover", bar.turnover.toString)
+    map.put("mktcap", bar.mktcap.toString)
+    map.put("nmc", bar.nmc.toString)
 
-    def mapToStock(map: Map[String, String]): Bar = new Bar(
-      ktype,
-      map.get("date").get,
+    Row(bar.code + "_" + format(bar.date, "yyyyMMddhhmmss"), localDateTimeToLong(bar.date), map.toMap)
+  }
+
+  def rowToBar(row: Row): Bar = {
+    val map = row.record
+
+    new Bar(
+      map.get("barType").get match {
+        case barType if (barType == "SEC_1") => SEC_1
+        case barType if (barType == "MIN_1") => MIN_1
+        case barType if (barType == "MIN_5") => MIN_5
+        case barType if (barType == "MIN_15") => MIN_15
+        case barType if (barType == "MIN_30") => MIN_30
+        case barType if (barType == "MIN_60") => MIN_60
+        case barType if (barType == "DAY") => DAY
+        case barType if (barType == "WEEK") => WEEK
+        case barType if (barType == "MONTH") => MONTH
+      },
+      longToLocalDateTime(row.timestamp),
       map.get("code").get,
-      map.get("name").getOrElse(""),
-      map.get("close").getOrElse("0").toFloat,
-      map.get("high").getOrElse("0").toFloat,
-      map.get("low").getOrElse("0").toFloat,
-      map.get("open").getOrElse("0").toFloat,
-      map.get("lastClose").getOrElse("0").toFloat,
-      map.get("p_change").getOrElse("0").toFloat,
-      map.get("a_change").getOrElse("0").toFloat,
-      map.get("volume").getOrElse("0").toFloat,
-      map.get("amount").getOrElse("0").toFloat,
-      map.get("turnover").getOrElse("0").toFloat,
-      map.get("mktcap").getOrElse("0").toFloat,
-      map.get("nmc").getOrElse("0").toFloat
+      map.get("name").get,
+      map.get("close").get.toFloat,
+      map.get("high").get.toFloat,
+      map.get("low").get.toFloat,
+      map.get("open").get.toFloat,
+      map.get("lastClose").get.toFloat,
+      map.get("p_change").get.toFloat,
+      map.get("a_change").get.toFloat,
+      map.get("volume").get.toFloat,
+      map.get("amount").get.toFloat,
+      map.get("turnover").get.toFloat,
+      map.get("mktcap").get.toFloat,
+      map.get("nmc").get.toFloat
     )
-
-    var file: String = ""
-    if (index) {
-      file = s"$baseDir$ktypeDir/${typeToPath(ktype)}/index/$code.csv"
-    } else {
-      file = s"$baseDir$ktypeDir/${typeToPath(ktype)}/stock/$code.csv"
-    }
-    val lines = scala.io.Source.fromFile(new File(file)).getLines().toList.drop(1)
-    val columns = ktype match {
-      case SEC_1 |MIN_1 | MIN_5 | MIN_15 | MIN_30 | MIN_60 => minStockColumns
-      case DAY | WEEK | MONTH =>
-        if (index)
-          dayIndexColumns
-        else
-          dayStockColumns
-    }
-
-    for {
-      line <- lines
-      fields = line.replaceAll("None", "0").split(",")
-      if (fields.length == 15 || fields.length == 12 || fields.length == 7)
-      map = (columns zip fields) (breakOut): Map[String, String]
-    } yield mapToStock(map)
   }
 }

@@ -1,11 +1,9 @@
 package com.squant.cheetah
 
-import java.io.File
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.Date
 
-import com.squant.cheetah.datasource.{StockCategoryDataSource, TickDataSource}
+import com.squant.cheetah.datasource.{DailyKTypeDataSource, StockCategoryDataSource, TickDataSource}
 import com.squant.cheetah.domain._
 import com.squant.cheetah.engine.Context
 import com.squant.cheetah.utils.Constants._
@@ -70,7 +68,7 @@ object DataEngine {
 
   //包含当天数据，内部做数据的聚合
   def ktype(code: String, kType: BarType, start: LocalDateTime = LocalDateTime.now().plusYears(-1), stop: LocalDateTime = LocalDateTime.now(), index: Boolean = false): List[Bar] = {
-    val bars = Bar.parseCSVToBars(code, kType, index)
+    val bars = DailyKTypeDataSource.fromCSV(code, kType, index)
     bars.filter(bar => bar.date.isAfter(start) && bar.date.isBefore(stop)).toList
   }
 
