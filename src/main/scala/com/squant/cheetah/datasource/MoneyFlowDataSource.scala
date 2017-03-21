@@ -5,6 +5,8 @@ import java.time.LocalDateTime
 import java.util.Random
 
 import com.google.gson.Gson
+import com.squant.cheetah.domain.MoneyFlow
+import com.squant.cheetah.engine.DataBase
 import com.squant.cheetah.utils.Constants._
 import com.squant.cheetah.utils._
 import com.typesafe.scalalogging.LazyLogging
@@ -12,7 +14,7 @@ import com.typesafe.scalalogging.LazyLogging
 import scala.io.Source
 import scala.collection.JavaConverters._
 
-object MoneyFlowDataSource extends App with DataSource with LazyLogging {
+object MoneyFlowDataSource extends DataSource with LazyLogging {
 
   private val baseDir = config.getString(CONFIG_PATH_DB_BASE)
   private val moneyflowDir = config.getString(CONFIG_PATH_MONEYFLOW)
@@ -55,6 +57,7 @@ object MoneyFlowDataSource extends App with DataSource with LazyLogging {
 
   //初始化数据源
   override def init(): Unit = {
+    clear()
     update()
   }
 
@@ -65,18 +68,6 @@ object MoneyFlowDataSource extends App with DataSource with LazyLogging {
     val dir = new File(s"$baseDir/$moneyflowDir/${format(stop, "yyyyMMdd")}")
     if (!dir.exists()) {
       dir.mkdirs()
-    }
-
-    def writeData(path: String, data: List[String]) = {
-      val file = new File(s"$baseDir/$moneyflowDir/${format(stop, "yyyyMMdd")}/$path.csv")
-      val writer = new FileWriter(file, false)
-
-      writer.write(INDUSTRY_MONEYFLOW_COLUMNS.foldLeft[String]("")((x: String, y: String) => x + "," + y).drop(1) + "\n")
-
-      for (line <- data) {
-        writer.write(new String(line.getBytes("utf-8")) + "\n");
-      }
-      writer.close()
     }
 
     /**
@@ -105,18 +96,40 @@ object MoneyFlowDataSource extends App with DataSource with LazyLogging {
     }
 
     for (path <- types) {
-      writeData("Industry_" + path, collect(0))
-      writeData("Concept_" + path, collect(1))
-      writeData("Region_" + path, collect(2))
+      toCSV("Industry_" + path, stop, collect(0))
+      toCSV("Concept_" + path, stop, collect(1))
+      toCSV("Region_" + path, stop, collect(2))
     }
   }
 
+  def toCSV(path: String, dateTime: LocalDateTime, data: List[String]) = {
+    val file = new File(s"$baseDir/$moneyflowDir/${format(dateTime, "yyyyMMdd")}/$path.csv")
+    val writer = new FileWriter(file, false)
+
+    writer.write(INDUSTRY_MONEYFLOW_COLUMNS.foldLeft[String]("")((x: String, y: String) => x + "," + y).drop(1) + "\n")
+
+    for (line <- data) {
+      writer.write(new String(line.getBytes("utf-8")) + "\n");
+    }
+    writer.close()
+  }
+
+  def fromCSV(path: String, dateTime: LocalDateTime = LocalDateTime.now()): List[MoneyFlow] = {
+    val data = Source.fromFile(new File(s"$baseDir/$moneyflowDir/${format(dateTime, "yyyyMMdd")}/$path.csv")).getLines()
+    val list = data.drop(1).map(item => MoneyFlow.csvToMoneyFlow(item) match {
+      case Some(flow) => flow
+      case None => throw new UnknownError("fail to parse moneyflow data")
+    }
+    )
+    list.toList
+  }
+
+  def toDB(tableName: String, engine: DataBase, dataBase: DataBase, data: List[String]): Unit = {
+    MoneyFlowDataSource
+  }
 
   //清空数据源
   override def clear(): Unit = {
     rm(s"/$baseDir/$moneyflowDir").foreach(r => logger.info(s"delete ${r._1} ${r._2}"))
   }
-
-  clear()
-  update()
 }
