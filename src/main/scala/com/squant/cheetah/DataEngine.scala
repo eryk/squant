@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
 
-import com.squant.cheetah.datasource.StockCategoryDataSource
+import com.squant.cheetah.datasource.{StockCategoryDataSource, TickDataSource}
 import com.squant.cheetah.domain._
 import com.squant.cheetah.engine.Context
 import com.squant.cheetah.utils.Constants._
@@ -17,9 +17,9 @@ class DataEngine(context: Context) {
 
   //获取历史数据
   def getHistoryData(code: String, //股票代码
-                   count: Int, //数量, 返回的结果集的行数
-                   frequency: BarType = DAY, //单位时间长度
-                  index:Boolean = false): List[Bar] = {
+                     count: Int, //数量, 返回的结果集的行数
+                     frequency: BarType = DAY, //单位时间长度
+                     index: Boolean = false): List[Bar] = {
     val now: LocalDateTime = context.clock.now()
     val start = frequency match {
       case SEC_1 => now.plusSeconds(-count)
@@ -32,7 +32,7 @@ class DataEngine(context: Context) {
       case WEEK => now.plusWeeks(-count)
       case MONTH => now.plusMonths(-count)
     }
-    DataEngine.ktype(code, frequency, start, now,index)
+    DataEngine.ktype(code, frequency, start, now, index)
   }
 
   //获取基金净值/期货结算价等
@@ -51,7 +51,7 @@ object DataEngine {
     RealTime.arrayToRealTime(array)
   }
 
-  def realtime2(code: String, date:LocalDateTime = LocalDateTime.now()): RealTime2 = {
+  def realtime2(code: String, date: LocalDateTime = LocalDateTime.now()): RealTime2 = {
     val url = "http://nuff.eastmoney.com/EM_Finance2015TradeInterface/JS.ashx?id=%s&_=%s"
 
     def getPath(symbol: String): String = {
@@ -60,17 +60,12 @@ object DataEngine {
     }
 
     val source = Source.fromURL(getPath(code), "utf8").mkString
-    val array = source.substring(source.indexOf("Value") + 8, source.lastIndexOf("]")).replaceAll("\"","").split(",")
+    val array = source.substring(source.indexOf("Value") + 8, source.lastIndexOf("]")).replaceAll("\"", "").split(",")
     RealTime.arrayToRealTime2(array)
   }
 
   def tick(code: String, date: LocalDateTime): Seq[Tick] = {
-    val lines = Source.fromFile(new File(s"/data/tick/${date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))}/$code.csv")).getLines().drop(1)
-    lines.map {
-      line =>
-        val fields = line.split(",", 6)
-        Tick(LocalDateTime.parse(date.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + " " + fields(0), DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss")), fields(1).toFloat, fields(3).toInt, fields(4).toDouble, TickType.from(fields(5)))
-    }.toSeq.reverse
+    TickDataSource.fromCSV(code, date)
   }
 
   //包含当天数据，内部做数据的聚合

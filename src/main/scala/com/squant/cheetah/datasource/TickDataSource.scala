@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 import com.squant.cheetah.DataEngine
-import com.squant.cheetah.domain.Symbol
+import com.squant.cheetah.domain.{Symbol, Tick, TickType}
 import com.squant.cheetah.utils._
 import com.squant.cheetah.utils.Constants._
 import com.typesafe.scalalogging.LazyLogging
@@ -27,7 +27,7 @@ object TickDataSource extends DataSource with LazyLogging {
     val stocks = DataEngine.symbols()
 
     stocks.foreach(symbol => {
-      writeTick(symbol.code, LocalDateTime.now())
+      toCSV(symbol.code, LocalDateTime.now())
     })
   }
 
@@ -35,7 +35,16 @@ object TickDataSource extends DataSource with LazyLogging {
     rm(s"/$baseDir/$tickDir").foreach(r => logger.info(s"delete ${r._1} ${r._2}"))
   }
 
-  private def writeTick(code: String, date: LocalDateTime) = {
+  def fromCSV(code: String, date: LocalDateTime) = {
+    val lines = Source.fromFile(new File(s"/data/tick/${date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))}/$code.csv")).getLines().drop(1)
+    lines.map {
+      line =>
+        val fields = line.split(",", 6)
+        Tick(LocalDateTime.parse(date.format(DateTimeFormatter.ofPattern("yyyyMMdd")) + " " + fields(0), DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss")), fields(1).toFloat, fields(3).toInt, fields(4).toDouble, TickType.from(fields(5)))
+    }.toSeq.reverse
+  }
+
+  def toCSV(code: String, date: LocalDateTime) = {
     val tickDayDataURL = "http://market.finance.sina.com.cn/downxls.php?date=%s&symbol=%s"
     val formatDate = date.format(DateTimeFormatter.ofPattern("yyyyMMdd"))
     if (!new File(s"/$baseDir/$tickDir/$formatDate").exists()) {
