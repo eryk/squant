@@ -26,7 +26,7 @@ case class MoneyFlow(
 object MoneyFlow {
   def csvToMoneyFlow(line: String): Option[MoneyFlow] = {
     val array: Array[String] = line.split(",")
-    if (array == 16) {
+    if (array.length == 16) {
       Some(new MoneyFlow(
         array(1),
         array(2),
@@ -70,5 +70,25 @@ object MoneyFlow {
     Row(moneyFlow.code, localDateTimeToLong(LocalDateTime.now()), map.toMap)
   }
 
-  def rowToMoneyFlow(row: Row): MoneyFlow = ???
+  def rowToMoneyFlow(row: Row): MoneyFlow = {
+    val map = row.record
+
+    new MoneyFlow(
+      map.get("code").get,
+      map.get("name").get,
+      map.get("change").get.toFloat,
+      map.get("netInflowAmount").get.toFloat,
+      map.get("netInflowRatio").get.toFloat,
+      map.get("largeOrderInflowAmount").get.toFloat,
+      map.get("largeOrderInflowRatio").get.toFloat,
+      map.get("bigOrderInflowAmount").get.toFloat,
+      map.get("bigOrderInflowRatio").get.toFloat,
+      map.get("mediumOrderInflowAmount").get.toFloat,
+      map.get("mediumOrderInflowRatio").get.toFloat,
+      map.get("smallOrderInflowAmount").get.toFloat,
+      map.get("smallOrderInflowRatio").get.toFloat,
+      map.get("topName").get,
+      map.get("topCode").get
+    )
+  }
 }

@@ -6,7 +6,7 @@ import java.util.Random
 
 import com.google.gson.Gson
 import com.squant.cheetah.domain.MoneyFlow
-import com.squant.cheetah.engine.DataBase
+import com.squant.cheetah.engine.{DataBase, Row}
 import com.squant.cheetah.utils.Constants._
 import com.squant.cheetah.utils._
 import com.typesafe.scalalogging.LazyLogging
@@ -124,8 +124,15 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
     list.toList
   }
 
-  def toDB(tableName: String, engine: DataBase, dataBase: DataBase, data: List[String]): Unit = {
-    MoneyFlowDataSource
+  def toDB(tableName: String, engine: DataBase, data: List[MoneyFlow]): Unit = {
+    val rows: List[Row] = data.map(MoneyFlow.moneyflowToRow)
+    engine.toDB(tableName, rows)
+  }
+
+  def fromDB(tableName: String, engine: DataBase, start: LocalDateTime,
+             stop: LocalDateTime): List[MoneyFlow] = {
+    val rowList = engine.fromDB(tableName, start, stop)
+    rowList.map(MoneyFlow.rowToMoneyFlow)
   }
 
   //清空数据源
