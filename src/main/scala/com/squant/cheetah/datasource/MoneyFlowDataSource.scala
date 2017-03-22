@@ -10,6 +10,7 @@ import com.squant.cheetah.engine.{DataBase, Row}
 import com.squant.cheetah.utils.Constants._
 import com.squant.cheetah.utils._
 import com.typesafe.scalalogging.LazyLogging
+import org.jsoup.Jsoup
 
 import scala.io.Source
 import scala.collection.JavaConverters._
@@ -18,6 +19,23 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
 
   private val baseDir = config.getString(CONFIG_PATH_DB_BASE)
   private val moneyflowDir = config.getString(CONFIG_PATH_MONEYFLOW)
+
+  private val STOCK_HIS_COLUMNS = List(
+    "date", //0   日期
+    "close", //1   收盘价
+    "change", //2   涨跌幅
+    "turnover", //3   换手率
+    "inflowAmount", //4   资金流入（万元）
+    "outflowAmount", //5   资金流出（万元）
+    "netInflowAmount", //6   净流入（万元）
+    "mainInflowAmount", //7   主力流入（万元）
+    "mainOutflowAmount", //8   主力流出（万元）
+    "mainNetInflowAmount" //9   主力净流入（万元）
+  )
+
+  //http://quotes.money.163.com/trade/lszjlx_600199,0.html
+  //code,pageNum
+  private val moneyFlowStockHisURL: String = "http://quotes.money.163.com/trade/lszjlx_%s,%s.html"
 
   //http://data.eastmoney.com/bkzj/hy.html
   private val moneyFlowIndustryHisURL: String = "http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?cmd=C._BKHY&type=ct&st=(BalFlowMain)&&token=894050c76af8597a853f5b408b759f5d&sty=DCFFITABK&rt=%s"
@@ -36,7 +54,7 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
   private val fiveDay = List(moneyFlowIndustry5DayHisURL, moneyFlowConcept5DayHisURL, moneyFlowRegion5DayHisURL)
   private val tenDay = List(moneyFlowIndustry10DayHisURL, moneyFlowConcept10DayHisURL, moneyFlowRegion10DayHisURL)
 
-  private val INDUSTRY_MONEYFLOW_COLUMNS = List(
+  private val CATEGORY_MONEYFLOW_COLUMNS = List(
     "num", //0     序号
     "block_code", //1     板块代码
     "name", //2     板块名称
@@ -102,11 +120,45 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
     }
   }
 
+  def toCSV(code: String) = {
+    val list = scala.collection.mutable.ListBuffer[List[String]]()
+
+    for (i <- 0 to 50) {
+      val source = Source.fromURL(moneyFlowStockHisURL.format(code, i), "utf-8").mkString
+      val doc = Jsoup.parse(source)
+      val tbody = doc.select("table[class='table_bg001 border_box'] tbody")
+      if (!tbody.isEmpty) {
+        val elements = tbody.get(0).select("tr").iterator()
+        while (elements.hasNext) {
+          val tds = elements.next().select("td")
+          val columns = List(
+            tds.get(0).text(),
+            tds.get(1).text(),
+            tds.get(2).text(),
+            tds.get(3).text(),
+            tds.get(4).text(),
+            tds.get(5).text(),
+            tds.get(6).text(),
+            tds.get(7).text(),
+            tds.get(8).text(),
+            tds.get(9).text()
+          )
+          list.append(columns)
+        }
+      }
+    }
+
+    if(list.size > 0){
+      val writer = new FileWriter(s"$baseDir/$moneyflowDir/stock/$code.csv")
+//      writer.write(STOCK_HIS_COLUMNS.foldLeft())
+    }
+  }
+
   def toCSV(path: String, dateTime: LocalDateTime, data: List[String]) = {
     val file = new File(s"$baseDir/$moneyflowDir/${format(dateTime, "yyyyMMdd")}/$path.csv")
     val writer = new FileWriter(file, false)
 
-    writer.write(INDUSTRY_MONEYFLOW_COLUMNS.foldLeft[String]("")((x: String, y: String) => x + "," + y).drop(1) + "\n")
+    writer.write(CATEGORY_MONEYFLOW_COLUMNS.foldLeft[String]("")((x: String, y: String) => x + "," + y).drop(1) + "\n")
 
     for (line <- data) {
       writer.write(new String(line.getBytes("utf-8")) + "\n");
