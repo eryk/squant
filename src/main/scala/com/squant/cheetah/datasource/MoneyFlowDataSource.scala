@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.Random
 
 import com.google.gson.Gson
-import com.squant.cheetah.domain.MoneyFlow
+import com.squant.cheetah.domain.{MoneyFlow, StockMoneyFlow}
 import com.squant.cheetah.engine.{DataBase, Row}
 import com.squant.cheetah.utils.Constants._
 import com.squant.cheetah.utils._
@@ -120,6 +120,11 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
     }
   }
 
+  /**
+    * stock money flow data to csv
+    *
+    * @param code
+    */
   def toCSV(code: String) = {
     val list = scala.collection.mutable.ListBuffer[List[String]]()
 
@@ -136,22 +141,35 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
             tds.get(1).text(),
             tds.get(2).text(),
             tds.get(3).text(),
-            tds.get(4).text(),
-            tds.get(5).text(),
-            tds.get(6).text(),
-            tds.get(7).text(),
-            tds.get(8).text(),
-            tds.get(9).text()
+            tds.get(4).text().replaceAll(",", ""),
+            tds.get(5).text().replaceAll(",", ""),
+            tds.get(6).text().replaceAll(",", ""),
+            tds.get(7).text().replaceAll(",", ""),
+            tds.get(8).text().replaceAll(",", ""),
+            tds.get(9).text().replaceAll(",", "")
           )
           list.append(columns)
         }
       }
     }
 
-    if(list.size > 0){
-      val writer = new FileWriter(s"$baseDir/$moneyflowDir/stock/$code.csv")
-//      writer.write(STOCK_HIS_COLUMNS.foldLeft())
+    if (list.size > 0) {
+      createDir(s"$baseDir/$moneyflowDir/stock")
+      val writer = new FileWriter(s"$baseDir/$moneyflowDir/stock/$code.csv", false)
+      writer.write(STOCK_HIS_COLUMNS.foldLeft("")((x: String, y: String) => x + "," + y).drop(1) + "\n")
+      for (line <- list.reverse) {
+        writer.write(line.foldLeft("")((x: String, y: String) => x + "," + y).drop(1) + "\n")
+      }
+      writer.close
     }
+  }
+
+  def fromCSV(code: String): List[StockMoneyFlow] = {
+    val file = Source.fromFile(new File(s"$baseDir/$moneyflowDir/stock/$code.csv")).getLines()
+    file.drop(1).map(StockMoneyFlow.csvToStockMoneyFlow(_) match {
+      case Some(flow) => flow
+      case None => throw new UnknownError()
+    }).toList
   }
 
   def toCSV(path: String, dateTime: LocalDateTime, data: List[String]) = {
@@ -185,6 +203,14 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
              stop: LocalDateTime): List[MoneyFlow] = {
     val rowList = engine.fromDB(tableName, start, stop)
     rowList.map(MoneyFlow.rowToMoneyFlow)
+  }
+
+  def toDB(code: String, engine: DataBase) = {
+    engine.toDB(s"moneyflow_$code", fromCSV(code).map(StockMoneyFlow.stockMoneyFlowToRow))
+  }
+
+  def fromDB(code:String,engine:DataBase):List[StockMoneyFlow] = {
+    engine.fromDB(s"moneyflow_$code",FIRST_DAY,TODAY).map(StockMoneyFlow.rowToStockMoneyFlow)
   }
 
   //清空数据源

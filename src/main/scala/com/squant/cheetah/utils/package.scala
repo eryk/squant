@@ -19,6 +19,10 @@ package object utils {
 
   lazy val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
+  val FIRST_DAY:LocalDateTime = LocalDateTime.of(1990, 1, 1, 0, 0)
+
+  val TODAY:LocalDateTime = LocalDateTime.now
+
   def yaml(path: String): java.util.Map[String, Any] = {
     val input = new FileInputStream(new File(path))
     val yaml = new Yaml()
@@ -41,6 +45,15 @@ package object utils {
     contexts.toMap
   }
 
+  def createDir(path: String): Boolean = {
+    val file = new File(path)
+    if (!file.exists()) {
+      file.mkdirs
+    } else {
+      false
+    }
+  }
+
   implicit def strToFile(path: String): File = {
     new File(path)
   }
@@ -61,6 +74,10 @@ package object utils {
     date.format(DateTimeFormatter.ofPattern(format))
   }
 
+  def stringToLocalDateTime(date: String, format: String): LocalDateTime = {
+    LocalDateTime.parse(date, DateTimeFormatter.ofPattern(format))
+  }
+
   def localDateTimeToLong(date: LocalDateTime): Long = {
     Date.from(date.atZone(ZoneId.systemDefault()).toInstant).getTime
   }
@@ -73,7 +90,7 @@ package object utils {
     longToLocalDateTime(date.getTime)
   }
 
-  def localDateTimeToDate(localDateTime: LocalDateTime):Date = {
+  def localDateTimeToDate(localDateTime: LocalDateTime): Date = {
     Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant)
   }
 
