@@ -3,23 +3,46 @@ package com.squant.cheetah.datasource
 import java.time.LocalDateTime
 
 import com.typesafe.scalalogging.StrictLogging
+import com.squant.cheetah.utils._
+import cronish._
+import cronish.dsl._
+
+
+case class TaskConfig(name: String, cron: String, clear: Boolean, toCSV: Boolean, toDB: Boolean)
 
 object Updater extends App with StrictLogging {
+  val sourceTypes = List("daily", "minute", "category", "tick", "moneyflow")
 
-  val start = LocalDateTime.now.plusDays(-1)
-  val stop = LocalDateTime.now
+  def loadTaskConfig(): Map[String, TaskConfig] = {
+    sourceTypes.map(
+      (sourceType: String) => (sourceType, TaskConfig(
+        config.getString(s"squant.schedule.$sourceType.name"),
+        config.getString(s"squant.schedule.$sourceType.cron"),
+        config.getBoolean(s"squant.schedule.$sourceType.clear"),
+        config.getBoolean(s"squant.schedule.$sourceType.toCSV"),
+        config.getBoolean(s"squant.schedule.$sourceType.toDB"))
+        )
+    ).toMap
+  }
 
-  logger.info("开始下载股票基本面数据")
-  StockBasicsSource.init()
-  logger.info("股票基本面数据下载完成")
-  logger.info("开始下载股票分类数据,下载持续时间较长，请耐心等待")
-  StockCategoryDataSource.init()
-  logger.info("股票基本面数据下载完成")
-  logger.info("开始下载股票日线数据,下载持续时间较长，请耐心等待")
-  DailyKTypeDataSource.init()
-  logger.info("股票日线数据下载完成")
-  MinuteKTypeDataSource.init()
-  logger.info("开始下载股票当日逐笔数据,下载持续时间较长，请耐心等待")
-  TickDataSource.init()
-  logger.info("股票当日逐笔数据下载完成")
+  def runTask(taskConfig: TaskConfig, dataSource: DataSource) = {
+    logger.info(s"start to download ${taskConfig.name} data")
+    task {
+      dataSource.update(start = LocalDateTime.now().plusDays(-5))
+    } executes taskConfig.cron.cron
+    logger.info(s"Download completed")
+  }
+
+  val tasks = loadTaskConfig()
+
+  for ((name, taskConfig) <- tasks) {
+    name match {
+      case "daily" => runTask(taskConfig, DailyKTypeDataSource)
+      case "basics" => runTask(taskConfig, StockBasicsSource)
+      case "minute" => runTask(taskConfig, MinuteKTypeDataSource)
+      case "tick" => runTask(taskConfig, TickDataSource)
+      case "moneyflow" => runTask(taskConfig, MoneyFlowDataSource)
+      case "category" => runTask(taskConfig, StockCategoryDataSource)
+    }
+  }
 }

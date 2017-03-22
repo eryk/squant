@@ -8,7 +8,7 @@ trait DataSource {
   def init()
 
   //每个周期更新数据
-  def update(start:LocalDateTime,stop:LocalDateTime)
+  def update(start:LocalDateTime = LocalDateTime.now(),stop:LocalDateTime = LocalDateTime.now())
 
   //清空数据源
   def clear()
