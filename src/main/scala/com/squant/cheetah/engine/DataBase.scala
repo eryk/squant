@@ -94,7 +94,7 @@ class HBaseEngine(zookeeper: String = "127.0.0.1", root: String = "/hbase") exte
     while (iter.hasNext) {
       val t = iter.next()
       val columns = t.listCells().asScala
-      val values = columns.map((cell: Cell) => (new String(CellUtil.cloneQualifier(cell),"utf8"), new String(CellUtil.cloneValue(cell),"utf8")))
+      val values = columns.map((cell: Cell) => (new String(CellUtil.cloneQualifier(cell), "utf8"), new String(CellUtil.cloneValue(cell), "utf8")))
 
       resultList.append(Row(Bytes.toString(t.getRow), columns.head.getTimestamp, values.toMap))
     }
@@ -111,11 +111,17 @@ class HBaseEngine(zookeeper: String = "127.0.0.1", root: String = "/hbase") exte
 
 object DataBase {
 
-  var engine:DataBase = null
+  var engine: DataBase = null
 
   def getEngine = {
     if (engine == null) {
-      engine = new HBaseEngine()
+      val dbType = config.getString(Constants.CONFIG_DATABASE_TYPE)
+      dbType match {
+        case dbType if (dbType == "hbase") =>
+          engine = new HBaseEngine(
+            config.getString(Constants.CONFIG_DATABASE_ZOOKEEPER),
+            config.getString(Constants.CONFIG_DATABASE_ZOOKEEPER_ROOT))
+      }
     }
     engine
   }

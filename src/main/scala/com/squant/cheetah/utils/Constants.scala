@@ -8,4 +8,8 @@ object Constants {
   val CONFIG_PATH_TICK = "squant.db.path.tick"
   val CONFIG_PATH_CATEGORY = "squant.db.path.category"
   val CONFIG_PATH_STRATEGY = "squant.strategy.path"
+
+  val CONFIG_DATABASE_TYPE = "squant.database.dbtype"
+  val CONFIG_DATABASE_ZOOKEEPER = "squant.database.zookeeper"
+  val CONFIG_DATABASE_ZOOKEEPER_ROOT = "squant.database.root"
 }
