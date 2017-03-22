@@ -30,6 +30,11 @@ sudo docker run --name squant -v /data:/data -d registry.cn-hangzhou.aliyuncs.co
 
 # changelog
 
+## 2017-03-23
+
+1. 所有已支持的数据源支持csv和db的读取和写入
+2. 添加数据源定时任务，对数据进行定时增量更新
+
 ## 2017-03-20
 
 1. squant支持HBase存储接口
