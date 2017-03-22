@@ -5,6 +5,8 @@ import java.time.LocalDateTime
 
 import com.google.gson.Gson
 import com.squant.cheetah.DataEngine
+import com.squant.cheetah.domain.{Bar, BarType, DAY, MIN_1, MIN_15, MIN_30, MIN_5, MIN_60, WEEK}
+import com.squant.cheetah.engine.DataBase
 import com.squant.cheetah.utils.Constants._
 import com.squant.cheetah.utils._
 import com.typesafe.scalalogging.LazyLogging
@@ -17,6 +19,14 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
   private val baseDir = config.getString(CONFIG_PATH_DB_BASE)
   private val ktypeDir = config.getString(CONFIG_PATH_KTYPE)
   private val ktypeSubDir = Seq("5", "15", "30", "60")
+
+  private val ktypeToPath = Map(
+    ("MIN_1", "1"),
+    ("MIN_5", "5"),
+    ("MIN_15", "15"),
+    ("MIN_30", "30"),
+    ("MIN_60", "60")
+  )
 
   private val INDEX_SYMBOL = Map[String, String](
     ("000001", "sh000001"), ("000002", "sh000002"), ("000003", "sh000003"), ("000008", "sh000008"),
@@ -69,27 +79,6 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
       }
     }
 
-    def writeData(code: String, data: Iterator[String], ktype: String, path: String): Unit = {
-      val file = new File(s"$baseDir/$ktypeDir/$ktype/$path/$code.csv")
-
-      val dir = new File(s"$baseDir/$ktypeDir/$ktype/$path")
-      if (!dir.exists()) {
-        dir.mkdirs()
-      }
-      val isNewFile = !file.exists();
-
-      val writer = new FileWriter(file, true)
-
-      if (isNewFile) {
-        writer.write("date,code,open,high,low,close,volume" + "\n")
-      }
-      val iter = data.drop(1).toList.reverse
-      for (line: String <- iter) {
-        writer.write(new String(line.getBytes("utf-8")) + "\n")
-      }
-      writer.close()
-    }
-
     //update index minute data
     for ((c, rCode) <- INDEX_SYMBOL) {
       for (k <- ktypeSubDir) {
@@ -98,7 +87,7 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
           val data = jsonParser(content).map(item => {
             s"${item.get("day").get},$c,${item.get("open").get},${item.get("high").get},${item.get("low").get},${item.get("close").get},${item.get("volume").get}"
           })
-          writeData(c, data.toList.reverse.toIterator, k, "index")
+          toCSV(c, data.toList.reverse.toIterator, k, "index")
         } else {
           logger.error(s"fail to download source. code=$c")
         }
@@ -113,12 +102,53 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
           val data = jsonParser(content).map(item => {
             s"${item.get("day").get},${symbol.code},${item.get("open").get},${item.get("high").get},${item.get("low").get},${item.get("close").get},${item.get("volume").get}"
           })
-          writeData(symbol.code, data.toList.reverse.toIterator, k, "stock")
+          toCSV(symbol.code, data.toList.reverse.toIterator, k, "stock")
         } else {
           logger.error(s"fail to download source. code=${symbol.code}")
         }
       }
     }
+  }
+
+  def toCSV(code: String, data: Iterator[String], ktype: String, path: String): Unit = {
+    val file = new File(s"$baseDir/$ktypeDir/$ktype/$path/$code.csv")
+
+    val dir = new File(s"$baseDir/$ktypeDir/$ktype/$path")
+    if (!dir.exists()) {
+      dir.mkdirs()
+    }
+    val isNewFile = !file.exists();
+
+    val writer = new FileWriter(file, true)
+
+    if (isNewFile) {
+      writer.write("date,code,open,high,low,close,volume" + "\n")
+    }
+    val iter = data.drop(1).toList.reverse
+    for (line: String <- iter) {
+      writer.write(new String(line.getBytes("utf-8")) + "\n")
+    }
+    writer.close()
+  }
+
+  def fromCSV(code: String, ktype: BarType, isIndex: Boolean): List[Bar] = {
+    val path = isIndex match {
+      case true => "index"
+      case false => "stock"
+    }
+
+    val data = Source.fromFile(s"$baseDir/$ktypeDir/${ktypeToPath.get(ktype.toString).get}/$path/$code.csv").getLines()
+    data.drop(1).map(Bar.minuteCSVToBar(ktype, _).get).toList
+  }
+
+  def toDB(code: String, ktype: BarType, isIndex: Boolean,engine:DataBase) = {
+    val path = isIndex match {
+      case true => "index"
+      case false => "stock"
+    }
+
+    val bars = fromCSV(code,ktype,isIndex)
+    engine.toDB(s"ktype_${ktype}_${code}_${path}",bars.map(Bar.minuteBarToRow(_)))
   }
 
   override def clear(): Unit = {

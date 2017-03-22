@@ -75,24 +75,38 @@ object Bar {
     map.put("mktcap", bar.mktcap.toString)
     map.put("nmc", bar.nmc.toString)
 
-    Row(bar.code + "_" + format(bar.date, "yyyyMMddhhmmss"), localDateTimeToLong(bar.date), map.toMap)
+    Row(bar.code + "_" + format(bar.date, "yyyyMMddHHmmss"), localDateTimeToLong(bar.date), map.toMap)
+  }
+
+  def minuteBarToRow(bar: Bar): Row = {
+    val map = scala.collection.mutable.HashMap[String, String]()
+    map.put("barType", bar.barType.toString)
+    map.put("close", bar.close.toString)
+    map.put("high", bar.high.toString)
+    map.put("low", bar.low.toString)
+    map.put("open", bar.open.toString)
+    map.put("volume", bar.volume.toString)
+
+    Row(bar.code + format(bar.date, "yyyyMMddHHmmss"), localDateTimeToLong(bar.date), map.toMap)
+  }
+
+  def stringToBarType(ktype: String) = ktype match {
+    case barType if (barType == "SEC_1") => SEC_1
+    case barType if (barType == "MIN_1") => MIN_1
+    case barType if (barType == "MIN_5") => MIN_5
+    case barType if (barType == "MIN_15") => MIN_15
+    case barType if (barType == "MIN_30") => MIN_30
+    case barType if (barType == "MIN_60") => MIN_60
+    case barType if (barType == "DAY") => DAY
+    case barType if (barType == "WEEK") => WEEK
+    case barType if (barType == "MONTH") => MONTH
   }
 
   def rowToBar(row: Row): Bar = {
     val map = row.record
 
     new Bar(
-      map.get("barType").get match {
-        case barType if (barType == "SEC_1") => SEC_1
-        case barType if (barType == "MIN_1") => MIN_1
-        case barType if (barType == "MIN_5") => MIN_5
-        case barType if (barType == "MIN_15") => MIN_15
-        case barType if (barType == "MIN_30") => MIN_30
-        case barType if (barType == "MIN_60") => MIN_60
-        case barType if (barType == "DAY") => DAY
-        case barType if (barType == "WEEK") => WEEK
-        case barType if (barType == "MONTH") => MONTH
-      },
+      stringToBarType(map.get("barType").get),
       longToLocalDateTime(row.timestamp),
       map.get("code").get,
       map.get("name").get,
@@ -109,5 +123,31 @@ object Bar {
       map.get("mktcap").get.toFloat,
       map.get("nmc").get.toFloat
     )
+  }
+
+  def minuteCSVToBar(ktype: BarType, line: String): Option[Bar] = {
+    val fields = line.split(",")
+    if (fields.length == 7) {
+      Some(Bar(
+        ktype,
+        stringToDate(fields(0)),
+        fields(1),
+        "",
+        fields(5).toFloat, //close
+        fields(3).toFloat, //high
+        fields(4).toFloat, //low
+        fields(2).toFloat, //open
+        0.0f,
+        0.0f,
+        0.0f,
+        fields(6).toFloat,
+        0.0f,
+        0.0f,
+        0.0f,
+        0.0f
+      ))
+    } else {
+      None
+    }
   }
 }
