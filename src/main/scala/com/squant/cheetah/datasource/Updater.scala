@@ -6,12 +6,13 @@ import com.typesafe.scalalogging.StrictLogging
 import com.squant.cheetah.utils._
 import cronish._
 import cronish.dsl._
+import scala.collection.JavaConverters._
 
 
 case class TaskConfig(name: String, cron: String, clear: Boolean, toCSV: Boolean, toDB: Boolean)
 
 object Updater extends App with StrictLogging {
-  val sourceTypes = List("daily", "minute", "category", "tick", "moneyflow")
+  val sourceTypes = config.getStringList(Constants.CONFIG_SCHEDULE_TASKS).asScala.toList
 
   def loadTaskConfig(): Map[String, TaskConfig] = {
     sourceTypes.map(

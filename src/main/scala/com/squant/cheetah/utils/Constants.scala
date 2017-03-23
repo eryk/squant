@@ -12,4 +12,6 @@ object Constants {
   val CONFIG_DATABASE_TYPE = "squant.database.dbtype"
   val CONFIG_DATABASE_ZOOKEEPER = "squant.database.zookeeper"
   val CONFIG_DATABASE_ZOOKEEPER_ROOT = "squant.database.zkroot"
+
+  val CONFIG_SCHEDULE_TASKS = "squant.schedule.tasks"
 }
