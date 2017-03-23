@@ -1,6 +1,6 @@
 name := "squant"
 
-version := "1.0"
+version := "1.1"
 
 scalaVersion := "2.11.8"
 
@@ -30,10 +30,9 @@ libraryDependencies ++= Seq(
 )
 
 assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
   case PathList(ps @ _*) if ps.last == "application.conf" => MergeStrategy.discard
-  case x =>
-    val oldStrategy = (assemblyMergeStrategy in assembly).value
-    oldStrategy(x)
+  case x => MergeStrategy.first
 }
 
 //mainClass in assembly := Some("com.squant.cheetah.datasource.Updater")
