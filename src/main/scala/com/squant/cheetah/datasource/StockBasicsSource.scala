@@ -28,8 +28,10 @@ object StockBasicsSource extends DataSource with LazyLogging {
   //每个周期更新数据
   override def update(start: LocalDateTime = LocalDateTime.now(),
                       stop: LocalDateTime = LocalDateTime.now()): Unit = {
+    logger.info(s"start to download stock basics data")
     toCSV(stop)
-    toDB(tableName, DataBase.getEngine)
+    toDB(tableName)
+    logger.info(s"Download completed")
   }
 
   def toCSV(date: LocalDateTime): Unit = {
@@ -41,7 +43,7 @@ object StockBasicsSource extends DataSource with LazyLogging {
 
     if (!sourceFile.exists()) {
       logger.error("fail to download stock basics data.")
-      return true
+      return
     }
 
     val dest = new File(s"$path/$name-${format(date, "yyyyMMdd")}")
@@ -51,13 +53,13 @@ object StockBasicsSource extends DataSource with LazyLogging {
     Files.copy(sourceFile.toPath, dest.toPath)
   }
 
-  def toDB(tableName: String, engine: DataBase): Unit = {
+  def toDB(tableName: String): Unit = {
     val symbols = Symbol.csvToSymbols(s"$path/$name").map(symbol => Symbol.symbolToRow(symbol)).toList
-    engine.toDB(tableName, symbols)
+    DataBase.getEngine.toDB(tableName, symbols)
   }
 
-  def fromDB(tableName: String = tableName, engine: DataBase): Seq[Symbol] = {
-    val rows = engine.fromDB(tableName, start = LocalDateTime.now().plusDays(-2), stop = LocalDateTime.now())
+  def fromDB(tableName: String = tableName): Seq[Symbol] = {
+    val rows = DataBase.getEngine.fromDB(tableName, start = LocalDateTime.now().plusDays(-2), stop = LocalDateTime.now())
     rows.map(Symbol.rowToSymbol)
   }
 

@@ -7,7 +7,6 @@ scalaVersion := "2.11.8"
 lazy val akkaVersion = "2.4.14"
 
 resolvers += Resolver.bintrayRepo("fcomb", "maven")
-resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" % "akka-actor_2.11" % akkaVersion,
@@ -19,19 +18,21 @@ libraryDependencies ++= Seq(
   "com.tictactec" % "ta-lib" % "0.4.0",
   "com.quantifind" % "wisp_2.11" % "0.0.4",
   "org.yaml" % "snakeyaml" % "1.17",
-  "com.github.philcali" %% "cronish" % "0.1.3",
+  //http://www.sauronsoftware.it/projects/cron4j/manual.php
+  "it.sauronsoftware.cron4j" % "cron4j" % "2.2.5",
+
   "com.github.scopt" % "scopt_2.11" % "3.5.0",
   "com.github.tototoshi" %% "scala-csv" % "1.3.4",
   "com.google.code.gson" % "gson" % "2.8.0",
   "org.apache.hbase" % "hbase-client" % "1.3.0",
   "org.apache.hbase" % "hbase-common" % "1.3.0",
-  "org.apache.hadoop" % "hadoop-common" % "2.7.3",
-  "org.scalatest" % "scalatest_2.11" % "3.0.1" % "test" from "http://repo.artima.com/releases"
+  "org.apache.hadoop" % "hadoop-common" % "2.7.3"
+//  "org.scalatest" % "scalatest_2.11" % "3.0.1" % "test" from "http://repo.artima.com/releases"
 )
 
 assemblyMergeStrategy in assembly := {
-  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
-  case PathList(ps @ _*) if ps.last == "application.conf" => MergeStrategy.discard
+  case PathList("META-INF", xs@_*) => MergeStrategy.discard
+  case PathList(ps@_*) if ps.last == "application.conf" => MergeStrategy.discard
   case x => MergeStrategy.first
 }
 

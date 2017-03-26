@@ -137,12 +137,12 @@ object DailyKTypeDataSource extends DataSource with LazyLogging {
     } yield mapToStock(map)
   }
 
-  def toDB(tableName: String, engine: DataBase, bars: List[Bar]): Unit = {
-    engine.toDB(tableName, bars.map(Bar.barToRow))
+  def toDB(tableName: String, bars: List[Bar]): Unit = {
+    DataBase.getEngine.toDB(tableName, bars.map(Bar.barToRow))
   }
 
-  def fromDB(tableName: String, start: LocalDateTime, stop: LocalDateTime = LocalDateTime.now, engine: DataBase): List[Bar] = {
-    engine.fromDB(tableName, start, stop).map(Bar.rowToBar)
+  def fromDB(tableName: String, start: LocalDateTime, stop: LocalDateTime = LocalDateTime.now): List[Bar] = {
+    DataBase.getEngine.fromDB(tableName, start, stop).map(Bar.rowToBar)
   }
 
   //清空数据源

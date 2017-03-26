@@ -141,14 +141,14 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
     data.drop(1).map(Bar.minuteCSVToBar(ktype, _).get).toList
   }
 
-  def toDB(code: String, ktype: BarType, isIndex: Boolean,engine:DataBase) = {
+  def toDB(code: String, ktype: BarType, isIndex: Boolean) = {
     val path = isIndex match {
       case true => "index"
       case false => "stock"
     }
 
-    val bars = fromCSV(code,ktype,isIndex)
-    engine.toDB(s"ktype_${ktype}_${code}_${path}",bars.map(Bar.minuteBarToRow(_)))
+    val bars = fromCSV(code, ktype, isIndex)
+    DataBase.getEngine.toDB(s"ktype_${ktype}_${code}_${path}", bars.map(Bar.minuteBarToRow(_)))
   }
 
   override def clear(): Unit = {

@@ -30,7 +30,7 @@ object StockCategoryDataSource extends DataSource with LazyLogging {
     //下载股票分类数据
     toCSV(baseDir + fileName)
 
-    toDB(tableName, DataBase.getEngine)
+    toDB(tableName)
   }
 
   override def clear(): Unit = {
@@ -72,7 +72,7 @@ object StockCategoryDataSource extends DataSource with LazyLogging {
     writer.close()
   }
 
-  def toDB(tableName: String, engine: DataBase): Unit = {
+  def toDB(tableName: String): Unit = {
     val categories: Map[String, Category] = readCategory(baseDir + fileName)
 
     val rows: Map[String, Row] = categories.map(item => (item._1, Category.categoryToRow(item._2)))
@@ -83,7 +83,7 @@ object StockCategoryDataSource extends DataSource with LazyLogging {
     }
     )
 
-    engine.toDB(tableName, rows.values.toList)
+    DataBase.getEngine.toDB(tableName, rows.values.toList)
   }
 
   def readCategory(file: String): Map[String, Category] = {

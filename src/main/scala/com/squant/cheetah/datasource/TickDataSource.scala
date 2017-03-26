@@ -58,12 +58,12 @@ object TickDataSource extends DataSource with LazyLogging {
     }
   }
 
-  def toDB(code: String, tableName: String, engine: DataBase, ticks: List[Tick]): Unit = {
-    engine.toDB(tableName, ticks.map(Tick.tickToRow(code, _)))
+  def toDB(code: String, tableName: String, ticks: List[Tick]): Unit = {
+    DataBase.getEngine.toDB(tableName, ticks.map(Tick.tickToRow(code, _)))
   }
 
-  def fromDB(tableName: String, engine: DataBase, s: LocalDateTime, e: LocalDateTime): List[Tick] = {
-    val rows = engine.fromDB(tableName, start = s, stop = e)
+  def fromDB(tableName: String, s: LocalDateTime, e: LocalDateTime): List[Tick] = {
+    val rows = DataBase.getEngine.fromDB(tableName, start = s, stop = e)
     rows.map(Tick.rowToTick)
   }
 

@@ -205,12 +205,12 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
     rowList.map(MoneyFlow.rowToMoneyFlow)
   }
 
-  def toDB(code: String, engine: DataBase) = {
-    engine.toDB(s"moneyflow_$code", fromCSV(code).map(StockMoneyFlow.stockMoneyFlowToRow))
+  def toDB(code: String) = {
+    DataBase.getEngine.toDB(s"moneyflow_$code", fromCSV(code).map(StockMoneyFlow.stockMoneyFlowToRow))
   }
 
-  def fromDB(code:String,engine:DataBase):List[StockMoneyFlow] = {
-    engine.fromDB(s"moneyflow_$code",FIRST_DAY,TODAY).map(StockMoneyFlow.rowToStockMoneyFlow)
+  def fromDB(code:String):List[StockMoneyFlow] = {
+    DataBase.getEngine.fromDB(s"moneyflow_$code",FIRST_DAY,TODAY).map(StockMoneyFlow.rowToStockMoneyFlow)
   }
 
   //清空数据源
