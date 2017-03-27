@@ -28,6 +28,14 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
     ("MIN_60", "60")
   )
 
+  private val pathToKtype = Map(
+    ("1", "MIN_1"),
+    ("5", "MIN_5"),
+    ("15", "MIN_15"),
+    ("30", "MIN_30"),
+    ("60", "MIN_60")
+  )
+
   private val INDEX_SYMBOL = Map[String, String](
     ("000001", "sh000001"), ("000002", "sh000002"), ("000003", "sh000003"), ("000008", "sh000008"),
     ("000009", "sh000009"), ("000010", "sh000010"), ("000011", "sh000011"), ("000012", "sh000012"),
@@ -79,7 +87,7 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
       }
     }
 
-    logger.info(s"Start to download index minute bar data, ${format(stop,"yyyyMMdd")}")
+    logger.info(s"Start to download index minute bar data, ${format(stop, "yyyyMMdd")}")
     //update index minute data
     for ((c, rCode) <- INDEX_SYMBOL) {
       for (k <- ktypeSubDir) {
@@ -89,13 +97,14 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
             s"${item.get("day").get},$c,${item.get("open").get},${item.get("high").get},${item.get("low").get},${item.get("close").get},${item.get("volume").get}"
           })
           toCSV(c, data.toList.reverse.toIterator, k, "index")
+          toDB(c,stringToBarType(pathToKtype.get(k).get),true)
         } else {
           logger.error(s"fail to download source. code=$c")
         }
       }
     }
     logger.info(s"Download completed")
-    logger.info(s"Start to download stock minute bar data, ${format(stop,"yyyyMMdd")}")
+    logger.info(s"Start to download stock minute bar data, ${format(stop, "yyyyMMdd")}")
     //update stock minute data
     val symbols = DataEngine.symbols()
     for (symbol <- symbols) {
@@ -106,6 +115,7 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
             s"${item.get("day").get},${symbol.code},${item.get("open").get},${item.get("high").get},${item.get("low").get},${item.get("close").get},${item.get("volume").get}"
           })
           toCSV(symbol.code, data.toList.reverse.toIterator, k, "stock")
+          toDB(symbol.code,stringToBarType(pathToKtype.get(k).get),false)
         } else {
           logger.error(s"fail to download source. code=${symbol.code}")
         }

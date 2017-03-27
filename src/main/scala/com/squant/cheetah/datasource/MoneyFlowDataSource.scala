@@ -120,10 +120,17 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
       toCSV("Industry_" + path, stop, collect(0))
       toCSV("Concept_" + path, stop, collect(1))
       toCSV("Region_" + path, stop, collect(2))
+
+      toDB("Industry_" + path,stop)
+      toDB("Concept_" + path,stop)
+      toDB("Region_" + path,stop)
     }
 
     val symbols = DataEngine.symbols()
-    symbols.par.foreach(symbol => toCSV(symbol.code))
+    symbols.par.foreach(symbol => {
+      toCSV(symbol.code)
+      toDB(symbol.code)
+    })
 
     logger.info(s"Download completed")
   }
@@ -202,14 +209,21 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
     list.toList
   }
 
-  def toDB(tableName: String, data: List[MoneyFlow]): Unit = {
-    val rows: List[Row] = data.map(MoneyFlow.moneyflowToRow)
-    DataBase.getEngine.toDB(tableName, rows)
+  def toCategoryTableName(path: String, date: LocalDateTime) = {
+    s"${path}_${format(date, "yyyyMMdd")}"
   }
 
-  def fromDB(tableName: String, start: LocalDateTime,
-             stop: LocalDateTime): List[MoneyFlow] = {
-    val rowList = DataBase.getEngine.fromDB(tableName, start, stop)
+  def toDB(path: String, dateTime: LocalDateTime = LocalDateTime.now()): Unit = {
+    val data = fromCSV(path, dateTime)
+    if (data != null && data.size > 0) {
+      val rows: List[Row] = data.map(MoneyFlow.moneyflowToRow)
+      DataBase.getEngine.toDB(toCategoryTableName(path,dateTime), rows)
+    }
+  }
+
+  def fromDB(path: String, dateTime: LocalDateTime): List[MoneyFlow] = {
+    val rowList = DataBase.getEngine.fromDB(toCategoryTableName(path,dateTime),
+      dateTime.plusDays(-1), dateTime.plusDays(1))
     rowList.map(MoneyFlow.rowToMoneyFlow)
   }
 

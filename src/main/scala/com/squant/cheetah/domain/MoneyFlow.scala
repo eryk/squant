@@ -30,7 +30,7 @@ object MoneyFlow {
       Some(new MoneyFlow(
         array(1),
         array(2),
-        array(3).toFloat,
+        array(3).replaceAll("-","0").toFloat,
         array(4).toFloat,
         array(5).toFloat,
         array(6).toFloat,

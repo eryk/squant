@@ -47,19 +47,21 @@ object DailyKTypeDataSource extends DataSource with LazyLogging {
       }
     }
 
-    logger.info(s"Start to download index daily bar data, ${format(stop,"yyyyMMdd")}")
+    logger.info(s"Start to download index daily bar data, ${format(stop, "yyyyMMdd")}")
     //update index daily data
     for ((code, rCode) <- INDEX_SYMBOL) {
       val data = Source.fromURL(indexURL.format(rCode, format(start, "yyyyMMdd"), format(stop, "yyyyMMdd")), "gbk").getLines()
       toCSV(code, data, "index")
+      toDB(code, true)
     }
     logger.info(s"Download completed")
-    logger.info(s"Start to download stock daily bar data, ${format(stop,"yyyyMMdd")}")
+    logger.info(s"Start to download stock daily bar data, ${format(stop, "yyyyMMdd")}")
     //update stock daily data
     val stocks = DataEngine.symbols()
     for (stock <- stocks) {
       val data = Source.fromURL(stockURL.format(stockCode(stock.code), format(start, "yyyyMMdd"), format(stop, "yyyyMMdd")), "gbk").getLines()
       toCSV(stock.code, data, "stock")
+      toDB(stock.code, false)
     }
     logger.info(s"Download completed")
   }
@@ -140,12 +142,22 @@ object DailyKTypeDataSource extends DataSource with LazyLogging {
     } yield mapToStock(map)
   }
 
-  def toDB(tableName: String, bars: List[Bar]): Unit = {
-    DataBase.getEngine.toDB(tableName, bars.map(Bar.barToRow))
+  def getTableName(code: String, index: Boolean = false): String = {
+    val path = index match {
+      case true => "index"
+      case false => "stock"
+    }
+    s"ktype_day_${code}_${path}"
   }
 
-  def fromDB(tableName: String, start: LocalDateTime, stop: LocalDateTime = LocalDateTime.now): List[Bar] = {
-    DataBase.getEngine.fromDB(tableName, start, stop).map(Bar.rowToBar)
+  def toDB(code: String, index: Boolean = false): Unit = {
+    val bars = fromCSV(code, DAY, index)
+    if (bars != null && bars.size > 0)
+      DataBase.getEngine.toDB(getTableName(code, index), bars.toList.map(Bar.barToRow))
+  }
+
+  def fromDB(code: String, index: Boolean = false, start: LocalDateTime, stop: LocalDateTime = LocalDateTime.now): List[Bar] = {
+    DataBase.getEngine.fromDB(getTableName(code, index), start, stop).map(Bar.rowToBar)
   }
 
   //清空数据源
