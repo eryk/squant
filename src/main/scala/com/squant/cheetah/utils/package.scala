@@ -21,6 +21,8 @@ package object utils {
 
   val FIRST_DAY:LocalDateTime = LocalDateTime.of(1990, 1, 1, 0, 0)
 
+  val YESTERDAY = LocalDateTime.now.plusDays(-1)
+
   val TODAY:LocalDateTime = LocalDateTime.now
 
   def yaml(path: String): java.util.Map[String, Any] = {

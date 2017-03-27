@@ -9,16 +9,21 @@ import it.sauronsoftware.cron4j.{Scheduler, Task, TaskExecutionContext}
 import scala.collection.JavaConverters._
 
 
-case class TaskConfig(name: String, cron: String, clear: Boolean, toCSV: Boolean, toDB: Boolean)
+case class TaskConfig(name: String,
+                      cron: String,
+                      clear: Boolean = false,
+                      toCSV: Boolean = false,
+                      toDB: Boolean = false,
+                      start: LocalDateTime,
+                      stop: LocalDateTime
+                     )
 
 object Updater extends App with StrictLogging {
 
   class UpdateTask(taskConfig: TaskConfig, dataSource: DataSource) extends Task {
     override def execute(context: TaskExecutionContext): Unit = {
-      logger.info(s"start to download ${taskConfig.name} data")
       if (taskConfig.clear) dataSource.clear
       dataSource.update(start = LocalDateTime.now().plusDays(-5))
-      logger.info(s"Download completed")
     }
 
   }
@@ -26,14 +31,32 @@ object Updater extends App with StrictLogging {
   val sourceTypes = config.getStringList(Constants.CONFIG_SCHEDULE_TASKS).asScala.toList
 
   def loadTaskConfig(): Map[String, TaskConfig] = {
+
+    def getLocalDateTime(key: String, default: LocalDateTime): LocalDateTime = {
+      if (config.hasPath(key)) {
+        stringToLocalDateTime(config.getString(key), "yyyyMMdd")
+      } else {
+        default
+      }
+    }
+
+    def getBoolean(key: String, default: Boolean): Boolean = {
+      if (config.hasPath(key))
+        config.getBoolean(key)
+      else
+        default
+    }
+
     sourceTypes.map(
       (sourceType: String) => (sourceType, TaskConfig(
         config.getString(s"squant.schedule.$sourceType.name"),
         config.getString(s"squant.schedule.$sourceType.cron"),
-        config.getBoolean(s"squant.schedule.$sourceType.clear"),
-        config.getBoolean(s"squant.schedule.$sourceType.toCSV"),
-        config.getBoolean(s"squant.schedule.$sourceType.toDB"))
-        )
+        clear = getBoolean(s"squant.schedule.$sourceType.clear", false),
+        toCSV = getBoolean(s"squant.schedule.$sourceType.toCSV", true),
+        toDB = getBoolean(s"squant.schedule.$sourceType.toDB", true),
+        start = getLocalDateTime(s"squant.schedule.$sourceType.start", YESTERDAY),
+        stop = getLocalDateTime(s"squant.schedule.$sourceType.stop", TODAY)
+      ))
     ).toMap
   }
 
@@ -52,11 +75,6 @@ object Updater extends App with StrictLogging {
   }
 
   scheduler.start()
-
-  try {
-    Thread.sleep(1000L * 60L * 10L)
-  } catch {
-    case e:InterruptedException => e.printStackTrace()
-  }
+  Thread.sleep(1000L * 3600L * 24L * 6L)
   scheduler.stop()
 }
