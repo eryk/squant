@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import java.util.Random
 
 import com.google.gson.Gson
+import com.squant.cheetah.DataEngine
 import com.squant.cheetah.domain.{MoneyFlow, StockMoneyFlow}
 import com.squant.cheetah.engine.{DataBase, Row}
 import com.squant.cheetah.utils.Constants._
@@ -118,6 +119,9 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
       toCSV("Concept_" + path, stop, collect(1))
       toCSV("Region_" + path, stop, collect(2))
     }
+
+    val symbols = DataEngine.symbols()
+    symbols.par.foreach(symbol => toCSV(symbol.code))
   }
 
   /**
@@ -209,8 +213,8 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
     DataBase.getEngine.toDB(s"moneyflow_$code", fromCSV(code).map(StockMoneyFlow.stockMoneyFlowToRow))
   }
 
-  def fromDB(code:String):List[StockMoneyFlow] = {
-    DataBase.getEngine.fromDB(s"moneyflow_$code",FIRST_DAY,TODAY).map(StockMoneyFlow.rowToStockMoneyFlow)
+  def fromDB(code: String): List[StockMoneyFlow] = {
+    DataBase.getEngine.fromDB(s"moneyflow_$code", FIRST_DAY, TODAY).map(StockMoneyFlow.rowToStockMoneyFlow)
   }
 
   //清空数据源
