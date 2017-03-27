@@ -28,7 +28,7 @@ object StockBasicsSource extends DataSource with LazyLogging {
   //每个周期更新数据
   override def update(start: LocalDateTime = LocalDateTime.now(),
                       stop: LocalDateTime = LocalDateTime.now()): Unit = {
-    logger.info(s"start to download stock basics data")
+    logger.info(s"Start to download stock basics data, ${format(stop,"yyyyMMdd")}")
     toCSV(stop)
     toDB(tableName)
     logger.info(s"Download completed")

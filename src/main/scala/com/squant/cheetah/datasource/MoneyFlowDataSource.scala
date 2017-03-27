@@ -114,6 +114,8 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
       return list.asScala.toList
     }
 
+    logger.info(s"Start to download moneyflow data")
+
     for (path <- types) {
       toCSV("Industry_" + path, stop, collect(0))
       toCSV("Concept_" + path, stop, collect(1))
@@ -122,6 +124,8 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
 
     val symbols = DataEngine.symbols()
     symbols.par.foreach(symbol => toCSV(symbol.code))
+
+    logger.info(s"Download completed")
   }
 
   /**
@@ -198,14 +202,14 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
     list.toList
   }
 
-  def toDB(tableName: String, engine: DataBase, data: List[MoneyFlow]): Unit = {
+  def toDB(tableName: String, data: List[MoneyFlow]): Unit = {
     val rows: List[Row] = data.map(MoneyFlow.moneyflowToRow)
-    engine.toDB(tableName, rows)
+    DataBase.getEngine.toDB(tableName, rows)
   }
 
-  def fromDB(tableName: String, engine: DataBase, start: LocalDateTime,
+  def fromDB(tableName: String, start: LocalDateTime,
              stop: LocalDateTime): List[MoneyFlow] = {
-    val rowList = engine.fromDB(tableName, start, stop)
+    val rowList = DataBase.getEngine.fromDB(tableName, start, stop)
     rowList.map(MoneyFlow.rowToMoneyFlow)
   }
 

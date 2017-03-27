@@ -79,6 +79,7 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
       }
     }
 
+    logger.info(s"Start to download index minute bar data, ${format(stop,"yyyyMMdd")}")
     //update index minute data
     for ((c, rCode) <- INDEX_SYMBOL) {
       for (k <- ktypeSubDir) {
@@ -93,7 +94,9 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
         }
       }
     }
-
+    logger.info(s"Download completed")
+    logger.info(s"Start to download stock minute bar data, ${format(stop,"yyyyMMdd")}")
+    //update stock minute data
     val symbols = DataEngine.symbols()
     for (symbol <- symbols) {
       for (k <- ktypeSubDir) {
@@ -108,6 +111,8 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
         }
       }
     }
+
+    logger.info(s"Download completed")
   }
 
   def toCSV(code: String, data: Iterator[String], ktype: String, path: String): Unit = {

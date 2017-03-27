@@ -27,10 +27,10 @@ object StockCategoryDataSource extends DataSource with LazyLogging {
   }
 
   def update(start: LocalDateTime = LocalDateTime.now(), stop: LocalDateTime = LocalDateTime.now()) = {
-    //下载股票分类数据
+    logger.info(s"Start to download stock category data, ${format(stop,"yyyyMMdd")}")
     toCSV(baseDir + fileName)
-
     toDB(tableName)
+    logger.info(s"Download completed")
   }
 
   override def clear(): Unit = {

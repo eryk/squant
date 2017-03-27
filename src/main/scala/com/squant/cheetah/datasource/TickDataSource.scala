@@ -25,11 +25,12 @@ object TickDataSource extends DataSource with LazyLogging {
   }
 
   override def update(start: LocalDateTime = LocalDateTime.now(), stop: LocalDateTime = LocalDateTime.now()): Unit = {
+    logger.info(s"Start to download stock tick data, ${format(stop,"yyyyMMdd")}")
     val stocks = DataEngine.symbols()
-
     stocks.par.foreach(symbol => {
       toCSV(symbol.code, stop)
     })
+    logger.info(s"Download completed")
   }
 
   override def clear(): Unit = {

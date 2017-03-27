@@ -47,18 +47,21 @@ object DailyKTypeDataSource extends DataSource with LazyLogging {
       }
     }
 
+    logger.info(s"Start to download index daily bar data, ${format(stop,"yyyyMMdd")}")
     //update index daily data
     for ((code, rCode) <- INDEX_SYMBOL) {
       val data = Source.fromURL(indexURL.format(rCode, format(start, "yyyyMMdd"), format(stop, "yyyyMMdd")), "gbk").getLines()
       toCSV(code, data, "index")
     }
-
+    logger.info(s"Download completed")
+    logger.info(s"Start to download stock daily bar data, ${format(stop,"yyyyMMdd")}")
     //update stock daily data
     val stocks = DataEngine.symbols()
     for (stock <- stocks) {
       val data = Source.fromURL(stockURL.format(stockCode(stock.code), format(start, "yyyyMMdd"), format(stop, "yyyyMMdd")), "gbk").getLines()
       toCSV(stock.code, data, "stock")
     }
+    logger.info(s"Download completed")
   }
 
   def toCSV(code: String, data: Iterator[String], path: String): Unit = {
