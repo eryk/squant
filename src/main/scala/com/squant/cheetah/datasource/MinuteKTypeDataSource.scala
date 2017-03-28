@@ -50,12 +50,15 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
     "CN_MarketData.getKLineData?symbol=%s&scale=%s&ma=no&datalen=1023"
 
   //初始化数据源
-  override def init(): Unit = {
+  override def init(taskConfig: TaskConfig =
+                    TaskConfig("StockCategoryDataSource",
+                      "", true, true, true,
+                      LocalDateTime.of(1990, 1, 1, 0, 0), LocalDateTime.now)): Unit = {
     clear()
-    update(start = LocalDateTime.of(1990, 1, 1, 0, 0))
+    update(taskConfig)
   }
 
-  def update(start: LocalDateTime = LocalDateTime.now(), stop: LocalDateTime = LocalDateTime.now()) = {
+  def update(taskConfig: TaskConfig) = {
     def url(code: String, idx: Boolean = false, kType: String): String = {
       mURL.format(code, kType)
     }
@@ -87,7 +90,7 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
       }
     }
 
-    logger.info(s"Start to download index minute bar data, ${format(stop, "yyyyMMdd")}")
+    logger.info(s"Start to download index minute bar data, ${format(taskConfig.stop, "yyyyMMdd")}")
     //update index minute data
     for ((c, rCode) <- INDEX_SYMBOL) {
       for (k <- ktypeSubDir) {
@@ -104,7 +107,7 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
       }
     }
     logger.info(s"Download completed")
-    logger.info(s"Start to download stock minute bar data, ${format(stop, "yyyyMMdd")}")
+    logger.info(s"Start to download stock minute bar data, ${format(taskConfig.stop, "yyyyMMdd")}")
     //update stock minute data
     val symbols = DataEngine.symbols()
     for (symbol <- symbols) {

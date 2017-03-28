@@ -31,13 +31,16 @@ object DailyKTypeDataSource extends DataSource with LazyLogging {
   )
 
   //初始化数据源
-  override def init(): Unit = {
+  override def init(taskConfig: TaskConfig =
+                    TaskConfig("DailyKTypeDataSource",
+                      "", true, true, true,
+                      LocalDateTime.of(1990, 1, 1, 0, 0), LocalDateTime.now)): Unit = {
     clear()
-    update(start = LocalDateTime.of(1990, 1, 1, 0, 0))
+    update(taskConfig)
   }
 
   //每个周期更新数据
-  override def update(start: LocalDateTime = LocalDateTime.now(), stop: LocalDateTime = LocalDateTime.now()): Unit = {
+  override def update(taskConfig: TaskConfig): Unit = {
     def stockCode(code: String): String = {
       if (code.length != 6)
         return ""
@@ -47,19 +50,21 @@ object DailyKTypeDataSource extends DataSource with LazyLogging {
       }
     }
 
-    logger.info(s"Start to download index daily bar data, ${format(stop, "yyyyMMdd")}")
+    logger.info(s"Start to download index daily bar data, ${format(taskConfig.stop, "yyyyMMdd")}")
     //update index daily data
     for ((code, rCode) <- INDEX_SYMBOL) {
-      val data = Source.fromURL(indexURL.format(rCode, format(start, "yyyyMMdd"), format(stop, "yyyyMMdd")), "gbk").getLines()
+      val data = Source.fromURL(indexURL.format(rCode, format(taskConfig.start, "yyyyMMdd"),
+        format(taskConfig.stop, "yyyyMMdd")), "gbk").getLines()
       toCSV(code, data, "index")
       toDB(code, true)
     }
     logger.info(s"Download completed")
-    logger.info(s"Start to download stock daily bar data, ${format(stop, "yyyyMMdd")}")
+    logger.info(s"Start to download stock daily bar data, ${format(taskConfig.stop, "yyyyMMdd")}")
     //update stock daily data
     val stocks = DataEngine.symbols()
     for (stock <- stocks) {
-      val data = Source.fromURL(stockURL.format(stockCode(stock.code), format(start, "yyyyMMdd"), format(stop, "yyyyMMdd")), "gbk").getLines()
+      val data = Source.fromURL(stockURL.format(stockCode(stock.code), format(taskConfig.start, "yyyyMMdd"),
+        format(taskConfig.stop, "yyyyMMdd")), "gbk").getLines()
       toCSV(stock.code, data, "stock")
       toDB(stock.code, false)
     }

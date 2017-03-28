@@ -22,17 +22,20 @@ object TickDataSource extends DataSource with LazyLogging {
   private val tickDir = config.getString(CONFIG_PATH_TICK)
 
   //初始化数据源
-  override def init(): Unit = {
+  override def init(taskConfig: TaskConfig =
+                    TaskConfig("TickDataSource",
+                      "", true, true, true, LocalDateTime.now, LocalDateTime.now)): Unit = {
     clear()
-    update(start = LocalDateTime.now(), stop = LocalDateTime.now)
+    update(taskConfig)
   }
 
-  override def update(start: LocalDateTime = LocalDateTime.now(), stop: LocalDateTime = LocalDateTime.now()): Unit = {
-    logger.info(s"Start to download stock tick data, ${format(stop, "yyyyMMdd")}")
+  override def update(taskConfig: TaskConfig): Unit = {
+    logger.info(s"Start to download stock tick data, ${format(taskConfig.stop, "yyyyMMdd")}")
     val stocks = DataEngine.symbols()
     stocks.par.foreach(symbol => {
-      toCSV(symbol.code, stop)
-      toDB(symbol.code, stop)
+      if (taskConfig.clear) clear()
+      if (taskConfig.toCSV) toCSV(symbol.code, taskConfig.stop)
+      if (taskConfig.toDB) toDB(symbol.code, taskConfig.stop)
     })
     logger.info(s"Download completed")
   }

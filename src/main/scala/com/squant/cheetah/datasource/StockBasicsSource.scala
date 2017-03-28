@@ -20,17 +20,20 @@ object StockBasicsSource extends DataSource with LazyLogging {
   private val tableName = "stock_tables"
 
   //初始化数据源
-  override def init(): Unit = {
+  override def init(taskConfig: TaskConfig =
+                    TaskConfig("StockBasicsSource",
+                      "", true, true, true,
+                      LocalDateTime.now, LocalDateTime.now)): Unit = {
     clear()
-    update()
+    update(taskConfig)
   }
 
   //每个周期更新数据
-  override def update(start: LocalDateTime = LocalDateTime.now(),
-                      stop: LocalDateTime = LocalDateTime.now()): Unit = {
-    logger.info(s"Start to download stock basics data, ${format(stop,"yyyyMMdd")}")
-    toCSV(stop)
-    toDB(tableName)
+  override def update(taskConfig: TaskConfig): Unit = {
+    logger.info(s"Start to download stock basics data, ${format(taskConfig.stop, "yyyyMMdd")}")
+    if (taskConfig.clear) clear()
+    if (taskConfig.toCSV) toCSV(taskConfig.stop)
+    if (taskConfig.toDB) toDB(tableName)
     logger.info(s"Download completed")
   }
 

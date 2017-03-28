@@ -22,10 +22,8 @@ object Updater extends App with StrictLogging {
 
   class UpdateTask(taskConfig: TaskConfig, dataSource: DataSource) extends Task {
     override def execute(context: TaskExecutionContext): Unit = {
-      if (taskConfig.clear) dataSource.clear
-      dataSource.update(start = LocalDateTime.now().plusDays(-5))
+      dataSource.update(taskConfig)
     }
-
   }
 
   val sourceTypes = config.getStringList(Constants.CONFIG_SCHEDULE_TASKS).asScala.toList

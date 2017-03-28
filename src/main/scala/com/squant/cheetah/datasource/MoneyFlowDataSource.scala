@@ -75,16 +75,19 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
   )
 
   //初始化数据源
-  override def init(): Unit = {
+  override def init(taskConfig: TaskConfig =
+                    TaskConfig("StockCategoryDataSource",
+                      "", true, true, true,
+                      LocalDateTime.now, LocalDateTime.now)): Unit = {
     clear()
-    update()
+    update(taskConfig)
   }
 
   //每个周期更新数据
-  override def update(start: LocalDateTime = LocalDateTime.now(), stop: LocalDateTime = LocalDateTime.now()): Unit = {
+  override def update(taskConfig: TaskConfig): Unit = {
     val types = List("today", "5_day", "10_day")
 
-    val dir = new File(s"$baseDir/$moneyflowDir/${format(stop, "yyyyMMdd")}")
+    val dir = new File(s"$baseDir/$moneyflowDir/${format(taskConfig.stop, "yyyyMMdd")}")
     if (!dir.exists()) {
       dir.mkdirs()
     }
@@ -117,13 +120,13 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
     logger.info(s"Start to download moneyflow data")
 
     for (path <- types) {
-      toCSV("Industry_" + path, stop, collect(0))
-      toCSV("Concept_" + path, stop, collect(1))
-      toCSV("Region_" + path, stop, collect(2))
+      toCSV("Industry_" + path, taskConfig.stop, collect(0))
+      toCSV("Concept_" + path, taskConfig.stop, collect(1))
+      toCSV("Region_" + path, taskConfig.stop, collect(2))
 
-      toDB("Industry_" + path,stop)
-      toDB("Concept_" + path,stop)
-      toDB("Region_" + path,stop)
+      toDB("Industry_" + path, taskConfig.stop)
+      toDB("Concept_" + path, taskConfig.stop)
+      toDB("Region_" + path, taskConfig.stop)
     }
 
     val symbols = DataEngine.symbols()
@@ -217,12 +220,12 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
     val data = fromCSV(path, dateTime)
     if (data != null && data.size > 0) {
       val rows: List[Row] = data.map(MoneyFlow.moneyflowToRow)
-      DataBase.getEngine.toDB(toCategoryTableName(path,dateTime), rows)
+      DataBase.getEngine.toDB(toCategoryTableName(path, dateTime), rows)
     }
   }
 
   def fromDB(path: String, dateTime: LocalDateTime): List[MoneyFlow] = {
-    val rowList = DataBase.getEngine.fromDB(toCategoryTableName(path,dateTime),
+    val rowList = DataBase.getEngine.fromDB(toCategoryTableName(path, dateTime),
       dateTime.plusDays(-1), dateTime.plusDays(1))
     rowList.map(MoneyFlow.rowToMoneyFlow)
   }
