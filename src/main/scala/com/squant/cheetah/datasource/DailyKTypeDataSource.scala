@@ -50,13 +50,15 @@ object DailyKTypeDataSource extends DataSource with LazyLogging {
       }
     }
 
+    if (taskConfig.clear) clear()
+
     logger.info(s"Start to download index daily bar data, ${format(taskConfig.stop, "yyyyMMdd")}")
     //update index daily data
     for ((code, rCode) <- INDEX_SYMBOL) {
       val data = Source.fromURL(indexURL.format(rCode, format(taskConfig.start, "yyyyMMdd"),
         format(taskConfig.stop, "yyyyMMdd")), "gbk").getLines()
-      toCSV(code, data, "index")
-      toDB(code, true)
+      if (taskConfig.toCSV) toCSV(code, data, "index")
+      if (taskConfig.toDB) toDB(code, true)
     }
     logger.info(s"Download completed")
     logger.info(s"Start to download stock daily bar data, ${format(taskConfig.stop, "yyyyMMdd")}")
@@ -65,8 +67,8 @@ object DailyKTypeDataSource extends DataSource with LazyLogging {
     for (stock <- stocks) {
       val data = Source.fromURL(stockURL.format(stockCode(stock.code), format(taskConfig.start, "yyyyMMdd"),
         format(taskConfig.stop, "yyyyMMdd")), "gbk").getLines()
-      toCSV(stock.code, data, "stock")
-      toDB(stock.code, false)
+      if (taskConfig.toCSV) toCSV(stock.code, data, "stock")
+      if (taskConfig.toDB) toDB(stock.code, false)
     }
     logger.info(s"Download completed")
   }

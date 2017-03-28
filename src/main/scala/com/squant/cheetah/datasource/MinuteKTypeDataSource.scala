@@ -90,6 +90,8 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
       }
     }
 
+    if (taskConfig.clear) clear()
+
     logger.info(s"Start to download index minute bar data, ${format(taskConfig.stop, "yyyyMMdd")}")
     //update index minute data
     for ((c, rCode) <- INDEX_SYMBOL) {
@@ -99,8 +101,8 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
           val data = jsonParser(content).map(item => {
             s"${item.get("day").get},$c,${item.get("open").get},${item.get("high").get},${item.get("low").get},${item.get("close").get},${item.get("volume").get}"
           })
-          toCSV(c, data.toList.reverse.toIterator, k, "index")
-          toDB(c,stringToBarType(pathToKtype.get(k).get),true)
+          if (taskConfig.toCSV) toCSV(c, data.toList.reverse.toIterator, k, "index")
+          if (taskConfig.toDB) toDB(c,stringToBarType(pathToKtype.get(k).get),true)
         } else {
           logger.error(s"fail to download source. code=$c")
         }

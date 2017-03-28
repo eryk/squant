@@ -117,22 +117,23 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
       return list.asScala.toList
     }
 
+    if (taskConfig.clear) clear()
+
     logger.info(s"Start to download moneyflow data")
-
     for (path <- types) {
-      toCSV("Industry_" + path, taskConfig.stop, collect(0))
-      toCSV("Concept_" + path, taskConfig.stop, collect(1))
-      toCSV("Region_" + path, taskConfig.stop, collect(2))
+      if (taskConfig.toCSV) toCSV("Industry_" + path, taskConfig.stop, collect(0))
+      if (taskConfig.toCSV) toCSV("Concept_" + path, taskConfig.stop, collect(1))
+      if (taskConfig.toCSV) toCSV("Region_" + path, taskConfig.stop, collect(2))
 
-      toDB("Industry_" + path, taskConfig.stop)
-      toDB("Concept_" + path, taskConfig.stop)
-      toDB("Region_" + path, taskConfig.stop)
+      if (taskConfig.toDB) toDB("Industry_" + path, taskConfig.stop)
+      if (taskConfig.toDB) toDB("Concept_" + path, taskConfig.stop)
+      if (taskConfig.toDB) toDB("Region_" + path, taskConfig.stop)
     }
 
     val symbols = DataEngine.symbols()
     symbols.par.foreach(symbol => {
-      toCSV(symbol.code)
-      toDB(symbol.code)
+      if (taskConfig.toCSV) toCSV(symbol.code)
+      if (taskConfig.toDB) toDB(symbol.code)
     })
 
     logger.info(s"Download completed")
