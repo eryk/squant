@@ -33,7 +33,7 @@ object DailyKTypeDataSource extends DataSource with LazyLogging {
   //初始化数据源
   override def init(taskConfig: TaskConfig =
                     TaskConfig("DailyKTypeDataSource",
-                      "", true, true, true,
+                      "", true, true, false,
                       LocalDateTime.of(1990, 1, 1, 0, 0), LocalDateTime.now)): Unit = {
     clear()
     update(taskConfig)
