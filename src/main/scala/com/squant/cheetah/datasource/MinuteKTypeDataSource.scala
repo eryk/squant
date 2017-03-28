@@ -52,7 +52,7 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
   //初始化数据源
   override def init(taskConfig: TaskConfig =
                     TaskConfig("StockCategoryDataSource",
-                      "", true, true, true,
+                      "", true, true, false,
                       LocalDateTime.of(1990, 1, 1, 0, 0), LocalDateTime.now)): Unit = {
     clear()
     update(taskConfig)
@@ -102,7 +102,7 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
             s"${item.get("day").get},$c,${item.get("open").get},${item.get("high").get},${item.get("low").get},${item.get("close").get},${item.get("volume").get}"
           })
           if (taskConfig.toCSV) toCSV(c, data.toList.reverse.toIterator, k, "index")
-          if (taskConfig.toDB) toDB(c,stringToBarType(pathToKtype.get(k).get),true)
+          if (taskConfig.toDB) toDB(c,stringToBarType(k),true)
         } else {
           logger.error(s"fail to download source. code=$c")
         }
@@ -119,8 +119,8 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
           val data = jsonParser(content).map(item => {
             s"${item.get("day").get},${symbol.code},${item.get("open").get},${item.get("high").get},${item.get("low").get},${item.get("close").get},${item.get("volume").get}"
           })
-          toCSV(symbol.code, data.toList.reverse.toIterator, k, "stock")
-          toDB(symbol.code,stringToBarType(pathToKtype.get(k).get),false)
+          if (taskConfig.toCSV) toCSV(symbol.code, data.toList.reverse.toIterator, k, "stock")
+          if (taskConfig.toDB) toDB(symbol.code,stringToBarType(k),false)
         } else {
           logger.error(s"fail to download source. code=${symbol.code}")
         }
