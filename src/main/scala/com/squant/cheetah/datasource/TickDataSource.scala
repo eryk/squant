@@ -24,7 +24,7 @@ object TickDataSource extends DataSource with LazyLogging {
   //初始化数据源
   override def init(taskConfig: TaskConfig =
                     TaskConfig("TickDataSource",
-                      "", true, true, true, LocalDateTime.now, LocalDateTime.now)): Unit = {
+                      "", false, true, false, LocalDateTime.now, LocalDateTime.now)): Unit = {
     clear()
     update(taskConfig)
   }

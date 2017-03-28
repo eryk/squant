@@ -77,7 +77,7 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
   //初始化数据源
   override def init(taskConfig: TaskConfig =
                     TaskConfig("StockCategoryDataSource",
-                      "", true, true, true,
+                      "", false, true, false,
                       LocalDateTime.now, LocalDateTime.now)): Unit = {
     clear()
     update(taskConfig)
