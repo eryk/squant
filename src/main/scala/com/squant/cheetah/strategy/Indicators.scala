@@ -1,7 +1,6 @@
 package com.squant.cheetah.strategy
 
 import com.squant.cheetah.DataEngine
-import com.squant.cheetah.datasource.DailyKTypeDataSource
 import com.squant.cheetah.domain.DAY
 import com.tictactec.ta.lib.{Core, MAType, MInteger, RetCode}
 
@@ -9,12 +8,17 @@ object Indicators extends App {
 
   private val core: Core = new Core()
 
-
   val bars = DataEngine.ktype("000001", DAY, index = true)
   bars.foreach(println)
-  val array = bars.map(bar => bar.close.toDouble).toArray
-  val result = boll(array)
-  println(result(0).last + "\t" + result(1).last + "\t" + result(2).last)
+  val high = bars.map(bar => bar.high.toDouble).toArray
+  val low = bars.map(bar => bar.low.toDouble).toArray
+  val close = bars.map(bar => bar.close.toDouble).toArray
+//  val result = kdj(high, low, close)
+  //  println("macd:" + result(0).last + "\t" + result(1).last + "\t" + result(2).last)
+//  result(0).foreach(println)
+
+  val array = dma(close)
+  array.foreach(println)
 
   def sma(prices: Array[Double], ma: Int): Array[Double] = {
     val tempOutPut: Array[Double] = new Array[Double](prices.length)
@@ -48,6 +52,20 @@ object Indicators extends App {
       i += 1
     }
     return output
+  }
+
+  def dma(prices: Array[Double]): Array[Array[Double]] = {
+    val ma10: Array[Double] = sma(prices, 10)
+    val ma50: Array[Double] = sma(prices, 50)
+    val dif: Array[Double] = new Array[Double](ma10.length)
+    var i: Int = 0
+    while (i < dif.length) {
+      dif(i) = ma10(i) - ma50(i)
+      i += 1
+    }
+    val ama: Array[Double] = sma(dif, 10)
+    val result: Array[Array[Double]] = Array(dif, ama)
+    return result
   }
 
   def macd(prices: Array[Double], optInFastPeriod: Int = 12, optInSlowPeriod: Int = 26, optInSignalPeriod: Int = 9): Array[Array[Double]] = {
@@ -117,134 +135,84 @@ object Indicators extends App {
     output
   }
 
-  //
-  //  def dma(prices: Array[Double]): Array[Array[Double]] = {
-  //    val ma10: Array[Double] = sma(prices, 10)
-  //    val ma50: Array[Double] = sma(prices, 50)
-  //    val dif: Array[Double] = new Array[Double](ma10.length)
-  //    var i: Int = 0
-  //    while (i < dif.length) {
-  //      {
-  //        dif(i) = ma10(i) - ma50(i)
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    val ama: Array[Double] = sma(dif, 10)
-  //    val result: Array[Array[Double]] = Array(dif, ama)
-  //    return result
-  //  }
+  def rsi(prices: Array[Double], period: Int): Array[Double] = {
+    val output: Array[Double] = new Array[Double](prices.length)
+    val tempOutPut: Array[Double] = new Array[Double](prices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.rsi(0, prices.length - 1, prices, period, begin, length, tempOutPut)
+    var i: Int = period
+    while (i < prices.length) {
+      output(i) = tempOutPut(i - period)
+      i += 1
+    }
+    return output
+  }
 
-  //  def kdj(high: Array[Double], low: Array[Double], close: Array[Double]): Array[Array[Double]] = {
-  //    val length: Int = high.length
-  //    val outSlowK: Double = new Array[Double](high.length)
-  //    val outSlowD: Double = new Array[Double](high.length)
-  //    val outSlowJ: Double = new Array[Double](high.length)
-  //    val RSV: Array[Double] = new Array[Double](high.length)
-  //    var i: Int = 0
-  //    while (i < length) {
-  //      {
-  //        if (i >= 8) {
-  //          var start: Int = i - 8
-  //          var high9: Double = Double.MIN_VALUE
-  //          var low9: Double = Double.MAX_VALUE
-  //          while (start <= i) {
-  //            {
-  //              if (high(start) > high9) {
-  //                high9 = high(start)
-  //              }
-  //              if (low(start) < low9) {
-  //                low9 = low(start)
-  //              }
-  //              start += 1
-  //            }
-  //          }
-  //          RSV(i) = (close(i) - low9) / (high9 - low9) * 100
-  //        }
-  //        else {
-  //          RSV(i) = 0d
-  //        }
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = 0
-  //    while (i < length) {
-  //      {
-  //        if (i > 1) {
-  //          outSlowK(i) = 2 / 3d * outSlowK(i - 1) + 1 / 3d * RSV(i)
-  //          outSlowD(i) = 2 / 3d * outSlowD(i - 1) + 1 / 3d * outSlowK(i)
-  //          outSlowJ(i) = 3 * outSlowK(i) - 2 * outSlowD(i)
-  //          if (outSlowJ(i) > 100) {
-  //            outSlowJ(i) = 100
-  //          }
-  //          else if (outSlowJ(i) < 0) {
-  //            outSlowJ(i) = 0
-  //          }
-  //        }
-  //        else {
-  //          outSlowK(i) = 50
-  //          outSlowD(i) = 50
-  //          outSlowJ(i) = 50
-  //        }
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    val result: Array[Array[Double]] = Array(outSlowK, outSlowD, outSlowJ)
-  //    return result
-  //  }
-  //
-  //  def kdj(stockDataList: Nothing): Array[Array[Double]] = {
-  //    val closes: Array[Double] = new Array[Double](stockDataList.size)
-  //    val high: Array[Double] = new Array[Double](stockDataList.size)
-  //    val low: Array[Double] = new Array[Double](stockDataList.size)
-  //    var i: Int = 0
-  //    while (i < stockDataList.size) {
-  //      {
-  //        closes(i) = stockDataList.get(i).get(StockConstants.CLOSE)
-  //        high(i) = stockDataList.get(i).get(StockConstants.HIGH)
-  //        low(i) = stockDataList.get(i).get(StockConstants.LOW)
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return kdj(high, low, closes)
-  //  }
-  //
-  //  def rsi(prices: Array[Double], period: Int): Array[Double] = {
-  //    val output: Array[Double] = new Array[Double](prices.length)
-  //    val tempOutPut: Array[Double] = new Array[Double](prices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.rsi(0, prices.length - 1, prices, period, begin, length, tempOutPut)
-  //    var i: Int = 0
-  //    while (i < period) {
-  //      {
-  //        output(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = period
-  //    while (0 < i && i < (prices.length)) {
-  //      {
-  //        output(i) = tempOutPut(i - period)
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
+  def obv(prices: Array[Double], volume: Array[Double]): Array[Double] = {
+    val output: Array[Double] = new Array[Double](prices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.obv(0, prices.length - 1, prices, volume, begin, length, output)
+    return output
+  }
+
+  def kdj(high: Array[Double], low: Array[Double], close: Array[Double]): Array[Array[Double]] = {
+    val length: Int = high.length
+    val outSlowK: Array[Double] = new Array[Double](high.length)
+    val outSlowD: Array[Double] = new Array[Double](high.length)
+    val outSlowJ: Array[Double] = new Array[Double](high.length)
+    val RSV: Array[Double] = new Array[Double](high.length)
+    var i: Int = 0
+    while (i < length) {
+      if (i >= 8) {
+        var start: Int = i - 8
+        var high9: Double = Double.MinValue
+        var low9: Double = Double.MaxValue
+        while (start <= i) {
+          if (high(start) > high9) {
+            high9 = high(start)
+          }
+          if (low(start) < low9) {
+            low9 = low(start)
+          }
+          start += 1
+        }
+        RSV(i) = (close(i) - low9) / (high9 - low9) * 100
+      }
+      else {
+        RSV(i) = 0d
+      }
+      i += 1
+    }
+    i = 0
+    while (i < length) {
+      if (i > 1) {
+        outSlowK(i) = 2 / 3d * outSlowK(i - 1) + 1 / 3d * RSV(i)
+        outSlowD(i) = 2 / 3d * outSlowD(i - 1) + 1 / 3d * outSlowK(i)
+        outSlowJ(i) = 3 * outSlowK(i) - 2 * outSlowD(i)
+        if (outSlowJ(i) > 100)
+          outSlowJ(i) = 100
+        else if (outSlowJ(i) < 0)
+          outSlowJ(i) = 0
+      }
+      else {
+        outSlowK(i) = 50
+        outSlowD(i) = 50
+        outSlowJ(i) = 50
+      }
+      i += 1
+    }
+    val result: Array[Array[Double]] = Array(outSlowK, outSlowD, outSlowJ)
+    return result
+  }
+
   //
   //  def sar(highPrices: Array[Double], lowPrices: Array[Double], optInAcceleration: Double, optInMaximum: Double): Array[Double] = {
   //    val output: Array[Double] = new Array[Double](lowPrices.length)
@@ -387,16 +355,6 @@ object Indicators extends App {
   //    return output
   //  }
   //
-  //  def obv(prices: Array[Double], volume: Array[Double]): Array[Double] = {
-  //    val output: Array[Double] = new Array[Double](prices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.obv(0, prices.length - 1, prices, volume, begin, length, output)
-  //    return output
-  //  }
   //
   //  def roc(prices: Array[Double], optInTimePeriod: Int): Array[Double] = {
   //    val tempOutPut: Array[Double] = new Array[Double](prices.length)
