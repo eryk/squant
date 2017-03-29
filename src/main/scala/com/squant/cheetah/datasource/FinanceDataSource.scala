@@ -1,15 +1,17 @@
 package com.squant.cheetah.datasource
 
 import java.io._
-import java.net.{HttpURLConnection, URL}
+import java.net.URL
 
-import com.github.tototoshi.csv.CSVReader
+import com.squant.cheetah.DataEngine
+import com.squant.cheetah.domain.Finance
 import com.squant.cheetah.utils.Constants._
 import com.squant.cheetah.utils._
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
-import org.apache.poi.ss.util.WorkbookUtil
+import org.apache.poi.ss.usermodel.Cell
 
+import scala.collection.JavaConverters._
 import scala.io.Source
 
 /**
@@ -46,63 +48,52 @@ object FinanceDataSource extends DataSource with LazyLogging {
 
   //每个周期更新数据
   override def update(config: TaskConfig): Unit = {
-
+    logger.info(s"Start to download stock Finance data, ${format(config.stop, "yyyyMMdd")}")
+    val symbols = DataEngine.symbols()
+    if (config.clear) clear()
+    if (config.toCSV) symbols.par.foreach(symbol => toCSV(symbol.code))
+    if (config.toDB) symbols.par.foreach(symbol => toDB(symbol.code))
+    logger.info(s"Download completed")
   }
 
   def toCSV(code: String) = {
 
-    def readInputStream(inputStream: InputStream): Array[Byte] = {
-      var buffer = new Array[Byte](1024)
-      var len = 0
-      val bos = new ByteArrayOutputStream()
-      len = inputStream.read(buffer)
-      while (len != -1) {
-        bos.write(buffer, 0, len)
-        len = inputStream.read(buffer)
-      }
-      bos.close()
-      bos.toByteArray()
-    }
-
-    for ((name, url) <- reports) {
-      createDir(s"/$baseDir/$subDir/$code/")
-
+    def xlsToCSV(url: String): List[String] = {
       val path = new URL(url.format(code))
       val conn = path.openConnection()
       conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)")
       val inputStream = conn.getInputStream()
       val wb = new HSSFWorkbook(inputStream)
       val sheet = wb.getSheetAt(0)
-      println(sheet.rowIterator().next().cellIterator().next().getStringCellValue)
+      val lines = sheet.iterator().asScala.map(item => item.cellIterator().asScala.foldLeft("")((x: String, cell: Cell) => x + "," + cell.toString).drop(1))
+      lines.toList
+    }
+
+    for ((name, url) <- reports) {
+      createDir(s"/$baseDir/$subDir/$code/")
+      val data = xlsToCSV(url.format(code)).fold("")((left: String, right: String) => left + "\n" + right).drop(1)
 
       val writer = new FileWriter(new File(s"/$baseDir/$subDir/$code/$name"), false)
-      //读取行和列
-      val iter = sheet.rowIterator()
-      while (iter.hasNext) {
-        val sourceRow = iter.next()
-        var content = ""
-        val cellIter = sourceRow.cellIterator()
-        while (cellIter.hasNext) {
-          val sourceCell = cellIter.next
-          println(sourceCell)
-          content += sourceCell + ","
-        }
-        content += "\r\n"; //换行
-        writer.write(content); //写入文件
-      }
-      if (writer != null) {
-        //关闭文件流
-        writer.close()
-      }
-      System.out.println("----------  export  xls 2 csv/txt  文件已转换   -----------");
-
+      writer.write(data)
+      writer.close
     }
   }
 
-  //      val data = Source.fromURL(url.format(code),"utf8").mkString
-  //      val writer = new FileWriter(new File(s"/$baseDir/$subDir/$code/$name"), false)
-  //      writer.write(data)
-  //      writer.close()
+  def fromCSV(code: String): Finance = {
+    val resultMap: Iterable[(String, Map[String, Map[String, Double]])] =
+      for {(name, url) <- reports
+           lines = Source.fromFile(new File(s"/$baseDir/$subDir/$code/$name")).getLines().toList
+           result = Finance.csvToMap(lines)
+      } yield (name, result)
+    val maps = resultMap.toMap
+
+    Finance(maps.getOrElse("mainreport.xls", Map[String, Map[String, Double]]()),
+      maps.getOrElse("debtreport.xls", Map[String, Map[String, Double]]()),
+      maps.getOrElse("benefitreport.xls", Map[String, Map[String, Double]]()),
+      maps.getOrElse("cashreport.xls", Map[String, Map[String, Double]]()))
+  }
+
+  def toDB(code: String) = {}
 
   //清空数据源
   override def clear(): Unit = {

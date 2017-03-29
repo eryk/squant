@@ -69,6 +69,7 @@ object Updater extends App with StrictLogging {
       case "tick" => scheduler.schedule(taskConfig.cron, new UpdateTask(taskConfig, TickDataSource))
       case "moneyflow" => scheduler.schedule(taskConfig.cron, new UpdateTask(taskConfig, MoneyFlowDataSource))
       case "category" => scheduler.schedule(taskConfig.cron, new UpdateTask(taskConfig, StockCategoryDataSource))
+      case "finance" => scheduler.schedule(taskConfig.cron, new UpdateTask(taskConfig, FinanceDataSource))
     }
   }
 

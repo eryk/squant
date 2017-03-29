@@ -5,6 +5,7 @@ object Constants {
   val CONFIG_PATH_STOCKS = "squant.csv.path.stocks"
   val CONFIG_PATH_KTYPE = "squant.csv.path.ktype"
   val CONFIG_PATH_MONEYFLOW = "squant.csv.path.moneyflow"
+  val CONFIG_PATH_FINANCE = "squant.csv.path.finance"
   val CONFIG_PATH_TICK = "squant.csv.path.tick"
   val CONFIG_PATH_CATEGORY = "squant.csv.path.category"
   val CONFIG_PATH_STRATEGY = "squant.strategy.path"
