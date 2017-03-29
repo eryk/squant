@@ -1,7 +1,7 @@
 package com.squant.cheetah
 
 import java.io.{File, FileInputStream}
-import java.time.{Instant, LocalDateTime, LocalTime, ZoneId}
+import java.time._
 import java.time.format.DateTimeFormatter
 import java.util.{Calendar, Date}
 
@@ -21,9 +21,9 @@ package object utils {
 
   val FIRST_DAY:LocalDateTime = LocalDateTime.of(1990, 1, 1, 0, 0)
 
-  val YESTERDAY = LocalDateTime.now.plusDays(-1)
+  val YESTERDAY = LocalDate.now().atTime(0,0).plusDays(-1)
 
-  val TODAY:LocalDateTime = LocalDateTime.now
+  val TODAY:LocalDateTime = LocalDate.now().atTime(0,0)
 
   def yaml(path: String): java.util.Map[String, Any] = {
     val input = new FileInputStream(new File(path))
@@ -38,10 +38,10 @@ package object utils {
     val contexts = mutable.Map[String, Context]()
     strategyMap.foreach(map => {
       val value = map.asScala
-      val interval: String = value.get("interval").getOrElse("0")
-      val start: LocalDateTime = stringToDate(value.get("start").getOrElse("19901219"))
-      val stop: LocalDateTime = stringToDate(value.get("stop").getOrElse("20860621"))
-      contexts.put(value.get("name").get, new Context(Clock.mk(interval.toInt, Some(start), Some(stop))))
+      val interval: String = value.getOrElse("interval","0")
+      val start: LocalDateTime = stringToDate(value.getOrElse("start","19901219"))
+      val stop: LocalDateTime = stringToDate(value.getOrElse("stop","20860621"))
+      contexts.put(value("name"), new Context(Clock.mk(interval.toInt, Some(start), Some(stop))))
     }
     )
     contexts.toMap

@@ -59,37 +59,6 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
   }
 
   def update(taskConfig: TaskConfig) = {
-    def url(code: String, idx: Boolean = false, kType: String): String = {
-      mURL.format(code, kType)
-    }
-
-    def getCode(code: String, index: Boolean = false): String = {
-      if (index)
-        return INDEX_SYMBOL.get(code).getOrElse("")
-
-      if (code.length != 6)
-        return ""
-      else {
-        val index_code = if (List("5", "6", "9").contains(String.valueOf(code.charAt(0)))) s"sh$code" else s"sz$code"
-        return index_code
-      }
-    }
-
-    def jsonParser(string: String): Seq[Map[String, String]] = {
-      try {
-        val gson = new Gson()
-        val map = gson.fromJson(string, classOf[java.util.List[java.util.Map[String, String]]])
-        for {elem <- map.asScala.toList
-             item = elem.asScala.toMap
-        } yield item
-      } catch {
-        case ex: Exception => {
-          logger.error("fail to parse json. %s".format(string))
-          Seq[Map[String, String]]()
-        }
-      }
-    }
-
     if (taskConfig.clear) clear()
 
     logger.info(s"Start to download index minute bar data, ${format(taskConfig.stop, "yyyyMMdd")}")
@@ -102,7 +71,7 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
             s"${item.get("day").get},$c,${item.get("open").get},${item.get("high").get},${item.get("low").get},${item.get("close").get},${item.get("volume").get}"
           })
           if (taskConfig.toCSV) toCSV(c, data.toList.reverse.toIterator, k, "index")
-          if (taskConfig.toDB) toDB(c,stringToBarType(k),true)
+          if (taskConfig.toDB) toDB(c, stringToBarType(k), true)
         } else {
           logger.error(s"fail to download source. code=$c")
         }
@@ -120,7 +89,7 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
             s"${item.get("day").get},${symbol.code},${item.get("open").get},${item.get("high").get},${item.get("low").get},${item.get("close").get},${item.get("volume").get}"
           })
           if (taskConfig.toCSV) toCSV(symbol.code, data.toList.reverse.toIterator, k, "stock")
-          if (taskConfig.toDB) toDB(symbol.code,stringToBarType(k),false)
+          if (taskConfig.toDB) toDB(symbol.code, stringToBarType(k), false)
         } else {
           logger.error(s"fail to download source. code=${symbol.code}")
         }
@@ -175,4 +144,49 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
     ktypeSubDir.foreach(file =>
       rm(s"$baseDir/$ktypeDir/$file").foreach(r => logger.info(s"delete ${r._1} ${r._2}")))
   }
+
+  def realtime(symbol: String, barType: BarType, isIndex: Boolean = false): List[Bar] = {
+    val u = url(getCode(symbol, index = isIndex), kType = ktypeToPath.get(barType.toString).get)
+    val content = downloadWithRetry(u, "gb2312")
+    if (content != None && content != "") {
+      val data = jsonParser(content).map(item => {
+        s"${item.get("day").get},${symbol},${item.get("open").get},${item.get("high").get},${item.get("low").get},${item.get("close").get},${item.get("volume").get}"
+      })
+      data.map(string => Bar.minuteCSVToBar(barType, string).get).filter(bar => bar.date.isAfter(TODAY)).toList
+    } else {
+      List[Bar]()
+    }
+  }
+
+  private def url(code: String, idx: Boolean = false, kType: String): String = {
+    mURL.format(code, kType)
+  }
+
+  private def getCode(code: String, index: Boolean = false): String = {
+    if (index)
+      return INDEX_SYMBOL.get(code).getOrElse("")
+
+    if (code.length != 6)
+      return ""
+    else {
+      val index_code = if (List("5", "6", "9").contains(String.valueOf(code.charAt(0)))) s"sh$code" else s"sz$code"
+      return index_code
+    }
+  }
+
+  private def jsonParser(string: String): Seq[Map[String, String]] = {
+    try {
+      val gson = new Gson()
+      val map = gson.fromJson(string, classOf[java.util.List[java.util.Map[String, String]]])
+      for {elem <- map.asScala.toList
+           item = elem.asScala.toMap
+      } yield item
+    } catch {
+      case ex: Exception => {
+        logger.error("fail to parse json. %s".format(string))
+        Seq[Map[String, String]]()
+      }
+    }
+  }
+
 }
