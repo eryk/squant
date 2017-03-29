@@ -1,24 +1,20 @@
 package com.squant.cheetah.strategy
 
 import com.squant.cheetah.DataEngine
+import com.squant.cheetah.datasource.DailyKTypeDataSource
 import com.squant.cheetah.domain.DAY
-import com.tictactec.ta.lib.{Core, MInteger, RetCode}
+import com.tictactec.ta.lib.{Core, MAType, MInteger, RetCode}
 
-object Indicators extends App{
+object Indicators extends App {
 
   private val core: Core = new Core()
 
-  val bars = DataEngine.ktype("300022", DAY)
 
-  println("bars:" + bars.length)
-
+  val bars = DataEngine.ktype("000001", DAY, index = true)
+  bars.foreach(println)
   val array = bars.map(bar => bar.close.toDouble).toArray
-
-  println(array.length)
-
-  val result = sma(array, 5)
-
-  result.foreach(println)
+  val result = boll(array)
+  println(result(0).last + "\t" + result(1).last + "\t" + result(2).last)
 
   def sma(prices: Array[Double], ma: Int): Array[Double] = {
     val tempOutPut: Array[Double] = new Array[Double](prices.length)
@@ -29,53 +25,98 @@ object Indicators extends App{
     begin.value = -1
     length.value = -1
     retCode = core.sma(0, prices.length - 1, prices, ma, begin, length, tempOutPut)
-    var i: Int = 0
-    while (i < (ma - 1)) {
-      {
-        output(i) = 0
-        i += 1
-      }
-    }
-    i = ma - 1
-    while (0 < i && i < (prices.length)) {
-      {
-        output(i) = tempOutPut(i - ma + 1)
-        i += 1
-      }
-
+    var i = ma - 1
+    while (i < prices.length) {
+      output(i) = tempOutPut(i - ma + 1)
+      i += 1
     }
     return output
   }
 
-  //  def ema(prices: Array[Double], ma: Int): Array[Double] = {
-  //    val tempOutPut: Array[Double] = new Array[Double](prices.length)
-  //    val output: Array[Double] = new Array[Double](prices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.ema(0, prices.length - 1, prices, ma, begin, length, tempOutPut)
-  //    var i: Int = 0
-  //    while (i < ma - 1) {
-  //      {
-  //        output(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = ma - 1
-  //    while (0 < i && i < (prices.length)) {
-  //      {
-  //        output(i) = tempOutPut(i - ma + 1)
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
+  def ema(prices: Array[Double], ma: Int): Array[Double] = {
+    val tempOutPut: Array[Double] = new Array[Double](prices.length)
+    val output: Array[Double] = new Array[Double](prices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.ema(0, prices.length - 1, prices, ma, begin, length, tempOutPut)
+    var i = ma - 1
+    while (i < prices.length) {
+      output(i) = tempOutPut(i - ma + 1)
+      i += 1
+    }
+    return output
+  }
+
+  def macd(prices: Array[Double], optInFastPeriod: Int = 12, optInSlowPeriod: Int = 26, optInSignalPeriod: Int = 9): Array[Array[Double]] = {
+    val tempoutput1: Array[Double] = new Array[Double](prices.length)
+    val tempoutput2: Array[Double] = new Array[Double](prices.length)
+    val tempoutput3: Array[Double] = new Array[Double](prices.length)
+    val output: Array[Array[Double]] = Array(new Array[Double](prices.length), new Array[Double](prices.length), new Array[Double](prices.length))
+    val result1: Array[Double] = new Array[Double](prices.length)
+    val result2: Array[Double] = new Array[Double](prices.length)
+    val result3: Array[Double] = new Array[Double](prices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    val optInFastMAType: MAType = MAType.Ema
+    val optInSlowMAType: MAType = MAType.Ema
+    val optInSignalMAType: MAType = MAType.Ema
+    retCode = core.macdExt(0, prices.length - 1, prices, optInFastPeriod, optInFastMAType, optInSlowPeriod, optInSlowMAType, optInSignalPeriod, optInSignalMAType, begin, length, tempoutput1, tempoutput2, tempoutput3)
+
+    var i = begin.value
+    while (i < prices.length) {
+      result1(i) = tempoutput1(i - begin.value)
+      result2(i) = tempoutput2(i - begin.value)
+      result3(i) = tempoutput3(i - begin.value)
+      i += 1
+    }
+    i = 0
+    while (i < prices.length) {
+      output(0)(i) = result1(i)
+      output(1)(i) = result2(i)
+      output(2)(i) = (output(0)(i) - output(1)(i)) * 2
+      i += 1
+    }
+    return output
+  }
+
+  def boll(prices: Array[Double], optInTimePeriod: Int = 20, optInNbDevUp: Double = 2, optInNbDevDn: Double = 2): Array[Array[Double]] = {
+    val optInMAType: MAType = MAType.Sma
+    val tempoutput1: Array[Double] = new Array[Double](prices.length)
+    val tempoutput2: Array[Double] = new Array[Double](prices.length)
+    val tempoutput3: Array[Double] = new Array[Double](prices.length)
+    val output: Array[Array[Double]] = Array(new Array[Double](prices.length), new Array[Double](prices.length), new Array[Double](prices.length))
+    val result1: Array[Double] = new Array[Double](prices.length)
+    val result2: Array[Double] = new Array[Double](prices.length)
+    val result3: Array[Double] = new Array[Double](prices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.bbands(0, prices.length - 1, prices, optInTimePeriod, optInNbDevUp, optInNbDevDn, optInMAType, begin, length, tempoutput1, tempoutput2, tempoutput3)
+    var i = optInTimePeriod - 1
+    while (i < prices.length) {
+      result1(i) = tempoutput1(i - optInTimePeriod + 1)
+      result2(i) = tempoutput2(i - optInTimePeriod + 1)
+      result3(i) = tempoutput3(i - optInTimePeriod + 1)
+      i += 1
+    }
+    i = 0
+    while (i < prices.length) {
+      output(0)(i) = result1(i)
+      output(1)(i) = result2(i)
+      output(2)(i) = result3(i)
+      i += 1
+    }
+    output
+  }
+
   //
   //  def dma(prices: Array[Double]): Array[Array[Double]] = {
   //    val ma10: Array[Double] = sma(prices, 10)
@@ -94,119 +135,7 @@ object Indicators extends App{
   //    val result: Array[Array[Double]] = Array(dif, ama)
   //    return result
   //  }
-  //
-  //  def macd(prices: Array[Double], optInFastPeriod: Int, optInSlowPeriod: Int, optInSignalPeriod: Int): Array[Array[Double]] = {
-  //    val tempoutput1: Array[Double] = new Array[Double](prices.length)
-  //    val tempoutput2: Array[Double] = new Array[Double](prices.length)
-  //    val tempoutput3: Array[Double] = new Array[Double](prices.length)
-  //    val output: Array[Array[Double]] = Array(new Array[Double](prices.length), new Array[Double](prices.length), new Array[Double](prices.length))
-  //    val result1: Array[Double] = new Array[Double](prices.length)
-  //    val result2: Array[Double] = new Array[Double](prices.length)
-  //    val result3: Array[Double] = new Array[Double](prices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    val optInFastMAType: Nothing = MAType.Ema
-  //    val optInSlowMAType: Nothing = MAType.Ema
-  //    val optInSignalMAType: Nothing = MAType.Ema
-  //    retCode = core.macdExt(0, prices.length - 1, prices, optInFastPeriod, optInFastMAType, optInSlowPeriod, optInSlowMAType, optInSignalPeriod, optInSignalMAType, begin, length, tempoutput1, tempoutput2, tempoutput3)
-  //    var i: Int = 0
-  //    while (i < begin.value) {
-  //      {
-  //        result1(i) = 0
-  //        result2(i) = 0
-  //        result3(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = begin.value
-  //    while (0 < i && i < (prices.length)) {
-  //      {
-  //        result1(i) = tempoutput1(i - begin.value)
-  //        result2(i) = tempoutput2(i - begin.value)
-  //        result3(i) = tempoutput3(i - begin.value)
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = 0
-  //    while (i < prices.length) {
-  //      {
-  //        output(0)(i) = result1(i)
-  //        output(1)(i) = result2(i)
-  //        output(2)(i) = (output(0)(i) - output(1)(i)) * 2
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
-  //
-  //  def macd(prices: Array[Double]): Array[Array[Double]] = {
-  //    return macd(prices, 12, 26, 9)
-  //  }
-  //
-  //  def boll(prices: Array[Double], optInTimePeriod: Int, optInNbDevUp: Double, optInNbDevDn: Double): Array[Array[Double]] = {
-  //    val optInMAType: Nothing = MAType.Sma
-  //    val tempoutput1: Array[Double] = new Array[Double](prices.length)
-  //    val tempoutput2: Array[Double] = new Array[Double](prices.length)
-  //    val tempoutput3: Array[Double] = new Array[Double](prices.length)
-  //    val output: Array[Array[Double]] = Array(new Array[Double](prices.length), new Array[Double](prices.length), new Array[Double](prices.length))
-  //    val result1: Array[Double] = new Array[Double](prices.length)
-  //    val result2: Array[Double] = new Array[Double](prices.length)
-  //    val result3: Array[Double] = new Array[Double](prices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.bbands(0, prices.length - 1, prices, optInTimePeriod, optInNbDevUp, optInNbDevDn, optInMAType, begin, length, tempoutput1, tempoutput2, tempoutput3)
-  //    var i: Int = 0
-  //    while (i < optInTimePeriod - 1) {
-  //      {
-  //        result1(i) = 0
-  //        result2(i) = 0
-  //        result3(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = optInTimePeriod - 1
-  //    while (0 < i && i < (prices.length)) {
-  //      {
-  //        result1(i) = tempoutput1(i - optInTimePeriod + 1)
-  //        result2(i) = tempoutput2(i - optInTimePeriod + 1)
-  //        result3(i) = tempoutput3(i - optInTimePeriod + 1)
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = 0
-  //    while (i < prices.length) {
-  //      {
-  //        output(0)(i) = result1(i)
-  //        output(1)(i) = result2(i)
-  //        output(2)(i) = result3(i)
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
-  //
-  //  def boll(prices: Array[Double]): Array[Array[Double]] = {
-  //    return boll(prices, 20, 2.0, 2.0)
-  //  }
-  //
+
   //  def kdj(high: Array[Double], low: Array[Double], close: Array[Double]): Array[Array[Double]] = {
   //    val length: Int = high.length
   //    val outSlowK: Double = new Array[Double](high.length)
