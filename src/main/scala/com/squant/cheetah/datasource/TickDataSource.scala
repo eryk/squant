@@ -3,9 +3,11 @@ package com.squant.cheetah.datasource
 import java.io.{File, FileWriter}
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Date
 
+import com.google.common.base.Strings
 import com.squant.cheetah.DataEngine
-import com.squant.cheetah.domain.{Symbol, Tick, TickType}
+import com.squant.cheetah.domain.{MID, Symbol, Tick, TickType}
 import com.squant.cheetah.engine.DataBase
 import com.squant.cheetah.utils._
 import com.squant.cheetah.utils.Constants._
@@ -84,6 +86,32 @@ object TickDataSource extends DataSource with LazyLogging {
   def fromDB(code: String, s: LocalDateTime, e: LocalDateTime): List[Tick] = {
     val rows = DataBase.getEngine.fromDB(getTableName(code), start = s, stop = e)
     rows.map(Tick.rowToTick)
+  }
+
+  def realTime(code: String): List[Tick] = {
+    def sinaSymbol(symbol: String): String = {
+      if (Strings.isNullOrEmpty(symbol) && symbol.length != 6) return ""
+      if (symbol.startsWith("0") || symbol.startsWith("3")) return "sz" + symbol
+      if (symbol.startsWith("6")) return "sh" + symbol
+      return ""
+    }
+
+    val url = "http://vip.stock.finance.sina.com.cn/quotes_service/view/CN_TransListV2.php?num=10000&symbol=%s&rn=%s"
+    val data = Source.fromURL(url.format(sinaSymbol(code), new Date().getTime)).mkString
+    val regex = "(\\(.*\\))".r
+    val today = format(TODAY, "yyyyMMdd")
+    regex.findAllIn(data).map(string => {
+      val fields = string.replaceAll("[(|)|'| ]", "").split(",")
+      if (fields.length == 4)
+        Tick(stringToLocalDateTime(today + fields(0), "yyyyMMddHH:mm:ss"),
+          fields(2).toDouble,
+          fields(1).toInt / 100,
+          fields(1).toInt * fields(2).toDouble,
+          TickType.from(fields(3))
+        )
+      else
+        Tick(TODAY, 0, 0, 0, MID)
+    }).toList.drop(1).reverse
   }
 
 }

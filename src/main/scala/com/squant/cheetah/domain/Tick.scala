@@ -8,11 +8,10 @@ import com.squant.cheetah.utils._
 
 object TickType {
   def from(name: String): TickType = name match {
-    case "买盘" => BUY
-    case "卖盘" => SELL
-    case "中性盘" => MID
+    case "买盘" | "UP" => BUY
+    case "卖盘" | "DOWN" => SELL
+    case _ => MID
   }
-
 }
 
 sealed class TickType() {

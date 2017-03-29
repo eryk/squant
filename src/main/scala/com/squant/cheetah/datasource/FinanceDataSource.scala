@@ -11,7 +11,6 @@ import com.typesafe.scalalogging.LazyLogging
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import org.apache.poi.ss.usermodel.Cell
 
-import scala.collection.JavaConverters._
 import scala.io.Source
 
 /**
@@ -57,18 +56,6 @@ object FinanceDataSource extends DataSource with LazyLogging {
   }
 
   def toCSV(code: String) = {
-
-    def xlsToCSV(url: String): List[String] = {
-      val path = new URL(url.format(code))
-      val conn = path.openConnection()
-      conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)")
-      val inputStream = conn.getInputStream()
-      val wb = new HSSFWorkbook(inputStream)
-      val sheet = wb.getSheetAt(0)
-      val lines = sheet.iterator().asScala.map(item => item.cellIterator().asScala.foldLeft("")((x: String, cell: Cell) => x + "," + cell.toString).drop(1))
-      lines.toList
-    }
-
     for ((name, url) <- reports) {
       createDir(s"/$baseDir/$subDir/$code/")
       val data = xlsToCSV(url.format(code)).fold("")((left: String, right: String) => left + "\n" + right).drop(1)

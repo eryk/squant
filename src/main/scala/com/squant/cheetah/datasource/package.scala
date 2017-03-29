@@ -1,8 +1,11 @@
 package com.squant.cheetah
 
-import java.time.format.DateTimeFormatter
+import java.net.URL
+import scala.collection.JavaConverters._
 
 import com.squant.cheetah.domain.{BarType, DAY, MIN_15, MIN_30, MIN_5, MIN_60, MONTH, WEEK}
+import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import org.apache.poi.ss.usermodel.Cell
 
 import scala.io.Source
 
@@ -43,5 +46,16 @@ package object datasource {
           ""
       }
     }
+  }
+
+  def xlsToCSV(url: String): List[String] = {
+    val path = new URL(url)
+    val conn = path.openConnection()
+    conn.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.0; Windows NT; DigExt)")
+    val inputStream = conn.getInputStream()
+    val wb = new HSSFWorkbook(inputStream)
+    val sheet = wb.getSheetAt(0)
+    val lines = sheet.iterator().asScala.map(item => item.cellIterator().asScala.foldLeft("")((x: String, cell: Cell) => x + "," + cell.toString).drop(1))
+    lines.toList
   }
 }
