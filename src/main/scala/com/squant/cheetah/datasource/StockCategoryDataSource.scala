@@ -78,15 +78,7 @@ object StockCategoryDataSource extends DataSource with LazyLogging {
 
   def toDB(tableName: String): Unit = {
     val categories: Map[String, Category] = readCategory(baseDir + fileName)
-
     val rows: Map[String, Row] = categories.map(item => (item._1, Category.categoryToRow(item._2)))
-
-    rows.foreach(item => {
-      println(s"${item._1}")
-      println(s"${item._2}")
-    }
-    )
-
     DataBase.getEngine.toDB(tableName, rows.values.toList)
   }
 
