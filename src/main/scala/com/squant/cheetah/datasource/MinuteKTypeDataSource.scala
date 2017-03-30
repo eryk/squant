@@ -140,6 +140,15 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
     DataBase.getEngine.toDB(s"ktype_${ktype}_${code}_${path}", bars.map(Bar.minuteBarToRow(_)))
   }
 
+  def fromDB(code: String, ktype: BarType, isIndex: Boolean, start: LocalDateTime,
+             stop: LocalDateTime = LocalDateTime.now): List[Bar] = {
+    val path = isIndex match {
+      case true => "index"
+      case false => "stock"
+    }
+    DataBase.getEngine.fromDB(s"ktype_${ktype}_${code}_${path}", start, stop).map(Bar.minuteRowToBar)
+  }
+
   override def clear(): Unit = {
     ktypeSubDir.foreach(file =>
       rm(s"$baseDir/$ktypeDir/$file").foreach(r => logger.info(s"delete ${r._1} ${r._2}")))

@@ -97,17 +97,16 @@ object DailyKTypeDataSource extends DataSource with LazyLogging {
   /**
     *
     * @param code
-    * @param ktype
     * @param index if true,return index data ,else return stock data
     * @return
     */
-  def fromCSV(code: String, ktype: BarType, index: Boolean = false): Seq[Bar] = {
+  def fromCSV(code: String, index: Boolean = false): List[Bar] = {
 
     val baseDir = config.getString(CONFIG_PATH_DB_BASE)
     val ktypeDir = config.getString(CONFIG_PATH_KTYPE)
 
     def mapToStock(map: Map[String, String]): Bar = new Bar(
-      ktype,
+      DAY,
       map.get("date").get,
       map.get("code").get,
       map.get("name").getOrElse(""),
@@ -127,20 +126,12 @@ object DailyKTypeDataSource extends DataSource with LazyLogging {
 
     var file: String = ""
     if (index) {
-      file = s"$baseDir$ktypeDir/${typeToPath(ktype)}/index/$code.csv"
+      file = s"$baseDir$ktypeDir/day/index/$code.csv"
     } else {
-      file = s"$baseDir$ktypeDir/${typeToPath(ktype)}/stock/$code.csv"
+      file = s"$baseDir$ktypeDir/day/stock/$code.csv"
     }
     val lines = scala.io.Source.fromFile(new File(file)).getLines().toList.drop(1)
-    val columns = ktype match {
-      case SEC_1 | MIN_1 | MIN_5 | MIN_15 | MIN_30 | MIN_60 => minStockColumns
-      case DAY | WEEK | MONTH =>
-        if (index)
-          dayIndexColumns
-        else
-          dayStockColumns
-    }
-
+    val columns = if (index) dayIndexColumns else dayStockColumns
     for {
       line <- lines
       fields = line.replaceAll("None", "0").split(",")
@@ -158,7 +149,7 @@ object DailyKTypeDataSource extends DataSource with LazyLogging {
   }
 
   def toDB(code: String, index: Boolean = false): Unit = {
-    val bars = fromCSV(code, DAY, index)
+    val bars = fromCSV(code, index)
     if (bars != null && bars.size > 0)
       DataBase.getEngine.toDB(getTableName(code, index), bars.toList.map(Bar.barToRow))
   }

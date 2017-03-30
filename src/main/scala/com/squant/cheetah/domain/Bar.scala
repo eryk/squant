@@ -90,6 +90,30 @@ object Bar {
     Row(bar.code + format(bar.date, "yyyyMMddHHmmss"), localDateTimeToLong(bar.date), map.toMap)
   }
 
+  def minuteRowToBar(row: Row): Bar = {
+    val map = row.record
+    val code = row.index.substring(0, 6)
+
+    new Bar(
+      stringToBarType(map.get("barType").get),
+      longToLocalDateTime(row.timestamp),
+      code,
+      "",
+      map.get("close").get.toFloat,
+      map.get("high").get.toFloat,
+      map.get("low").get.toFloat,
+      map.get("open").get.toFloat,
+      0,
+      0,
+      0,
+      map.get("volume").get.toFloat,
+      0,
+      0,
+      0,
+      0
+    )
+  }
+
   def stringToBarType(ktype: String) = ktype match {
     case barType if (barType == "SEC_1") => SEC_1
     case barType if (barType == "MIN_1") => MIN_1

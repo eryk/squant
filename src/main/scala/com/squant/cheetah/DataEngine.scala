@@ -3,7 +3,7 @@ package com.squant.cheetah
 import java.time.LocalDateTime
 import java.util.Date
 
-import com.squant.cheetah.datasource.{DailyKTypeDataSource, StockCategoryDataSource, TickDataSource}
+import com.squant.cheetah.datasource.{DailyKTypeDataSource, FinanceDataSource, MinuteKTypeDataSource, StockCategoryDataSource, TickDataSource}
 import com.squant.cheetah.domain._
 import com.squant.cheetah.engine.Context
 import com.squant.cheetah.utils.Constants._
@@ -63,13 +63,20 @@ object DataEngine {
   }
 
   def tick(code: String, date: LocalDateTime): Seq[Tick] = {
-    TickDataSource.fromCSV(code, date)
+    if (date.isBefore(TODAY)) {
+      TickDataSource.fromCSV(code, date)
+    } else
+      TickDataSource.realTime(code)
   }
 
   //包含当天数据，内部做数据的聚合
   def ktype(code: String, kType: BarType, start: LocalDateTime = LocalDateTime.now().plusYears(-1), stop: LocalDateTime = LocalDateTime.now(), index: Boolean = false): List[Bar] = {
-    val bars = DailyKTypeDataSource.fromCSV(code, kType, index)
-    bars.filter(bar => bar.date.isAfter(start) && bar.date.isBefore(stop)).toList
+    val bars: List[Bar] = kType match {
+      case DAY => DailyKTypeDataSource.fromCSV(code, index)
+      case MIN_1 | MIN_15 | MIN_30 | MIN_60 => MinuteKTypeDataSource.fromCSV(code, kType, index)
+      case _ => List[Bar]()
+    }
+    bars.filter(bar => bar.date.isAfter(start) && bar.date.isBefore(stop))
   }
 
   //地区、概念、行业
@@ -79,10 +86,7 @@ object DataEngine {
 
   def symbols(): Seq[Symbol] = Symbol.csvToSymbols(config.getString(CONFIG_PATH_DB_BASE) + config.getString(CONFIG_PATH_STOCKS))
 
-  def getFundamentals(code: String) = ???
-
-  //获取指数成份股
-  def getIndexStocks() = ???
+  def getFundamentals(code: String): Finance = FinanceDataSource.fromCSV(code)
 
   def getSymbolInfo(code: String): Symbol = symbols().filter(_.code == code)(0)
 
