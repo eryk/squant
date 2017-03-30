@@ -13,9 +13,9 @@ object Indicators extends App {
   val high = bars.map(bar => bar.high.toDouble).toArray
   val low = bars.map(bar => bar.low.toDouble).toArray
   val close = bars.map(bar => bar.close.toDouble).toArray
-//  val result = kdj(high, low, close)
+  //  val result = kdj(high, low, close)
   //  println("macd:" + result(0).last + "\t" + result(1).last + "\t" + result(2).last)
-//  result(0).foreach(println)
+  //  result(0).foreach(println)
 
   val array = dma(close)
   array.foreach(println)
@@ -34,7 +34,7 @@ object Indicators extends App {
       output(i) = tempOutPut(i - ma + 1)
       i += 1
     }
-    return output
+    output
   }
 
   def ema(prices: Array[Double], ma: Int): Array[Double] = {
@@ -51,7 +51,7 @@ object Indicators extends App {
       output(i) = tempOutPut(i - ma + 1)
       i += 1
     }
-    return output
+    output
   }
 
   def dma(prices: Array[Double]): Array[Array[Double]] = {
@@ -65,7 +65,41 @@ object Indicators extends App {
     }
     val ama: Array[Double] = sma(dif, 10)
     val result: Array[Array[Double]] = Array(dif, ama)
-    return result
+    result
+  }
+
+  def kama(prices: Array[Double], optInTimePeriod: Int): Array[Double] = {
+    val tempOutPut: Array[Double] = new Array[Double](prices.length)
+    val output: Array[Double] = new Array[Double](prices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.kama(0, prices.length - 1, prices, optInTimePeriod, begin, length, tempOutPut)
+    var i: Int = optInTimePeriod
+    while (0 < i && i < prices.length) {
+      output(i) = tempOutPut(i - optInTimePeriod)
+      i += 1
+    }
+    output
+  }
+
+  def trima(prices: Array[Double], optInTimePeriod: Int): Array[Double] = {
+    val tempOutPut: Array[Double] = new Array[Double](prices.length)
+    val output: Array[Double] = new Array[Double](prices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.trima(0, prices.length - 1, prices, optInTimePeriod, begin, length, tempOutPut)
+    var i: Int = optInTimePeriod - 1
+    while (0 < i && i < prices.length) {
+      output(i) = tempOutPut(i - optInTimePeriod + 1)
+      i += 1
+    }
+    output
   }
 
   def macd(prices: Array[Double], optInFastPeriod: Int = 12, optInSlowPeriod: Int = 26, optInSignalPeriod: Int = 9): Array[Array[Double]] = {
@@ -100,7 +134,7 @@ object Indicators extends App {
       output(2)(i) = (output(0)(i) - output(1)(i)) * 2
       i += 1
     }
-    return output
+    output
   }
 
   def boll(prices: Array[Double], optInTimePeriod: Int = 20, optInNbDevUp: Double = 2, optInNbDevDn: Double = 2): Array[Array[Double]] = {
@@ -135,7 +169,7 @@ object Indicators extends App {
     output
   }
 
-  def rsi(prices: Array[Double], period: Int): Array[Double] = {
+  def rsi(prices: Array[Double], period: Int = 6): Array[Double] = {
     val output: Array[Double] = new Array[Double](prices.length)
     val tempOutPut: Array[Double] = new Array[Double](prices.length)
     val begin: MInteger = new MInteger()
@@ -149,7 +183,7 @@ object Indicators extends App {
       output(i) = tempOutPut(i - period)
       i += 1
     }
-    return output
+    output
   }
 
   def obv(prices: Array[Double], volume: Array[Double]): Array[Double] = {
@@ -160,7 +194,7 @@ object Indicators extends App {
     begin.value = -1
     length.value = -1
     retCode = core.obv(0, prices.length - 1, prices, volume, begin, length, output)
-    return output
+    output
   }
 
   def kdj(high: Array[Double], low: Array[Double], close: Array[Double]): Array[Array[Double]] = {
@@ -210,444 +244,234 @@ object Indicators extends App {
       i += 1
     }
     val result: Array[Array[Double]] = Array(outSlowK, outSlowD, outSlowJ)
-    return result
+    result
   }
 
-  //
-  //  def sar(highPrices: Array[Double], lowPrices: Array[Double], optInAcceleration: Double, optInMaximum: Double): Array[Double] = {
-  //    val output: Array[Double] = new Array[Double](lowPrices.length)
-  //    val tempoutput: Array[Double] = new Array[Double](lowPrices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.sar(0, lowPrices.length - 1, highPrices, lowPrices, optInAcceleration, optInMaximum, begin, length, tempoutput)
-  //    var i: Int = 1
-  //    while (i < lowPrices.length) {
-  //      {
-  //        output(i) = tempoutput(i - 1)
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
-  //
-  //  def adx(lowPrices: Array[Double], highPrices: Array[Double], closePrices: Array[Double], optInTimePeriod: Int): Array[Double] = {
-  //    val output: Array[Double] = new Array[Double](lowPrices.length)
-  //    val tempOutPut: Array[Double] = new Array[Double](lowPrices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.adx(0, lowPrices.length - 1, highPrices, lowPrices, closePrices, optInTimePeriod, begin, length, tempOutPut)
-  //    var i: Int = 0
-  //    while (i < lowPrices.length - length.value) {
-  //      {
-  //        output(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = lowPrices.length - length.value
-  //    while (0 < i && i < (lowPrices.length)) {
-  //      {
-  //        output(i) = tempOutPut(i - (lowPrices.length - length.value))
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
-  //
-  //  def adxr(lowPrices: Array[Double], highPrices: Array[Double], closePrices: Array[Double], optInTimePeriod: Int): Array[Double] = {
-  //    val output: Array[Double] = new Array[Double](lowPrices.length)
-  //    val tempOutPut: Array[Double] = new Array[Double](lowPrices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.adxr(0, lowPrices.length - 1, highPrices, lowPrices, closePrices, optInTimePeriod, begin, length, tempOutPut)
-  //    var i: Int = 0
-  //    while (i < lowPrices.length - length.value) {
-  //      {
-  //        output(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = lowPrices.length - length.value
-  //    while (0 < i && i < (lowPrices.length)) {
-  //      {
-  //        output(i) = tempOutPut(i - (lowPrices.length - length.value))
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
-  //
-  //  def cci(highPrices: Array[Double], lowPrices: Array[Double], closePrices: Array[Double], inTimePeriod: Int): Array[Double] = {
-  //    val output: Array[Double] = new Array[Double](lowPrices.length)
-  //    val tempOutPut: Array[Double] = new Array[Double](lowPrices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.cci(0, lowPrices.length - 1, highPrices, lowPrices, closePrices, inTimePeriod, begin, length, tempOutPut)
-  //    var i: Int = 0
-  //    while (i < inTimePeriod - 1) {
-  //      {
-  //        output(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = inTimePeriod - 1
-  //    while (0 < i && i < (lowPrices.length)) {
-  //      {
-  //        output(i) = tempOutPut(i - inTimePeriod + 1)
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
-  //
-  //  def mfi(highPrices: Array[Double], lowPrices: Array[Double], closePrices: Array[Double], inVolume: Array[Double], optInTimePeriod: Int): Array[Double] = {
-  //    val output: Array[Double] = new Array[Double](lowPrices.length)
-  //    val tempOutPut: Array[Double] = new Array[Double](lowPrices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.mfi(0, lowPrices.length - 1, highPrices, lowPrices, closePrices, inVolume, optInTimePeriod, begin, length, tempOutPut)
-  //    var i: Int = 0
-  //    while (i < optInTimePeriod) {
-  //      {
-  //        output(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = optInTimePeriod
-  //    while (0 < i && i < (lowPrices.length)) {
-  //      {
-  //        output(i) = tempOutPut(i - optInTimePeriod)
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
-  //
-  //
-  //  def roc(prices: Array[Double], optInTimePeriod: Int): Array[Double] = {
-  //    val tempOutPut: Array[Double] = new Array[Double](prices.length)
-  //    val output: Array[Double] = new Array[Double](prices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.roc(0, prices.length - 1, prices, optInTimePeriod, begin, length, tempOutPut)
-  //    var i: Int = 0
-  //    while (i < optInTimePeriod - 1) {
-  //      {
-  //        output(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = optInTimePeriod - 1
-  //    while (0 < i && i < (prices.length)) {
-  //      {
-  //        output(i) = tempOutPut(i - optInTimePeriod + 1)
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
-  //
-  //  def rocP(prices: Array[Double], optInTimePeriod: Int): Array[Double] = {
-  //    val tempOutPut: Array[Double] = new Array[Double](prices.length)
-  //    val output: Array[Double] = new Array[Double](prices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.rocP(0, prices.length - 1, prices, optInTimePeriod, begin, length, tempOutPut)
-  //    var i: Int = 0
-  //    while (i < optInTimePeriod - 1) {
-  //      {
-  //        output(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = optInTimePeriod - 1
-  //    while (0 < i && i < (prices.length)) {
-  //      {
-  //        output(i) = tempOutPut(i - optInTimePeriod + 1)
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
-  //
-  //  def trix(prices: Array[Double], period: Int): Array[Double] = {
-  //    val output: Array[Double] = new Array[Double](prices.length)
-  //    val tempOutPut: Array[Double] = new Array[Double](prices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.trix(0, prices.length - 1, prices, period, begin, length, tempOutPut)
-  //    var i: Int = 0
-  //    while (i < begin.value) {
-  //      {
-  //        output(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = begin.value
-  //    while (0 < i && i < (prices.length)) {
-  //      {
-  //        output(i) = tempOutPut(i - begin.value)
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
-  //
-  //  def willR(highPrices: Array[Double], lowPrices: Array[Double], closePrices: Array[Double], inTimePeriod: Int): Array[Double] = {
-  //    val output: Array[Double] = new Array[Double](lowPrices.length)
-  //    val tempOutPut: Array[Double] = new Array[Double](lowPrices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.willR(0, lowPrices.length - 1, highPrices, lowPrices, closePrices, inTimePeriod, begin, length, tempOutPut)
-  //    var i: Int = 0
-  //    while (i < inTimePeriod - 1) {
-  //      {
-  //        output(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = inTimePeriod - 1
-  //    while (0 < i && i < (lowPrices.length)) {
-  //      {
-  //        output(i) = tempOutPut(i - inTimePeriod + 1)
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
-  //
-  //  def ad(highPrices: Array[Double], lowPrices: Array[Double], closePrices: Array[Double], inVolume: Array[Double], optInTimePeriod: Int): Array[Double] = {
-  //    val output: Array[Double] = new Array[Double](lowPrices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.ad(0, lowPrices.length - 1, highPrices, lowPrices, closePrices, inVolume, begin, length, output)
-  //    return output
-  //  }
-  //
-  //  def aroon(inHigh: Array[Double], inLow: Array[Double], optInTimePeriod: Int): Array[Array[Double]] = {
-  //    val output: Array[Array[Double]] = Array(new Array[Double](inHigh.length), new Array[Double](inHigh.length))
-  //    val tempOutPut1: Array[Double] = new Array[Double](inHigh.length)
-  //    val tempOutPut2: Array[Double] = new Array[Double](inHigh.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.aroon(0, inHigh.length - 1, inHigh, inLow, optInTimePeriod, begin, length, tempOutPut1, tempOutPut2)
-  //    var i: Int = 0
-  //    while (i < inHigh.length - length.value) {
-  //      {
-  //        output(0)(i) = 0
-  //        output(1)(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = inHigh.length - length.value
-  //    while (0 < i && i < (inHigh.length)) {
-  //      {
-  //        output(0)(i) = tempOutPut1(i - (inHigh.length - length.value))
-  //        output(1)(i) = tempOutPut1(i - (inHigh.length - length.value))
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
-  //
-  //  def aroonOsc(inHigh: Array[Double], inLow: Array[Double], optInTimePeriod: Int): Array[Double] = {
-  //    val output: Array[Double] = new Array[Double](inHigh.length)
-  //    val tempOutPut: Array[Double] = new Array[Double](inHigh.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.aroonOsc(0, inHigh.length - 1, inHigh, inLow, optInTimePeriod, begin, length, tempOutPut)
-  //    var i: Int = 0
-  //    while (i < inHigh.length - length.value) {
-  //      {
-  //        output(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = inHigh.length - length.value
-  //    while (0 < i && i < (inHigh.length)) {
-  //      {
-  //        output(i) = tempOutPut(i - (inHigh.length - length.value))
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
-  //
-  //  def bop(openPrices: Array[Double], highPrices: Array[Double], lowPrices: Array[Double], closePrices: Array[Double]): Array[Double] = {
-  //    val output: Array[Double] = new Array[Double](highPrices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: Nothing = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.bop(0, lowPrices.length - 1, openPrices, highPrices, lowPrices, closePrices, begin, length, output)
-  //    return output
-  //  }
-  //
-  //  def cmo(closePrices: Array[Double], period: Int): Array[Double] = {
-  //    val output: Array[Double] = new Array[Double](closePrices.length)
-  //    val tempOutPut: Array[Double] = new Array[Double](closePrices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.cmo(0, closePrices.length - 1, closePrices, period, begin, length, tempOutPut)
-  //    var i: Int = 0
-  //    while (i < closePrices.length - length.value) {
-  //      {
-  //        output(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = closePrices.length - length.value
-  //    while (0 < i && i < (closePrices.length)) {
-  //      {
-  //        output(i) = tempOutPut(i - (closePrices.length - length.value))
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
-  //
-  //  def kama(prices: Array[Double], optInTimePeriod: Int): Array[Double] = {
-  //    val tempOutPut: Array[Double] = new Array[Double](prices.length)
-  //    val output: Array[Double] = new Array[Double](prices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.kama(0, prices.length - 1, prices, optInTimePeriod, begin, length, tempOutPut)
-  //    var i: Int = 0
-  //    while (i < optInTimePeriod) {
-  //      {
-  //        output(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = optInTimePeriod
-  //    while (0 < i && i < (prices.length)) {
-  //      {
-  //        output(i) = tempOutPut(i - optInTimePeriod)
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
-  //
-  //  def trima(prices: Array[Double], optInTimePeriod: Int): Array[Double] = {
-  //    val tempOutPut: Array[Double] = new Array[Double](prices.length)
-  //    val output: Array[Double] = new Array[Double](prices.length)
-  //    val begin: MInteger = new MInteger()
-  //    val length: MInteger = new MInteger()
-  //    var retCode: RetCode = RetCode.InternalError
-  //    begin.value = -1
-  //    length.value = -1
-  //    retCode = core.trima(0, prices.length - 1, prices, optInTimePeriod, begin, length, tempOutPut)
-  //    var i: Int = 0
-  //    while (i < optInTimePeriod - 1) {
-  //      {
-  //        output(i) = 0
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    var i: Int = optInTimePeriod - 1
-  //    while (0 < i && i < (prices.length)) {
-  //      {
-  //        output(i) = tempOutPut(i - optInTimePeriod + 1)
-  //      }
-  //      ({
-  //        i += 1; i - 1
-  //      })
-  //    }
-  //    return output
-  //  }
+  def sar(highPrices: Array[Double], lowPrices: Array[Double], optInAcceleration: Double, optInMaximum: Double): Array[Double] = {
+    val output: Array[Double] = new Array[Double](lowPrices.length)
+    val tempoutput: Array[Double] = new Array[Double](lowPrices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.sar(0, lowPrices.length - 1, highPrices, lowPrices, optInAcceleration, optInMaximum, begin, length, tempoutput)
+    var i: Int = 1
+    while (i < lowPrices.length) {
+      output(i) = tempoutput(i - 1)
+      i += 1
+    }
+    output
+  }
+
+  def adx(lowPrices: Array[Double], highPrices: Array[Double], closePrices: Array[Double], optInTimePeriod: Int): Array[Double] = {
+    val output: Array[Double] = new Array[Double](lowPrices.length)
+    val tempOutPut: Array[Double] = new Array[Double](lowPrices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.adx(0, lowPrices.length - 1, highPrices, lowPrices, closePrices, optInTimePeriod, begin, length, tempOutPut)
+    var i: Int = lowPrices.length - length.value
+    while (0 < i && i < lowPrices.length) {
+      output(i) = tempOutPut(i - (lowPrices.length - length.value))
+      i += 1
+    }
+    output
+  }
+
+  def adxr(lowPrices: Array[Double], highPrices: Array[Double], closePrices: Array[Double], optInTimePeriod: Int): Array[Double] = {
+    val output: Array[Double] = new Array[Double](lowPrices.length)
+    val tempOutPut: Array[Double] = new Array[Double](lowPrices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.adxr(0, lowPrices.length - 1, highPrices, lowPrices, closePrices, optInTimePeriod, begin, length, tempOutPut)
+    var i: Int = lowPrices.length - length.value
+    while (0 < i && i < lowPrices.length) {
+      output(i) = tempOutPut(i - (lowPrices.length - length.value))
+      i += 1
+    }
+    output
+  }
+
+  def cci(highPrices: Array[Double], lowPrices: Array[Double], closePrices: Array[Double], inTimePeriod: Int): Array[Double] = {
+    val output: Array[Double] = new Array[Double](lowPrices.length)
+    val tempOutPut: Array[Double] = new Array[Double](lowPrices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.cci(0, lowPrices.length - 1, highPrices, lowPrices, closePrices, inTimePeriod, begin, length, tempOutPut)
+    var i: Int = inTimePeriod - 1
+    while (0 < i && i < lowPrices.length) {
+      output(i) = tempOutPut(i - inTimePeriod + 1)
+      i += 1
+    }
+    output
+  }
+
+  def mfi(highPrices: Array[Double], lowPrices: Array[Double], closePrices: Array[Double], inVolume: Array[Double], optInTimePeriod: Int): Array[Double] = {
+    val output: Array[Double] = new Array[Double](lowPrices.length)
+    val tempOutPut: Array[Double] = new Array[Double](lowPrices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.mfi(0, lowPrices.length - 1, highPrices, lowPrices, closePrices, inVolume, optInTimePeriod, begin, length, tempOutPut)
+    var i: Int = optInTimePeriod
+    while (0 < i && i < lowPrices.length) {
+      output(i) = tempOutPut(i - optInTimePeriod)
+      i += 1
+    }
+    output
+  }
+
+  def roc(prices: Array[Double], optInTimePeriod: Int): Array[Double] = {
+    val tempOutPut: Array[Double] = new Array[Double](prices.length)
+    val output: Array[Double] = new Array[Double](prices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.roc(0, prices.length - 1, prices, optInTimePeriod, begin, length, tempOutPut)
+    var i: Int = optInTimePeriod - 1
+    while (0 < i && i < prices.length) {
+      output(i) = tempOutPut(i - optInTimePeriod + 1)
+      i += 1
+    }
+    output
+  }
+
+  def rocP(prices: Array[Double], optInTimePeriod: Int): Array[Double] = {
+    val tempOutPut: Array[Double] = new Array[Double](prices.length)
+    val output: Array[Double] = new Array[Double](prices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.rocP(0, prices.length - 1, prices, optInTimePeriod, begin, length, tempOutPut)
+    var i: Int = optInTimePeriod - 1
+    while (0 < i && i < prices.length) {
+      output(i) = tempOutPut(i - optInTimePeriod + 1)
+      i += 1
+    }
+    output
+  }
+
+  def trix(prices: Array[Double], period: Int): Array[Double] = {
+    val output: Array[Double] = new Array[Double](prices.length)
+    val tempOutPut: Array[Double] = new Array[Double](prices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.trix(0, prices.length - 1, prices, period, begin, length, tempOutPut)
+    var i: Int = begin.value
+    while (0 < i && i < prices.length) {
+      output(i) = tempOutPut(i - begin.value)
+      i += 1
+    }
+    output
+  }
+
+  def willR(highPrices: Array[Double], lowPrices: Array[Double], closePrices: Array[Double], inTimePeriod: Int): Array[Double] = {
+    val output: Array[Double] = new Array[Double](lowPrices.length)
+    val tempOutPut: Array[Double] = new Array[Double](lowPrices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.willR(0, lowPrices.length - 1, highPrices, lowPrices, closePrices, inTimePeriod, begin, length, tempOutPut)
+    var i: Int = inTimePeriod - 1
+    while (0 < i && i < lowPrices.length) {
+      output(i) = tempOutPut(i - inTimePeriod + 1)
+      i += 1
+    }
+    output
+  }
+
+  def ad(highPrices: Array[Double], lowPrices: Array[Double], closePrices: Array[Double], inVolume: Array[Double], optInTimePeriod: Int): Array[Double] = {
+    val output: Array[Double] = new Array[Double](lowPrices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.ad(0, lowPrices.length - 1, highPrices, lowPrices, closePrices, inVolume, begin, length, output)
+    output
+  }
+
+  def aroon(inHigh: Array[Double], inLow: Array[Double], optInTimePeriod: Int): Array[Array[Double]] = {
+    val output: Array[Array[Double]] = Array(new Array[Double](inHigh.length), new Array[Double](inHigh.length))
+    val tempOutPut1: Array[Double] = new Array[Double](inHigh.length)
+    val tempOutPut2: Array[Double] = new Array[Double](inHigh.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.aroon(0, inHigh.length - 1, inHigh, inLow, optInTimePeriod, begin, length, tempOutPut1, tempOutPut2)
+    var i: Int = inHigh.length - length.value
+    while (0 < i && i < inHigh.length) {
+      output(0)(i) = tempOutPut1(i - (inHigh.length - length.value))
+      output(1)(i) = tempOutPut1(i - (inHigh.length - length.value))
+      i += 1
+    }
+    output
+  }
+
+  def aroonOsc(inHigh: Array[Double], inLow: Array[Double], optInTimePeriod: Int): Array[Double] = {
+    val output: Array[Double] = new Array[Double](inHigh.length)
+    val tempOutPut: Array[Double] = new Array[Double](inHigh.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.aroonOsc(0, inHigh.length - 1, inHigh, inLow, optInTimePeriod, begin, length, tempOutPut)
+    var i: Int = inHigh.length - length.value
+    while (0 < i && i < (inHigh.length)) {
+      output(i) = tempOutPut(i - (inHigh.length - length.value))
+      i += 1
+    }
+    output
+  }
+
+  def bop(openPrices: Array[Double], highPrices: Array[Double], lowPrices: Array[Double], closePrices: Array[Double]): Array[Double] = {
+    val output: Array[Double] = new Array[Double](highPrices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.bop(0, lowPrices.length - 1, openPrices, highPrices, lowPrices, closePrices, begin, length, output)
+    return output
+  }
+
+  def cmo(closePrices: Array[Double], period: Int): Array[Double] = {
+    val output: Array[Double] = new Array[Double](closePrices.length)
+    val tempOutPut: Array[Double] = new Array[Double](closePrices.length)
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    var retCode: RetCode = RetCode.InternalError
+    begin.value = -1
+    length.value = -1
+    retCode = core.cmo(0, closePrices.length - 1, closePrices, period, begin, length, tempOutPut)
+    var i: Int = closePrices.length - length.value
+    while (0 < i && i < closePrices.length) {
+      output(i) = tempOutPut(i - (closePrices.length - length.value))
+      i += 1
+    }
+    output
+  }
 }
