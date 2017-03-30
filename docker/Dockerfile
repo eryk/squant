@@ -8,7 +8,7 @@ RUN mkdir -p /home/squant/conf
 
 ADD jdk-8u121-linux-x64.tar.gz /usr/local/
 
-ADD squant-assembly-1.0.jar /home/squant/
+ADD squant-assembly-1.1.jar /home/squant/
 ADD application.conf /home/squant/conf/
 ADD logback.xml /home/squant/conf/
 
