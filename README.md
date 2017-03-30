@@ -1,8 +1,8 @@
 # TODO 
-1. DataEngine接口实时数据
-2. DataEngine接口实时数据与历史数据merge
+1. DataEngine接口实时数据与历史数据merge
 2. 常用指标计算
-3. 数据入库前进行清洗
+3. docker镜像打包与部署，更新wiki
+4. 回测引擎设计
 
 # 功能介绍
 
