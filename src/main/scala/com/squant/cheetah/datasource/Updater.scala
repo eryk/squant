@@ -9,13 +9,13 @@ import it.sauronsoftware.cron4j.{Scheduler, Task, TaskExecutionContext}
 import scala.collection.JavaConverters._
 
 
-case class TaskConfig(name: String,
-                      cron: String,
+case class TaskConfig(name: String = "",
+                      cron: String = "",
                       clear: Boolean = false,
                       toCSV: Boolean = false,
                       toDB: Boolean = false,
-                      start: LocalDateTime,
-                      stop: LocalDateTime
+                      start: LocalDateTime = TODAY,
+                      stop: LocalDateTime = TODAY
                      )
 
 object Updater extends App with StrictLogging {

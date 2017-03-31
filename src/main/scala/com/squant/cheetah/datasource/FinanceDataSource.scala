@@ -2,6 +2,7 @@ package com.squant.cheetah.datasource
 
 import java.io._
 import java.net.URL
+import java.time.LocalDateTime
 
 import com.squant.cheetah.DataEngine
 import com.squant.cheetah.domain.Finance
@@ -40,7 +41,10 @@ object FinanceDataSource extends DataSource with LazyLogging {
     ("cashreport.xls", cashreportURL))
 
   //初始化数据源
-  override def init(config: TaskConfig): Unit = {
+  override def init(config: TaskConfig =
+                    TaskConfig("FinanceDataSource",
+                      "", true, true, false,
+                      LocalDateTime.of(1990, 1, 1, 0, 0), LocalDateTime.now)): Unit = {
     clear()
     update(config)
   }
