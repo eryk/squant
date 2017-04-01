@@ -1,7 +1,6 @@
 # TODO 
-1. 数据源数据初始化命令
+1. 回测引擎设计,调研easyquant和rqalpha回测功能设计
 2. 更新wiki，介绍数据更新及使用方法
-3. 回测引擎设计
 
 # 功能介绍
 
@@ -27,4 +26,4 @@ sudo mkdir /data
 
 sudo docker pull registry.cn-hangzhou.aliyuncs.com/eryk/squant
 
-sudo docker run --name squant -v /data:/data -d registry.cn-hangzhou.aliyuncs.com/eryk/squant:1.0
+sudo docker run --name squant -v /data:/data -d registry.cn-hangzhou.aliyuncs.com/eryk/squant:1.1
