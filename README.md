@@ -1,5 +1,5 @@
 # TODO 
-1. 回测引擎设计,调研vnpy和rqalpha回测功能设计
+1. 回测引擎设计,调研easyquant和rqalpha回测功能设计
 2. 更新wiki，介绍数据更新及使用方法
 
 # 功能介绍
