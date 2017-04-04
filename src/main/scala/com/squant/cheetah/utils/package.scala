@@ -10,6 +10,7 @@ import org.yaml.snakeyaml.Yaml
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.io.Source
 
 package object utils {
 
@@ -19,14 +20,19 @@ package object utils {
 
   lazy val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
-  val FIRST_DAY:LocalDateTime = LocalDateTime.of(1990, 1, 1, 0, 0)
+  val FIRST_DAY: LocalDateTime = LocalDateTime.of(1990, 1, 1, 0, 0)
 
-  val YESTERDAY = LocalDate.now().atTime(0,0).plusDays(-1)
+  val YESTERDAY = LocalDate.now().atTime(0, 0).plusDays(-1)
 
-  val TODAY:LocalDateTime = LocalDate.now().atTime(0,0)
+  val TODAY: LocalDateTime = LocalDate.now().atTime(0, 0)
 
   def yaml(path: String): java.util.Map[String, Any] = {
-    val input = new FileInputStream(new File(path))
+    var input: String = ""
+    if (new File(path).exists()) {
+      input = Source.fromFile(new File(path)).mkString
+    } else {
+      input = Source.fromFile(new File(getClass.getResource("/").getPath + path)).mkString
+    }
     val yaml = new Yaml()
     yaml.load(input).asInstanceOf[java.util.Map[String, Any]]
   }
@@ -38,12 +44,12 @@ package object utils {
     val contexts = mutable.Map[String, Context]()
     strategyMap.foreach(map => {
       val value = map.asScala
-      val interval: String = value.getOrElse("interval","0")
-      val start: LocalDateTime = stringToDate(value.getOrElse("start","19901219"))
-      val stop: LocalDateTime = stringToDate(value.getOrElse("stop","20860621"))
-      contexts.put(value("name"), new Context(Clock.mk(interval.toInt, Some(start), Some(stop))))
-    }
-    )
+      val interval: String = value.getOrElse("interval", "0")
+      val start: LocalDateTime = stringToDate(value.getOrElse("start", "19901219"))
+      val stop: LocalDateTime = stringToDate(value.getOrElse("stop", "20860621"))
+      val cash: Int = value.getOrElse("startCash","100000").toInt
+      contexts.put(value("name"), new Context(value("name"),Clock.mk(interval.toInt, Some(start), Some(stop)),cash))
+    })
     contexts.toMap
   }
 

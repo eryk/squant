@@ -12,20 +12,20 @@ sealed trait ClockType {
   def interval(): Int
 }
 
-case class BACKTEST(start: LocalDateTime, stop: LocalDateTime, i: Int) extends ClockType {
+case class BACKTEST(start: LocalDateTime, stop: LocalDateTime, unit: Int) extends ClockType {
   var currentTime = start
 
   assert(start.isBefore(stop))
 
   override def update() = {
-    currentTime = currentTime.plusMinutes(interval)
+    currentTime = currentTime.plusMinutes(unit)
   }
 
   override def now(): LocalDateTime = {
     currentTime
   }
 
-  def interval() = i
+  def interval() = unit
 
   override def isFinished(): Boolean = currentTime.isAfter(stop)
 }
@@ -36,7 +36,7 @@ case class TRADE(i: Int) extends ClockType {
 
   def interval() = i
 
-  override def isFinished(): Boolean = false;
+  override def isFinished(): Boolean = false
 
   override def update(): Unit = {}
 }

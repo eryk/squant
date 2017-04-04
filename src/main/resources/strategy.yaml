@@ -11,4 +11,4 @@ contexts:
     interval: "60" #interval用于actor调度和clock的update，单位是分钟
     start: "20150101"
     stop: "20151231"
-    startingCash: 100000
+    startCash: "100000"

@@ -4,13 +4,13 @@ import com.squant.cheetah.trade.{Broker, Portfolio}
 import com.squant.cheetah.domain._
 
 //策略的上下文环境
-class Context(c: Clock) {
+class Context(n: String = "squant", c: Clock, cash: Int = 100000) {
 
-  var name: String = "cheetah"
+  val name: String = n
 
   val clock: Clock = c
 
-  val startCash = 100000
+  val startCash = cash
 
   var benchmark: String = "000001"
   //设置滑点
