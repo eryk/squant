@@ -11,8 +11,6 @@ import com.typesafe.scalalogging.LazyLogging
 
 abstract class Strategy(context: Context) extends LazyLogging {
 
-  var symbols: Seq[Symbol] = DataEngine.symbols()
-
   val portfolio: Portfolio = new Portfolio(context)
 
   val dataEngine: DataEngine = new DataEngine(context)
@@ -21,16 +19,20 @@ abstract class Strategy(context: Context) extends LazyLogging {
 
   def init()
 
-  def process(symbol: Symbol)
+  def handle()
 
-  def processes() = {
-    if (isTradingTime(context.clock.now())) {
-      symbols.foreach(process)
-    }
-    context.clock.update()
+  def getContext = context
+
+//  def processes() = {
+    //    if (isTradingTime(context.clock.now())) {
+    //      symbols.foreach(process)
+    //    }
+    //    context.clock.update()
+//  }
+
+//  def now(): LocalDateTime = context.clock.now()
+
+  def report(): Unit ={
+    portfolio.report()
   }
-
-  def now(): LocalDateTime = context.clock.now()
-
-  def find(code: String): Option[Symbol] = symbols.find(_.code == code)
 }
