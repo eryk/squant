@@ -64,7 +64,7 @@ object DailyKTypeDataSource extends DataSource with LazyLogging {
     logger.info(s"Start to download stock daily bar data, ${format(taskConfig.stop, "yyyyMMdd")}")
     //update stock daily data
     val stocks = DataEngine.symbols()
-    for (stock <- stocks) {
+    stocks.par.map{ stock =>
       val data = Source.fromURL(stockURL.format(stockCode(stock.code), format(taskConfig.start, "yyyyMMdd"),
         format(taskConfig.stop, "yyyyMMdd")), "gbk").getLines()
       if (taskConfig.toCSV) toCSV(stock.code, data, "stock")
