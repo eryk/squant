@@ -64,6 +64,10 @@ Command: test
 Command: run
 ```
 
-例如：下载日线级别股票数据可以执行如下命令：
+例如：
 
+1. 下载股票基本信息数据
+> java -cp squant-assembly-1.1.jar:conf com.squant.cheetah.Main source -t basic --init true
+
+2. 下载日线级别股票数据可以执行如下命令
 > java -cp squant-assembly-1.1.jar:conf com.squant.cheetah.Main source -t daily -init true
