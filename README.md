@@ -22,18 +22,16 @@
 
 ## 定时下载股票数据到指定目录
 
-```
 1. 创建数据保存的目录
-sudo mkdir /data
+> sudo mkdir /data
 
 2. 拉取squant的docker镜像
-sudo docker pull registry.cn-hangzhou.aliyuncs.com/eryk/squant:1.1
+> sudo docker pull registry.cn-hangzhou.aliyuncs.com/eryk/squant:1.1
 
 3. 启动squant镜像，任务会定时下载各类股票数据
-sudo docker run --name squant -v /data:/data -d registry.cn-hangzhou.aliyuncs.com/eryk/squant:1.1
+> sudo docker run --name squant -v /data:/data -d registry.cn-hangzhou.aliyuncs.com/eryk/squant:1.1
 
 4. 进入容器内查看
 > sudo docker exec -t -i **CONTAINER_ID** /bin/bash
-```
 
 注意：数据更新任务配置文件[点这里](https://github.com/eryk/squant/blob/master/src/main/resources/application.conf)
