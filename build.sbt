@@ -28,7 +28,8 @@ libraryDependencies ++= Seq(
   "org.apache.hbase" % "hbase-common" % "1.3.0",
   "org.apache.hadoop" % "hadoop-common" % "2.7.3" excludeAll ExclusionRule(organization = "javax.servlet"),
   "org.scalatest" % "scalatest_2.11" % "3.0.1" % "test",
-  "org.apache.poi" % "poi" % "3.15"
+  "org.apache.poi" % "poi" % "3.15",
+  "info.folone" %% "poi-scala" % "0.18"
 )
 
 assemblyMergeStrategy in assembly := {

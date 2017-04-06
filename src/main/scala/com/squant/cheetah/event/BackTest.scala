@@ -42,7 +42,7 @@ class BackTest(strategy: Strategy) extends Actor with ActorLogging {
         strategy.getContext.clock.update()
         self ! TimeEvent
       } else {
-        strategy.report()
+        ExcelUtils.export(strategy.portfolio,"/home/eryk/test.xls")
         self ! Finished
       }
     }

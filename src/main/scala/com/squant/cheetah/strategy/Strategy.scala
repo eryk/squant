@@ -22,17 +22,4 @@ abstract class Strategy(context: Context) extends LazyLogging {
   def handle()
 
   def getContext = context
-
-//  def processes() = {
-    //    if (isTradingTime(context.clock.now())) {
-    //      symbols.foreach(process)
-    //    }
-    //    context.clock.update()
-//  }
-
-//  def now(): LocalDateTime = context.clock.now()
-
-  def report(): Unit ={
-    portfolio.report()
-  }
 }
