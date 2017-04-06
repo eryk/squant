@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 import akka.actor.{Actor, ActorLogging, Props}
 import com.squant.cheetah.event.BackTest.{Finished, TimeEvent}
 import com.squant.cheetah.strategy.Strategy
+import com.squant.cheetah.utils.Constants._
 import com.squant.cheetah.utils._
 
 import scala.concurrent.duration._
@@ -42,12 +43,16 @@ class BackTest(strategy: Strategy) extends Actor with ActorLogging {
         strategy.getContext.clock.update()
         self ! TimeEvent
       } else {
-        ExcelUtils.export(strategy.portfolio,"/home/eryk/test.xls")
         self ! Finished
       }
     }
     case Finished => {
+
+      def savePath = s"${config.getString(CONFIG_PATH_DB_BASE)}" +
+        s"/backtest/${strategy.getContext.name}-${format(LocalDateTime.now(),"yyyyMMdd_HHmmss")}.xls"
+
 //      context stop self
+      ExcelUtils.export(strategy.portfolio,savePath)
       context.system.terminate
     }
   }

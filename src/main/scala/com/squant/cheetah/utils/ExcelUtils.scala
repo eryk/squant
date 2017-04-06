@@ -20,6 +20,8 @@ object ExcelUtils extends App {
   def importPortfolio(path: String): Portfolio = ???
 
   def export(p: Portfolio, path: String) = {
+    createDir(s"${config.getString(CONFIG_PATH_DB_BASE)}/backtest/")
+
     val pos: List[Set[StringCell]] = p.positions.map(item => {
       val position = item._2
       Set(StringCell(0, position.stockName),
