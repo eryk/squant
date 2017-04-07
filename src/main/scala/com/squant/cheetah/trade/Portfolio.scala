@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 
 import com.squant.cheetah.domain.{FAILED, LONG, Order, OrderState, OrderStyle, SHORT, SUCCESS}
 import com.squant.cheetah.engine.Context
+import com.squant.cheetah.utils._
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.collection._
@@ -27,6 +28,25 @@ class Portfolio(context: Context) extends LazyLogging {
 
   //记录账户当前持仓情况
   val metric = new Metric
+
+  val status = mutable.Map[String, PortfolioStatus]()
+
+  def saveStatus(order: Order) = {
+    if (ts != null && !status.contains(format(ts, "yyyyMMdd")) && isTradingTime(ts)) {
+
+      status.put(format(ts, "yyyyMMdd"),
+        PortfolioStatus(ts.toLocalDate,
+          (endingCash - startingCash) / startingCash,
+          metric.benchmarkBenfitPercent,
+          0,
+          0,
+          0,
+          0
+        ))
+    } else if (status.contains(format(ts, "yyyyMMdd"))) {
+
+    }
+  }
 
   def update(order: Order): Unit = {
     ts = context.clock.now()
@@ -74,6 +94,8 @@ class Portfolio(context: Context) extends LazyLogging {
     metric.pnlRate = (endingCash - startingCash) / startingCash * 100
 
     records.append(new Record(order.code, order.direction, order.amount, order.price, order.volume, context.cost.cost(order), ts))
+
+    saveStatus(order)
   }
 
   def buy(code: String, amount: Int, orderStyle: OrderStyle): OrderState = {
@@ -125,6 +147,12 @@ class Portfolio(context: Context) extends LazyLogging {
       posStr.append(s"\t\t${item._1} ${item._2}\n")
     }
 
+    val statusString = mutable.StringBuilder.newBuilder
+    status.foreach { item =>
+      statusString.append(s"\t\t${item._2}\n")
+    }
+
+
     s"账户详情信息:\n" +
       s"\t起始资金：$startingCash\n" +
       f"\t期末资金：$endingCash%2.2f\n" +
@@ -134,6 +162,7 @@ class Portfolio(context: Context) extends LazyLogging {
       f"\t最大资产：${metric.max}%2.2f\n" +
       f"\t最小资产：${metric.min}%2.2f\n" +
       f"\t持仓情况：\n${posStr.toString}" +
-      s"\t交易记录：\n${buffer.toString}"
+      s"\t交易记录：\n${buffer.toString}" +
+      s"\t账户记录：\n${statusString.toString}"
   }
 }
