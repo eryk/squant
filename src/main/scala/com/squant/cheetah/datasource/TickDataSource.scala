@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 import java.util.Date
 
 import com.google.common.base.Strings
-import com.squant.cheetah.DataEngine
+import com.squant.cheetah.Feeds
 import com.squant.cheetah.domain.{MID, Symbol, Tick, TickType}
 import com.squant.cheetah.engine.DataBase
 import com.squant.cheetah.utils._
@@ -33,7 +33,7 @@ object TickDataSource extends DataSource with LazyLogging {
 
   override def update(taskConfig: TaskConfig): Unit = {
     logger.info(s"Start to download stock tick data, ${format(taskConfig.stop, "yyyyMMdd")}")
-    val stocks = DataEngine.symbols()
+    val stocks = Feeds.symbols()
     stocks.par.foreach(symbol => {
       if (taskConfig.clear) clear()
       if (taskConfig.toCSV) toCSV(symbol.code, taskConfig.stop)

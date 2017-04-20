@@ -31,9 +31,6 @@ object BackTest {
 
 class BackTest(strategy: Strategy) extends Actor with ActorLogging {
 
-  //  import context.dispatcher
-  //  context.system.scheduler.schedule(0 milliseconds, 100 milliseconds, self, TimeEvent)
-
   override def receive: Receive = {
     case TimeEvent => {
       if (isTradingTime(strategy.getContext.clock.now())) {

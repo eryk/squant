@@ -1,6 +1,6 @@
 package com.squant.cheetah.strategy
 
-import com.squant.cheetah.DataEngine
+import com.squant.cheetah.Feeds
 import com.squant.cheetah.domain.DAY
 import com.tictactec.ta.lib.{Core, MAType, MInteger, RetCode}
 
@@ -8,7 +8,7 @@ object Indicators extends App {
 
   private val core: Core = new Core()
 
-  val bars = DataEngine.ktype("000001", DAY, index = true)
+  val bars = Feeds.ktype("000001", DAY, index = true)
   bars.foreach(println)
   val high = bars.map(bar => bar.high.toDouble).toArray
   val low = bars.map(bar => bar.low.toDouble).toArray

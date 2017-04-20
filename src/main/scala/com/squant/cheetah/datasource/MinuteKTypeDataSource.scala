@@ -4,7 +4,7 @@ import java.io.{File, FileWriter}
 import java.time.LocalDateTime
 
 import com.google.gson.Gson
-import com.squant.cheetah.DataEngine
+import com.squant.cheetah.Feeds
 import com.squant.cheetah.domain.{Bar, BarType, DAY, MIN_1, MIN_15, MIN_30, MIN_5, MIN_60, WEEK}
 import com.squant.cheetah.engine.DataBase
 import com.squant.cheetah.utils.Constants._
@@ -80,7 +80,7 @@ object MinuteKTypeDataSource extends DataSource with LazyLogging {
     logger.info(s"Download completed")
     logger.info(s"Start to download stock minute bar data, ${format(taskConfig.stop, "yyyyMMdd")}")
     //update stock minute data
-    val symbols = DataEngine.symbols()
+    val symbols = Feeds.symbols()
     for (symbol <- symbols) {
       for (k <- ktypeSubDir) {
         val content = downloadWithRetry(url(code = getCode(symbol.code), kType = k), "gb2312")

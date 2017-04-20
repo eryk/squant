@@ -1,13 +1,13 @@
 package com.squant.cheetah.examples
 
-import com.squant.cheetah.DataEngine
+import com.squant.cheetah.Feeds
 import com.squant.cheetah.domain.{DAY, FAILED, LONG, LimitOrderStyle, Order, SHORT, SUCCESS, Symbol}
 import com.squant.cheetah.engine.Context
 import com.squant.cheetah.strategy.Strategy
 
 class DoubleMovingAverage(context: Context) extends Strategy(context) {
 
-  val symbols = DataEngine.symbols().take(5)
+  val symbols = Feeds.symbols().take(5)
 
   override def init() = {
     logger.info("symbols:" + symbols.size)
@@ -16,7 +16,7 @@ class DoubleMovingAverage(context: Context) extends Strategy(context) {
 
   override def handle() = {
     symbols.foreach { symbol =>
-      val closeData = dataEngine.getHistoryData(symbol.code, 30, DAY)
+      val closeData = feeds.getHistoryData(symbol.code, 30, DAY)
 
       if (closeData.size != 0) {
         val ma5: Float = closeData.takeRight(5).map(_.close).sum / 5

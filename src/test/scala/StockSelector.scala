@@ -1,6 +1,6 @@
 import java.time.LocalDateTime
 
-import com.squant.cheetah.DataEngine
+import com.squant.cheetah.Feeds
 import com.squant.cheetah.domain.DAY
 
 /**
@@ -8,14 +8,14 @@ import com.squant.cheetah.domain.DAY
   */
 object StockSelector extends App {
 
-  var symbols = DataEngine.symbols()
+  var symbols = Feeds.symbols()
 
-  symbols = symbols.filter(symbol => !symbol.name.contains("ST") && symbol.pe > 0 && symbol.pe < 200 && DataEngine.realtime(symbol.code).close < 30)
+  symbols = symbols.filter(symbol => !symbol.name.contains("ST") && symbol.pe > 0 && symbol.pe < 200 && Feeds.realtime(symbol.code).close < 30)
   symbols.par.foreach(symbol => find(symbol.code))
 
   def find(symbol: String) = {
     try {
-      val bars = DataEngine.ktype(symbol, DAY, index = false).filter(bar => bar.close > 0)
+      val bars = Feeds.ktype(symbol, DAY, index = false).filter(bar => bar.close > 0)
       if (bars.length > 13) {
         for (i <- 13 until bars.size) {
 

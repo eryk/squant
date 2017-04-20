@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import java.util.Random
 
 import com.google.gson.Gson
-import com.squant.cheetah.DataEngine
+import com.squant.cheetah.Feeds
 import com.squant.cheetah.domain.{MoneyFlow, StockMoneyFlow}
 import com.squant.cheetah.engine.{DataBase, Row}
 import com.squant.cheetah.utils.Constants._
@@ -130,7 +130,7 @@ object MoneyFlowDataSource extends DataSource with LazyLogging {
       if (taskConfig.toDB) toDB("Region_" + path, taskConfig.stop)
     }
 
-    val symbols = DataEngine.symbols()
+    val symbols = Feeds.symbols()
     symbols.par.foreach(symbol => {
       if (taskConfig.toCSV) toCSV(symbol.code)
       if (taskConfig.toDB) toDB(symbol.code)

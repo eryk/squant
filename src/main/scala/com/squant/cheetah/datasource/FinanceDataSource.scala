@@ -4,7 +4,7 @@ import java.io._
 import java.net.URL
 import java.time.LocalDateTime
 
-import com.squant.cheetah.DataEngine
+import com.squant.cheetah.Feeds
 import com.squant.cheetah.domain.Finance
 import com.squant.cheetah.utils.Constants._
 import com.squant.cheetah.utils._
@@ -52,7 +52,7 @@ object FinanceDataSource extends DataSource with LazyLogging {
   //每个周期更新数据
   override def update(config: TaskConfig): Unit = {
     logger.info(s"Start to download stock Finance data, ${format(config.stop, "yyyyMMdd")}")
-    val symbols = DataEngine.symbols()
+    val symbols = Feeds.symbols()
     if (config.clear) clear()
     if (config.toCSV) symbols.par.foreach(symbol => toCSV(symbol.code))
     if (config.toDB) symbols.par.foreach(symbol => toDB(symbol.code))

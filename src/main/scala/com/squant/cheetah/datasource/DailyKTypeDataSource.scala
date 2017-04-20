@@ -3,7 +3,7 @@ package com.squant.cheetah.datasource
 import java.io.{File, FileWriter}
 import java.time.LocalDateTime
 
-import com.squant.cheetah.DataEngine
+import com.squant.cheetah.Feeds
 import com.squant.cheetah.domain._
 import com.squant.cheetah.engine.DataBase
 import com.squant.cheetah.utils.Constants._
@@ -63,7 +63,7 @@ object DailyKTypeDataSource extends DataSource with LazyLogging {
     logger.info(s"Download completed")
     logger.info(s"Start to download stock daily bar data, ${format(taskConfig.stop, "yyyyMMdd")}")
     //update stock daily data
-    val stocks = DataEngine.symbols()
+    val stocks = Feeds.symbols()
     stocks.par.map{ stock =>
       val data = Source.fromURL(stockURL.format(stockCode(stock.code), format(taskConfig.start, "yyyyMMdd"),
         format(taskConfig.stop, "yyyyMMdd")), "gbk").getLines()

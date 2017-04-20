@@ -11,7 +11,7 @@ import com.squant.cheetah.utils._
 
 import scala.io.Source
 
-class DataEngine(context: Context) {
+class Feeds(context: Context) {
 
   //获取历史数据
   def getHistoryData(code: String, //股票代码
@@ -30,7 +30,7 @@ class DataEngine(context: Context) {
       case WEEK => now.plusWeeks(-count)
       case MONTH => now.plusMonths(-count)
     }
-    DataEngine.ktype(code, frequency, start, now, index)
+    Feeds.ktype(code, frequency, start, now, index)
   }
 
   //获取基金净值/期货结算价等
@@ -40,7 +40,7 @@ class DataEngine(context: Context) {
   def getFundamentals(code: String, startDate: LocalDateTime) = ???
 }
 
-object DataEngine {
+object Feeds {
 
   def realtime(code: String, date: LocalDateTime = LocalDateTime.now()): RealTime = {
     val url = "http://hq.sinajs.cn/list="
