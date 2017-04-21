@@ -3,6 +3,7 @@ package com.squant.cheetah.strategy
 import com.squant.cheetah.Feeds
 import com.squant.cheetah.domain.DAY
 import com.tictactec.ta.lib.{Core, MAType, MInteger, RetCode}
+import org.apache.commons.math3.stat.descriptive.rank.Min
 
 object Indicators extends App {
 
@@ -472,6 +473,27 @@ object Indicators extends App {
       output(i) = tempOutPut(i - (closePrices.length - length.value))
       i += 1
     }
+    output
+  }
+
+  /**
+    * Average true range平均真实波动范围
+    * @param period
+    * @param high
+    * @param low
+    * @param close
+    * @return
+    */
+  def atr(period: Int, high: Array[Double], low: Array[Double], close: Array[Double]): Array[Double] = {
+    val output: Array[Double] = new Array[Double](close.length)
+
+    val begin: MInteger = new MInteger()
+    val length: MInteger = new MInteger()
+    begin.value = -1
+    length.value = -1
+
+    core.atr(0, close.length, high, low, close, period, begin, length, output)
+
     output
   }
 }
