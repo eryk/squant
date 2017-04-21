@@ -1,8 +1,7 @@
 package com.squant.cheetah.trade
 
-import com.squant.cheetah.domain.{LONG, Order, SHORT}
-
 /**
+  * 策略收益情况的分析指标
   * Created by eryk on 17-4-5.
   */
 class Metric() {

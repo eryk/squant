@@ -1,6 +1,5 @@
 package com.squant.cheetah.engine
 
-import com.squant.cheetah.trade.{Broker, Portfolio}
 import com.squant.cheetah.domain._
 
 //策略的上下文环境

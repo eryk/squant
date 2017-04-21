@@ -3,7 +3,7 @@ package com.squant.cheetah.utils
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.squant.cheetah.trade.{Portfolio, Position, Record}
+import com.squant.cheetah.trade.{Portfolio, Position, OrderRecord}
 import info.folone.scala.poi.{Cell, NumericCell, Row, Sheet, StringCell, Workbook}
 import com.squant.cheetah.utils.Constants._
 import org.apache.poi.hssf.usermodel.{HSSFSheet, HSSFWorkbook}
@@ -61,7 +61,7 @@ object ExcelUtils extends App {
       })
     }
 
-    val records = p.records.map { record: Record => {
+    val records = p.records.map { record: OrderRecord => {
       Set(StringCell(0, record.code),
         StringCell(1, record.direction.toString),
         StringCell(2, record.amount.toString),

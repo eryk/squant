@@ -1,8 +1,9 @@
-package com.squant.cheetah.trade
+package com.squant.cheetah.broker
 
 import com.squant.cheetah.domain._
+import com.squant.cheetah.engine.Context
 
-class Broker(portfolio: Portfolio) {
+trait Broker{
 
   // 下单
   def order(order: Order): Unit = ???

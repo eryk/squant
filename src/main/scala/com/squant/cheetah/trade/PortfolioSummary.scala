@@ -3,11 +3,12 @@ package com.squant.cheetah.trade
 import java.time.LocalDate
 
 /**
+  * 每日投资组合盈亏情况记录
   * author: eryk
   * mail: xuqi86@gmail.com
   * date: 17-4-7.
   */
-case class PortfolioStatus(
+case class PortfolioSummary(
                             LocalDate:LocalDate,//日期
                             pnl:Double,         //策略收益
                             benchMarkPnl:Double,//基准收益

@@ -19,7 +19,7 @@ class Portfolio(context: Context) extends LazyLogging {
   //可用资金, 可用来购买证券的资金
   var availableCash: Double = startingCash
 
-  val records = mutable.Buffer[Record]() //记录各个时间点账户状态
+  val records = mutable.Buffer[OrderRecord]() //记录各个时间点账户状态
 
   var ts: LocalDateTime = null //最后更新record的时间点
 
@@ -29,13 +29,13 @@ class Portfolio(context: Context) extends LazyLogging {
   //记录账户当前持仓情况
   val metric = new Metric
 
-  val status = mutable.Map[String, PortfolioStatus]()
+  val status = mutable.Map[String, PortfolioSummary]()
 
   def saveStatus(order: Order) = {
     if (ts != null && !status.contains(format(ts, "yyyyMMdd")) && isTradingTime(ts)) {
 
       status.put(format(ts, "yyyyMMdd"),
-        PortfolioStatus(ts.toLocalDate,
+        PortfolioSummary(ts.toLocalDate,
           (endingCash - startingCash) / startingCash,
           metric.benchmarkBenfitPercent,
           0,
@@ -93,7 +93,7 @@ class Portfolio(context: Context) extends LazyLogging {
     metric.pnl = endingCash - startingCash
     metric.pnlRate = (endingCash - startingCash) / startingCash * 100
 
-    records.append(new Record(order.code, order.direction, order.amount, order.price, order.volume, context.cost.cost(order), ts))
+    records.append(new OrderRecord(order.code, order.direction, order.amount, order.price, order.volume, context.cost.cost(order), ts))
 
     saveStatus(order)
   }
