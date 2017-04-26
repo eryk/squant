@@ -1,10 +1,12 @@
-package com.squant.cheetah.trade
+package com.squant.cheetah.event
+
+import com.squant.cheetah.engine.Context
 
 /**
   * 策略收益情况的分析指标
   * Created by eryk on 17-4-5.
   */
-class Metric() {
+class StrategyMetric() {
   //交易盈亏
   var pnl: Double = 0
   //收益率=交易盈亏/起始资产
@@ -45,4 +47,8 @@ class Metric() {
   var sharpe: Double = 0
   //所提诺比率
   var sortino: Double = 0
+}
+
+object StrategyMetric {
+  def summary(context: Context): StrategyMetric = ???
 }

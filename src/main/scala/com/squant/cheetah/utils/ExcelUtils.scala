@@ -3,7 +3,9 @@ package com.squant.cheetah.utils
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.squant.cheetah.trade.{Portfolio, Position, OrderRecord}
+import com.squant.cheetah.domain.Position
+import com.squant.cheetah.engine.Context
+import com.squant.cheetah.event.{OrderRecord, Portfolio}
 import info.folone.scala.poi.{Cell, NumericCell, Row, Sheet, StringCell, Workbook}
 import com.squant.cheetah.utils.Constants._
 import org.apache.poi.hssf.usermodel.{HSSFSheet, HSSFWorkbook}
@@ -19,14 +21,16 @@ object ExcelUtils extends App {
 
   def importPortfolio(path: String): Portfolio = ???
 
-  def export(p: Portfolio, path: String) = {
+  def export(context: Context, path: String) = {
     createDir(s"${config.getString(CONFIG_PATH_DB_BASE)}/backtest/")
+
+    val p = context.portfolio
 
     val pos: List[Set[StringCell]] = p.positions.map(item => {
       val position = item._2
-      Set(StringCell(0, position.stockName),
+      Set(StringCell(0, position.name),
         StringCell(1, position.code),
-        StringCell(2, format(position.ts, "yyyyMMdd HH:mm:ss")),
+        StringCell(2, format(position.initTime, "yyyyMMdd HH:mm:ss")),
         StringCell(3, position.totalAmount.toString),
         StringCell(4, position.closeableAmount.toString),
         StringCell(5, position.todayAmount.toString),
@@ -93,28 +97,13 @@ object ExcelUtils extends App {
     Workbook {
       Set(Sheet("summary") {
         Set(Row(0) {
-          Set(StringCell(0, "起始资金"), NumericCell(1, p.startingCash))
+          Set(StringCell(0, "起始资金"), NumericCell(1, context.startCash))
         },
           Row(1) {
-            Set(StringCell(0, "期末资产"), NumericCell(1, p.endingCash))
+            Set(StringCell(0, "期末资产"), NumericCell(1, context.startCash))
           },
           Row(2) {
             Set(StringCell(0, "当前可用资金"), NumericCell(1, p.availableCash))
-          },
-          Row(3) {
-            Set(StringCell(0, "交易盈亏"), NumericCell(1, p.metric.pnl))
-          },
-          Row(4) {
-            Set(StringCell(0, "pnlRate"), NumericCell(1, p.metric.pnlRate))
-          },
-          Row(5) {
-            Set(StringCell(0, "最大资产"), NumericCell(1, p.metric.max))
-          },
-          Row(6) {
-            Set(StringCell(0, "最小资产"), NumericCell(1, p.metric.min))
-          },
-          Row(7) {
-            Set(StringCell(0, "总交易次数"), NumericCell(1, p.metric.totalOperate))
           }
         )
       },
@@ -131,5 +120,5 @@ object ExcelUtils extends App {
   val contexts = loadContext(config.getString(CONFIG_PATH_STRATEGY))
   val context = contexts("default")
 
-  export(new Portfolio(context), "/home/eryk/test.xls")
+  export(context, "/home/eryk/test.xls")
 }

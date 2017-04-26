@@ -1,22 +1,35 @@
 package com.squant.cheetah.broker
 
-import com.squant.cheetah.domain._
-import com.squant.cheetah.engine.Context
+import com.squant.cheetah.domain.{Direction, Order, OrderStyle}
 
-trait Broker{
+/**
+  * Created by eryk on 17-4-25.
+  */
+trait Broker {
 
-  // 下单
-  def order(order: Order): Unit = ???
+  def order(order: Order)
 
-  // 撤单
-  def cancelOrder(id: String) = ???
+  //按股数下单
+  def order(code: String, amount: Int, style: OrderStyle, direction: Direction)
 
-  // 获取未完成订单
-  def getOpenOrder() = ???
+  //买卖标的, 使最终标的的数量达到指定的amount
+  def orderTargetAmount(code: String, amount: Int, style: OrderStyle)
 
-  // 获取订单信息
-  def getOrders() = ???
+  //买卖价值为value的股票
+  def orderValue(code: String, value: Double, style: OrderStyle, direction: Direction) = ???
 
-  // 获取成交订单
-  def getTrades() = ???
+  //调整股票仓位到value价值
+  def orderTargetValue(code: String, targetValue: Double, style: OrderStyle, direction: Direction) = ???
+
+  //取消订单
+  def cancelOrder(orderId: String) = ???
+
+  //获得当天的所有未完成的订单
+  def getOpenOrders(): List[Order] = ???
+
+  //  获取当天的所有订单
+  def getOrders(): List[Order] = ???
+
+  // 获取成交信息
+  def getTrades(): List[Order] = ???
 }

@@ -16,7 +16,7 @@ case class OrderCost(openTax: Double = 0, //买入时印花税 (只股票类标�
     case STOCK if order.direction == SHORT => {
       order.amount * order.price * (closeTax + closeCommission)
     }
-    case _ => order.price
+    case _ => 0
   }
 }
 
@@ -30,3 +30,5 @@ case object FUND extends CostType
 
 //金融期货
 case object INDEX_FUTURES extends CostType
+
+case object FOREX extends CostType

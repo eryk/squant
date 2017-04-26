@@ -30,7 +30,7 @@ case class BACKTEST(start: LocalDateTime, stop: LocalDateTime, unit: Int) extend
   override def isFinished(): Boolean = currentTime.isAfter(stop)
 }
 
-case class TRADE(i: Int) extends ClockType {
+case class LIVE(i: Int) extends ClockType {
 
   override def now(): LocalDateTime = LocalDateTime.now()
 
@@ -59,9 +59,12 @@ class Clock(cType: ClockType) {
   }
 
   def isFinished(): Boolean = cType.isFinished()
+
+
+  override def toString = s"Clock($now, $clockType, $interval)"
 }
 
-object Clock extends App {
+object Clock{
   /**
     *
     * @param interval 单位:分钟
@@ -71,7 +74,7 @@ object Clock extends App {
     */
   def mk(interval: Int = 1, start: Option[LocalDateTime] = None, stop: Option[LocalDateTime] = Option[LocalDateTime](LocalDateTime.now())): Clock = {
     start match {
-      case None => new Clock(TRADE(interval))
+      case None => new Clock(LIVE(interval))
       case Some(t) => new Clock(BACKTEST(start.get, stop.get, interval))
     }
   }

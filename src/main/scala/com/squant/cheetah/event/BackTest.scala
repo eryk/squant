@@ -3,12 +3,11 @@ package com.squant.cheetah.event
 import java.time.LocalDateTime
 
 import akka.actor.{Actor, ActorLogging, Props}
-import com.squant.cheetah.event.BackTest.{Finished, TimeEvent}
+import com.squant.cheetah.event.BackTest.Finished
 import com.squant.cheetah.strategy.Strategy
 import com.squant.cheetah.utils.Constants._
 import com.squant.cheetah.utils._
-
-import scala.concurrent.duration._
+import com.typesafe.scalalogging.StrictLogging
 
 sealed trait Interval
 
@@ -23,22 +22,20 @@ object BackTest {
   def props(strategy: Strategy): Props =
     Props(new BackTest(strategy))
 
-  case object TimeEvent
-
   case object Finished
 
 }
 
-class BackTest(strategy: Strategy) extends Actor with ActorLogging {
+class BackTest(strategy: Strategy) extends Actor with StrictLogging {
 
   override def receive: Receive = {
-    case TimeEvent => {
-      if (isTradingTime(strategy.getContext.clock.now())) {
+    case TimeEvent(date) => {
+      if (isTradingTime(date)) {
         strategy.handle()
       }
       if (!strategy.getContext.clock.isFinished()) {
         strategy.getContext.clock.update()
-        self ! TimeEvent
+        self ! TimeEvent(strategy.getContext.currentDate())
       } else {
         self ! Finished
       }
@@ -46,11 +43,12 @@ class BackTest(strategy: Strategy) extends Actor with ActorLogging {
     case Finished => {
 
       def savePath = s"${config.getString(CONFIG_PATH_DB_BASE)}" +
-        s"/backtest/${strategy.getContext.name}-${format(LocalDateTime.now(),"yyyyMMdd_HHmmss")}.xls"
+        s"/backtest/${strategy.getContext.name}-${format(LocalDateTime.now(), "yyyyMMdd_HHmmss")}.xls"
 
-//      context stop self
-      ExcelUtils.export(strategy.portfolio,savePath)
+      //      context stop self
+      ExcelUtils.export(strategy.getContext, savePath)
       context.system.terminate
     }
+    case _ => println("unknow event type")
   }
 }
