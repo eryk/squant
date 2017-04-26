@@ -248,6 +248,15 @@ object Indicators extends App {
     result
   }
 
+  /**
+    * 抛物线指标（SAR）[1]  也称为停损点转向指标，这种指标与移动平均线的原理颇为相似，属于价格与时间并重的分析工具。
+    * 趋势类指标
+    * @param highPrices
+    * @param lowPrices
+    * @param optInAcceleration
+    * @param optInMaximum
+    * @return
+    */
   def sar(highPrices: Array[Double], lowPrices: Array[Double], optInAcceleration: Double, optInMaximum: Double): Array[Double] = {
     val output: Array[Double] = new Array[Double](lowPrices.length)
     val tempoutput: Array[Double] = new Array[Double](lowPrices.length)
@@ -265,6 +274,17 @@ object Indicators extends App {
     output
   }
 
+  /**
+    * 平均趋向指数
+    * Average Directional Index 或者Average Directional Movement Index
+    * ADX指数是反映趋向变动的程度，而不是方向的本身
+    *
+    * @param lowPrices
+    * @param highPrices
+    * @param closePrices
+    * @param optInTimePeriod
+    * @return
+    */
   def adx(lowPrices: Array[Double], highPrices: Array[Double], closePrices: Array[Double], optInTimePeriod: Int): Array[Double] = {
     val output: Array[Double] = new Array[Double](lowPrices.length)
     val tempOutPut: Array[Double] = new Array[Double](lowPrices.length)
