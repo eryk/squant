@@ -26,12 +26,12 @@ class Context(n: String = "squant", c: Clock, cash: Int = 100000) {
     * 按天回测时, hour = 9, minute = 30, second = microsecond = 0,
     * 按分钟回测时, second = microsecond = 0
     */
-  def currentDate(): LocalDateTime = {
+  def currentDate: LocalDateTime = {
     //TODO
     clock.now()
   }
 
-  def previousDate(): LocalDateTime = {
+  def previousDate: LocalDateTime = {
     clock.now().plusDays(-1)
   }
 

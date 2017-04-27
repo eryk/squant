@@ -19,7 +19,7 @@ class DoubleMovingAverage(context: Context)(implicit broker: Broker) extends Str
     symbols.foreach { symbol =>
       val closeData = feeds.getHistoryData(symbol.code, 30, DAY)
 
-      if (closeData.size != 0) {
+      if (closeData.nonEmpty) {
         val ma5: Float = closeData.takeRight(5).map(_.close).sum / 5
 
         val ma10: Float = closeData.takeRight(10).map(_.close).sum / 10
@@ -27,7 +27,7 @@ class DoubleMovingAverage(context: Context)(implicit broker: Broker) extends Str
         val amount: Int = (context.portfolio.availableCash / closeData.last.close).toInt
         if (ma5 > ma10) {
           orderTargetAmount(symbol.code, amount, LimitOrderStyle(closeData.last.close))
-        } else if (ma5 < ma10 && context.portfolio.positions.contains(symbol.code)) {
+        } else if (ma5 < ma10) {
           orderTargetAmount(symbol.code, 0, LimitOrderStyle(closeData.last.close))
         }
       }

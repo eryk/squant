@@ -17,5 +17,5 @@ object Main extends App with StrictLogging {
   implicit val broker: Broker = new BackTestBroker(context)
 
   val backtest = system.actorOf(BackTest.props(new DoubleMovingAverage(context)))
-  backtest ! TimeEvent(context.currentDate())
+  backtest ! TimeEvent(context.currentDate)
 }

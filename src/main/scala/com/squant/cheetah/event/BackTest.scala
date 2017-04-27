@@ -35,13 +35,12 @@ class BackTest(strategy: Strategy) extends Actor with StrictLogging {
       }
       if (!strategy.getContext.clock.isFinished()) {
         strategy.getContext.clock.update()
-        self ! TimeEvent(strategy.getContext.currentDate())
+        self ! TimeEvent(strategy.getContext.currentDate)
       } else {
         self ! Finished
       }
     }
     case Finished => {
-
       def savePath = s"${config.getString(CONFIG_PATH_DB_BASE)}" +
         s"/backtest/${strategy.getContext.name}-${format(LocalDateTime.now(), "yyyyMMdd_HHmmss")}.xls"
 

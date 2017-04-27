@@ -25,11 +25,18 @@ trait Broker {
   def cancelOrder(orderId: String) = ???
 
   //获得当天的所有未完成的订单
-  def getOpenOrders(): List[Order] = ???
+  def getOpenOrders: List[Order] = ???
 
   //  获取当天的所有订单
-  def getOrders(): List[Order] = ???
+  def getOrders: List[Order] = ???
 
   // 获取成交信息
-  def getTrades(): List[Order] = ???
+  def getTrades: List[Order] = ???
+
+  protected def computeAmount(amount: Int): Int = {
+    amount match {
+      case value if value < 100 => 0
+      case value => value / 100 * 100
+    }
+  }
 }

@@ -14,33 +14,31 @@ class BackTestBroker(context: Context) extends Broker with LazyLogging {
 
   //按股数下单
   override def order(code: String, amount: Int, style: OrderStyle, direction: Direction): Unit = {
-    context.portfolio.update(Order(code, amount, style, direction, context.currentDate()))
+    context.portfolio.update(Order(code, amount, style, direction, context.currentDate))
   }
 
   //买卖标的, 使最终标的的数量达到指定的amount
   override def orderTargetAmount(code: String, amount: Int, style: OrderStyle): Unit = {
-    val currentPosition: Position = context.portfolio.positions.get(code) match {
+    val order: Option[Order] = context.portfolio.positions.get(code) match {
       case Some(position) => {
-        if (math.abs(position.closeableAmount - amount) < 100) {
-          position
+        val currentAmount = computeAmount(math.abs(position.totalAmount - amount))
+        if (currentAmount >= 100) {
+          val direction: Direction = if (position.totalAmount > amount) SHORT else LONG
+          Some(Order(code, currentAmount, style, direction, context.currentDate))
         } else {
-          if (position.closeableAmount > amount) {
-            logger.info(s"order:SHORT\t${code}\t${amount}\t${style}")
-            val order = Order(code, position.closeableAmount - amount, style, SHORT, context.currentDate())
-            context.portfolio.update(order)
-            position - Position.mkFrom(order)
-          } else if (position.closeableAmount < amount) {
-            logger.info(s"order:LONG\t${code}\t${amount}\t${style}")
-            val order = Order(code, amount - position.closeableAmount, style, LONG, context.currentDate())
-            context.portfolio.update(order)
-            position + Position.mkFrom(order)
-          } else {
-            position
-          }
+          None
         }
       }
-      case None => Position.mkFrom(Order(code, amount, style, LONG, context.currentDate()))
+      case None => {
+        val currentAmount = computeAmount(amount)
+        if (amount > 0) Some(Order(code, currentAmount, style, LONG, context.currentDate))
+        else None
+      }
     }
-    context.portfolio.positions.put(code, currentPosition)
+    if (order.isDefined) {
+      context.portfolio.update(order.get)
+      logger.info(s"${order.get.date}\torder:${order.get.direction}\t$code\t${order.get.amount}\t$style")
+    }
+
   }
 }

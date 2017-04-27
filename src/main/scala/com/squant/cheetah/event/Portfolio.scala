@@ -47,13 +47,13 @@ class Portfolio(context: Context) extends LazyLogging {
     availableCash -= context.cost.cost(order)
 
     records.append(new OrderRecord(order.code, order.direction, order.amount, order.price, order.volume,
-      context.cost.cost(order), context.currentDate()))
+      context.cost.cost(order), context.currentDate))
   }
 
   override def toString: String = {
     val buffer = mutable.StringBuilder.newBuilder
     for (item <- records) {
-      buffer.append(s"\t\t${item}\n")
+      buffer.append(s"\t\t$item\n")
     }
 
     val posStr = mutable.StringBuilder.newBuilder

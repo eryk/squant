@@ -13,14 +13,14 @@ abstract class Strategy(context: Context, broker: Broker) extends LazyLogging wi
 
   def handle()
 
-  def getContext() = context
+  def getContext = context
 
   override def order(order: Order): Unit = {
     broker.order(order)
   }
 
   override def order(code: String, amount: Int, style: OrderStyle, direction: Direction): Unit = {
-    logger.info(s"order:${direction}\t${code}\t${amount}\t${style}")
+    logger.info(s"order:$direction\t$code\t$amount\t$style")
     broker.order(code, amount, style, direction)
   }
 
