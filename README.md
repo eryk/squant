@@ -1,10 +1,14 @@
 # TODO 
-1. 回测引擎设计,调研easyquant和rqalpha回测功能设计
-2. 更新wiki，介绍数据更新及使用方法
+1. 计算和展示portfolio
+2. 接入外汇数据
+3. 验证在外汇上做回测
+4. 更新wiki，介绍数据更新及使用方法
 
 # 功能介绍
 
-### 常用股票数据自动采集与更新
+### 数据自动采集与更新
+
+#### 股票数据:
 
 * 股票基本信息数据
 * 股票历史逐笔数据
@@ -14,7 +18,34 @@
 * 财务报表数据
 * 龙虎榜数据（开发中）
 
-### 高性能回测引擎与可视化的图表分析工具
+#### 外汇数据:
+
+* EUR/USD
+* GBP/USD
+* USD/JPA
+* USD/CHF
+* AUD/USD
+* USD/CAD
+* NZD/USD
+* EUR/GBP
+
+> 注意：数据更新支持全量更新好增量更新，具体命令参考 **快速上手**
+
+### 回测引擎
+
+通过继承策略类 **com.squant.cheetah.strategy.Strategy** 并实现 **handle()** 函数来开发策略
+```scala
+abstract class Strategy(context: Context, broker: Broker) extends LazyLogging with Broker {
+  def init()
+
+  def handle()
+```
+
+常用策略示例请参考[examples目录](https://github.com/eryk/squant/tree/master/src/main/scala/com/squant/cheetah/examples)
+
+#### 可视化的图表分析工具
+
+TODO
 
 ### 丰富的交易接口支持
  
