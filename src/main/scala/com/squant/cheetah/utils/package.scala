@@ -151,8 +151,8 @@ package object utils {
   def isTradingTime(dateTime: LocalDateTime = LocalDateTime.now()): Boolean = {
     if (dateTime.getDayOfWeek.getValue >= 1 && dateTime.getDayOfWeek.getValue <= 5) {
       val now: LocalTime = dateTime.toLocalTime
-      if ((now.isAfter(LocalTime.of(9, 30, 0, 0)) && now.isBefore(LocalTime.of(11, 30, 0, 0)))
-        || (now.isAfter(LocalTime.of(13, 0, 0, 0))) && now.isBefore(LocalTime.of(15, 0, 0, 0))) return true
+      if ((now.isAfter(LocalTime.of(9, 29, 59, 0)) && now.isBefore(LocalTime.of(11, 31, 1, 0)))
+        || (now.isAfter(LocalTime.of(12, 59, 59, 0))) && now.isBefore(LocalTime.of(15, 0, 1, 0))) return true
     }
     false
   }

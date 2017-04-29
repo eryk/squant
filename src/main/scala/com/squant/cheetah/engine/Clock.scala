@@ -2,6 +2,8 @@ package com.squant.cheetah.engine
 
 import java.time.LocalDateTime
 
+import com.squant.cheetah.utils._
+
 sealed trait ClockType {
   def now(): LocalDateTime
 
@@ -18,7 +20,12 @@ case class BACKTEST(start: LocalDateTime, stop: LocalDateTime, unit: Int) extend
   assert(start.isBefore(stop))
 
   override def update() = {
-    currentTime = currentTime.plusMinutes(unit)
+    val tmpTime = currentTime.plusMinutes(unit)
+    if (!isTradingTime(tmpTime) && tmpTime.getHour >= 15) {
+      currentTime = currentTime.plusDays(1).withHour(9).withMinute(30).withSecond(0)
+    } else {
+      currentTime = tmpTime
+    }
   }
 
   override def now(): LocalDateTime = {
@@ -64,7 +71,7 @@ class Clock(cType: ClockType) {
   override def toString = s"Clock($now, $clockType, $interval)"
 }
 
-object Clock{
+object Clock {
   /**
     *
     * @param interval 单位:分钟
