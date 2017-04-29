@@ -9,12 +9,16 @@ import com.typesafe.scalalogging.LazyLogging
   */
 class BackTestBroker(context: Context) extends Broker with LazyLogging {
   override def order(order: Order): Unit = {
-    context.portfolio.update(order)
+    val currentAmount = computeAmount(order.amount)
+    if (currentAmount >= 100) {
+      context.portfolio.update(order.copy(amount = currentAmount))
+      logger.info(s"${order.date}\torder:${order.direction}\t${order.code}\t$currentAmount\t${order.style}")
+    }
   }
 
   //按股数下单
   override def order(code: String, amount: Int, style: OrderStyle, direction: Direction): Unit = {
-    context.portfolio.update(Order(code, amount, style, direction, context.currentDate))
+    order(Order(code, amount, style, direction, context.currentDate))
   }
 
   //买卖标的, 使最终标的的数量达到指定的amount
